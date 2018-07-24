@@ -12,7 +12,7 @@ class CatalogModel : public QAbstractItemModel
 public:
     CatalogModel(Catalog* catalog) : _catalog(catalog)
     {
-        _iconMemo = QIcon(":/icon/memo_default");
+        _iconMemo = QIcon(":/icon/memo_plain_text");
         _iconFolder = QIcon(":/icon/folder_closed");
     }
 
