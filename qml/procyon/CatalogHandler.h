@@ -44,6 +44,7 @@ signals:
 public slots:
     void loadSettings();
     void saveSettings();
+    void newCatalog(const QUrl &fileUrl);
     void loadCatalog(const QUrl &fileUrl);
     bool closeCatalog();
     void deleteInvalidMruItems();

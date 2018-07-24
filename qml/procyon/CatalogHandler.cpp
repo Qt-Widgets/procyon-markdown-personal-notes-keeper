@@ -10,6 +10,7 @@
 
 namespace {
 const int MAX_MRU_FILES_COUNT = 24;
+QString DEFAULT_EXT = ".enot";
 }
 
 CatalogHandler::CatalogHandler(QObject *parent) : QObject(parent)
@@ -52,7 +53,7 @@ void CatalogHandler::saveSettings()
     s.endGroup();
 }
 
-void CatalogHandler::loadCatalog(const QUrl &fileUrl)
+void CatalogHandler::newCatalog(const QUrl &fileUrl)
 {
     auto fileName = fileUrl.path();
     if (fileName.isEmpty())
@@ -60,6 +61,27 @@ void CatalogHandler::loadCatalog(const QUrl &fileUrl)
         qWarning() << "Filename is not set" << fileUrl;
         return;
     }
+
+    if (!closeCatalog()) return;
+
+    // TODO: FileDialog.defaultSuffix doesn't work even in Qt 5.10 despite of it was introduced there
+    auto res = Catalog::create(fileName.endsWith(DEFAULT_EXT) ? fileName : fileName + DEFAULT_EXT);
+    if (res.ok())
+        catalogOpened(res.result());
+    else
+        emit error(tr("Unable to create catalog.\n\n%1").arg(res.error()));
+}
+
+void CatalogHandler::loadCatalog(const QUrl &fileUrl)
+{
+    auto fileName = fileUrl.path();
+
+    if (fileName.isEmpty())
+    {
+        qWarning() << "Filename is not set" << fileUrl;
+        return;
+    }
+
     if (!QFile::exists(fileName))
     {
         emit error(tr("File does not exist: %1").arg(fileName));
@@ -72,10 +94,9 @@ void CatalogHandler::loadCatalog(const QUrl &fileUrl)
         auto curPath = QFileInfo(_catalog->fileName()).canonicalFilePath();
         auto newPath = QFileInfo(fileName).canonicalFilePath();
         if (curPath == newPath) return;
-
-        if (!closeCatalog())
-            return;
     }
+
+    if (!closeCatalog()) return;
 
     auto res = Catalog::open(fileName);
     if (res.ok())

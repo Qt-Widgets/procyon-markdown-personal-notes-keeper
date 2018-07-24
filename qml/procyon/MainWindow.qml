@@ -3,7 +3,7 @@ import org.orion_project.procyon.catalog 1.0
 import QtQuick 2.7
 import QtQml 2.2
 import QtQuick.Controls 1.4
-import QtQuick.Dialogs 1.1
+import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.0
 import QtQuick.Window 2.2
 import Qt.labs.settings 1.0
@@ -50,8 +50,6 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        catalog.loadSettings()
-
         // Default geometry when no position is stored
         if (width == 10 || height == 10) {
             width = 1024
@@ -59,6 +57,7 @@ ApplicationWindow {
             x = Screen.width / 2 - width / 2
             y = Screen.height / 2 - height / 2
         }
+        catalog.loadSettings()
     }
 
     onClosing: {
@@ -70,6 +69,7 @@ ApplicationWindow {
         id: newCatalogAction
         text: qsTr("&New...")
         shortcut: StandardKey.New
+        onTriggered: newCatalogDialog.open()
     }
     Action {
         id: openCatalogAction
@@ -77,7 +77,7 @@ ApplicationWindow {
         tooltip: qsTr("Open catalog")
         iconSource: "qrc:/icon/folder_opened"
         shortcut: StandardKey.Open
-        onTriggered: openDialog.open()
+        onTriggered: openCatalogDialog.open()
     }
     Action {
         id: closeCatalogAction
@@ -165,10 +165,6 @@ ApplicationWindow {
         }
     }*/
 
-    function getRecentOpenFolder() {
-        return encodeURIComponent("/home/nikolay"); // TODO
-    }
-
     statusBar: StatusBar {
         RowLayout {
             anchors.fill: parent
@@ -219,10 +215,19 @@ ApplicationWindow {
     }
 
     FileDialog {
-        id: openDialog
+        id: openCatalogDialog
         nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
-        folder: getRecentOpenFolder()
+        folder: shortcuts.documents
         onAccepted: catalog.loadCatalog(fileUrl)
+    }
+
+    FileDialog {
+        id: newCatalogDialog
+        nameFilters: openCatalogDialog.nameFilters
+        selectExisting: false
+        defaultSuffix: "enot"
+        folder: shortcuts.documents
+        onAccepted: catalog.newCatalog(fileUrl)
     }
 
     MessageDialog {
