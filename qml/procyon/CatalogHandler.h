@@ -11,6 +11,8 @@ class CatalogModel;
 class CatalogHandler : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool isOpened READ isOpened NOTIFY isOpenedChanged)
+    Q_PROPERTY(QString filePath READ filePath NOTIFY fileNameChanged)
     Q_PROPERTY(QString fileName READ fileName NOTIFY fileNameChanged)
     Q_PROPERTY(QString memoCount READ memoCount NOTIFY memoCountChanged)
     Q_PROPERTY(QAbstractItemModel* model READ catalogModel NOTIFY catalogModelChanged)
@@ -22,6 +24,8 @@ public:
     explicit CatalogHandler(QObject *parent = nullptr);
     ~CatalogHandler();
 
+    bool isOpened() const { return _catalog; }
+    QString filePath() const;
     QString fileName() const;
     QString memoCount() const;
     QAbstractItemModel* catalogModel() const;
@@ -35,11 +39,13 @@ signals:
     void memoCountChanged() const;
     void catalogModelChanged() const;
     void recentFilesChanged() const;
+    void isOpenedChanged() const;
 
 public slots:
     void loadSettings();
     void saveSettings();
-    void load(const QUrl &fileUrl);
+    void loadCatalog(const QUrl &fileUrl);
+    bool closeCatalog();
     void deleteInvalidMruItems();
     void deleteAllMruItems();
 

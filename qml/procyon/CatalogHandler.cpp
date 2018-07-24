@@ -2,9 +2,6 @@
 
 #include <QDebug>
 #include <QFileInfo>
-#include <QFileSelector>
-#include <QQmlFile>
-#include <QQmlFileSelector>
 #include <QSettings>
 #include <QTimer>
 
@@ -21,10 +18,7 @@ CatalogHandler::CatalogHandler(QObject *parent) : QObject(parent)
 
 CatalogHandler::~CatalogHandler()
 {
-    if (_catalogModel)
-        delete _catalogModel;
-    if (_catalog)
-        delete _catalog;
+    closeCatalog();
 }
 
 void CatalogHandler::loadSettings()
@@ -39,7 +33,7 @@ void CatalogHandler::loadSettings()
     s.beginGroup("State");
     auto lastFile = s.value("catalogFile").toString();
     if (!lastFile.isEmpty())
-        QTimer::singleShot(0, [&, lastFile]{ load(lastFile); });
+        QTimer::singleShot(0, [&, lastFile]{ loadCatalog(lastFile); });
     s.endGroup();
 }
 
@@ -58,7 +52,7 @@ void CatalogHandler::saveSettings()
     s.endGroup();
 }
 
-void CatalogHandler::load(const QUrl &fileUrl)
+void CatalogHandler::loadCatalog(const QUrl &fileUrl)
 {
     auto fileName = fileUrl.path();
     if (fileName.isEmpty())
@@ -79,7 +73,8 @@ void CatalogHandler::load(const QUrl &fileUrl)
         auto newPath = QFileInfo(fileName).canonicalFilePath();
         if (curPath == newPath) return;
 
-        // TODO close current catalog
+        if (!closeCatalog())
+            return;
     }
 
     auto res = Catalog::open(fileName);
@@ -89,9 +84,39 @@ void CatalogHandler::load(const QUrl &fileUrl)
         emit error(tr("Unable to load catalog.\n\n%1").arg(res.error()));
 }
 
-QString CatalogHandler::fileName() const
+bool CatalogHandler::closeCatalog()
+{
+    if (!_catalog)
+        return true;
+
+    // TODO check if some opened memos were changed
+    // TODO save catalog session
+
+    if (_catalogModel)
+    {
+        delete _catalogModel;
+        _catalogModel = nullptr;
+    }
+    if (_catalog)
+    {
+        delete _catalog;
+        _catalog = nullptr;
+    }
+    emit fileNameChanged();
+    emit memoCountChanged();
+    emit catalogModelChanged();
+    emit isOpenedChanged();
+    return true;
+}
+
+QString CatalogHandler::filePath() const
 {
     return _catalog ? _catalog->fileName() : QString();
+}
+
+QString CatalogHandler::fileName() const
+{
+    return _catalog ? QFileInfo(_catalog->fileName()).baseName() : QString();
 }
 
 QString CatalogHandler::memoCount() const
@@ -120,10 +145,12 @@ void CatalogHandler::catalogOpened(Catalog *catalog)
 
     addToRecent(catalog->fileName());
 
-    // TODO
+    // TODO restore catalog session
+
     emit fileNameChanged();
     emit memoCountChanged();
     emit catalogModelChanged();
+    emit isOpenedChanged();
 }
 
 void CatalogHandler::addToRecent(const QString &fileName)

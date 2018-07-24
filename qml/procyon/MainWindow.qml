@@ -15,7 +15,7 @@ ApplicationWindow {
     visible: true
     width: 10 // dummy default value
     height: 10 // dummy default value
-    title: qsTr("Procyon")
+    title: catalog.fileName + ' - ' + Qt.application.name
     color: appearance.baseColor()
 
     property int currentMemoId: 0
@@ -62,8 +62,8 @@ ApplicationWindow {
     }
 
     onClosing: {
-        // TODO: check if some of opened memos were changed
         catalog.saveSettings()
+        close.accepted = catalog.closeCatalog()
     }
 
     Action {
@@ -78,6 +78,12 @@ ApplicationWindow {
         iconSource: "qrc:/icon/folder_opened"
         shortcut: StandardKey.Open
         onTriggered: openDialog.open()
+    }
+    Action {
+        id: closeCatalogAction
+        text: qsTr("&Close")
+        enabled: catalog.isOpened
+        onTriggered: catalog.closeCatalog()
     }
     Action {
         id: quitAppAction
@@ -100,6 +106,7 @@ ApplicationWindow {
             title: qsTr("&File")
             MenuItem { action: newCatalogAction }
             MenuItem { action: openCatalogAction }
+            MenuItem { action: closeCatalogAction }
             Menu {
                 id: mruFileMenu
                 title: qsTr("&Recent Files")
@@ -107,7 +114,7 @@ ApplicationWindow {
                     model: catalog.recentFilesModel
                     MenuItem {
                         text: modelData
-                        onTriggered: catalog.load(text)
+                        onTriggered: catalog.loadCatalog(text)
                     }
                     onObjectAdded: mruFileMenu.insertItem(index, object)
                     onObjectRemoved: mruFileMenu.removeItem(object)
@@ -166,12 +173,13 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             Row {
+                visible: catalog.isOpened
                 Label { text: qsTr("Memos: "); color: appearance.textColorModest() }
                 Label { text: catalog.memoCount }
             }
             Row {
                 Label { text: qsTr("Catalog: "); color: appearance.textColorModest() }
-                Label { text: catalog.fileName }
+                Label { text: catalog.filePath || qsTr("(not selected)") }
             }
             Item { Layout.fillWidth: true }
         }
@@ -214,7 +222,7 @@ ApplicationWindow {
         id: openDialog
         nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
         folder: getRecentOpenFolder()
-        onAccepted: catalog.load(fileUrl)
+        onAccepted: catalog.loadCatalog(fileUrl)
     }
 
     MessageDialog {
