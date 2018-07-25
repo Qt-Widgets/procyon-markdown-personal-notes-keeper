@@ -6,7 +6,10 @@ Rectangle {
     property variant catalogModel
 
     function getSelectedMemoId() {
-        return memoSelector.currentIndex.id;
+        if (!memoSelector.hasSelection) return -1
+        if (!memoSelector.currentIndex) return -2
+        if (!memoSelector.currentIndex.data) return -3
+        return memoSelector.currentIndex.data.id;
     }
 
     Appearance { id: appearance }
