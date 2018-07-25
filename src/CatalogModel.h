@@ -3,7 +3,6 @@
 
 #include <QAbstractItemModel>
 #include <QDebug>
-#include <QIcon>
 
 #include "Catalog.h"
 
@@ -12,8 +11,6 @@ class CatalogModel : public QAbstractItemModel
 public:
     CatalogModel(Catalog* catalog) : _catalog(catalog)
     {
-        _iconMemo = QIcon(":/icon/memo_plain_text");
-        _iconFolder = QIcon(":/icon/folder_closed");
     }
 
     static CatalogItem* catalogItem(const QModelIndex &index)
@@ -91,23 +88,16 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override
     {
-        if (!index.isValid())
-            return QVariant();
-        if (role == Qt::DisplayRole)
-        {
-            auto item = catalogItem(index);
-            return item ? item->title() : QVariant();
-        }
-        if (role == Qt::DecorationRole)
+        if (index.isValid() && role == Qt::DisplayRole)
         {
             auto item = catalogItem(index);
             if (!item) return QVariant();
-            // TODO different icons for opened and closed folder
-            if (item->isFolder())
-                return _iconFolder;
-            if (item->asMemo()->type())
-                return item->asMemo()->type()->icon();
-            return _iconMemo;
+            auto memo = item->asMemo();
+            return QVariantMap({
+                { QStringLiteral("memoTitle"), item->title() },
+                { QStringLiteral("isFolder"), memo == nullptr },
+                { QStringLiteral("memoIconPath"), (memo && memo->type()) ? memo->type()->iconPath() : QString() }
+            });
         }
         return QVariant();
     }
@@ -126,12 +116,8 @@ public:
     }
 
     friend class ItemRemoverGuard;
-
-    const QIcon& folderIcon() const { return _iconFolder; }
-
 private:
     Catalog* _catalog;
-    QIcon _iconFolder, _iconMemo;
 };
 
 

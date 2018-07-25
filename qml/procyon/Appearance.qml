@@ -13,6 +13,14 @@ Item {
         return "SteelBlue";
     }
 
+    function textColor() {
+        return "Black";
+    }
+
+    function textColorSelected() {
+        return "White";
+    }
+
     function textColorModest() {
         return "Gray";
     }

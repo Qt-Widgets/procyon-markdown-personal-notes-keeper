@@ -22,10 +22,15 @@ ApplicationWindow {
 
     Settings {
         category: "MainWindow"
-        property alias x: mainWindow.x
-        property alias y: mainWindow.y
-        property alias width: mainWindow.width
-        property alias height: mainWindow.height
+        property alias windowX: mainWindow.x
+        property alias windowY: mainWindow.y
+        property alias windowWidth: mainWindow.width
+        property alias windowHeight: mainWindow.height
+        property alias openedMemosViewWidth: openedMemosView.width
+        property alias openedMemosViewVisible: showOpenedMemosViewAction.checked
+        property alias catalogViewWidth: catalogView.width
+        property alias catalogViewVisible: showCatalogViewAction.checked
+        property alias statusBarVisible: statusBar.visible
     }
 
     CatalogHandler {
@@ -58,6 +63,13 @@ ApplicationWindow {
             y = Screen.height / 2 - height / 2
         }
         catalog.loadSettings()
+
+        // We can't restore visibility of these components automatically
+        // because they are on a splitter and it restores their visibility
+        // after its panels are restored. So we store action check state instead
+        // and use it for setting visibilty of splitter subcomponents at the very end.
+        catalogView.visible = showCatalogViewAction.checked
+        openedMemosView.visible = showOpenedMemosViewAction.checked
     }
 
     onClosing: {
@@ -65,38 +77,62 @@ ApplicationWindow {
         close.accepted = catalog.closeCatalog()
     }
 
-    Action {
-        id: newCatalogAction
-        text: qsTr("&New...")
-        shortcut: StandardKey.New
-        onTriggered: newCatalogDialog.open()
-    }
-    Action {
-        id: openCatalogAction
-        text: qsTr("&Open...")
-        tooltip: qsTr("Open catalog")
-        iconSource: "qrc:/icon/folder_opened"
-        shortcut: StandardKey.Open
-        onTriggered: openCatalogDialog.open()
-    }
-    Action {
-        id: closeCatalogAction
-        text: qsTr("&Close")
-        enabled: catalog.isOpened
-        onTriggered: catalog.closeCatalog()
-    }
-    Action {
-        id: quitAppAction
-        text: qsTr("E&xit")
-        shortcut: StandardKey.Quit
-        onTriggered: Qt.quit()
-    }
-    Action {
-        id: openMemoAction
-        text: qsTr("&Open memo")
-        onTriggered: {
-            infoDialog.text = catalogView.getSelectedMemoId()
-            infoDialog.visible = true
+    Item {
+        id: actions
+        Action {
+            id: newCatalogAction
+            text: qsTr("&New...")
+            shortcut: StandardKey.New
+            onTriggered: newCatalogDialog.open()
+        }
+        Action {
+            id: openCatalogAction
+            text: qsTr("&Open...")
+            tooltip: qsTr("Open catalog")
+            iconSource: "qrc:/icon/folder_opened"
+            shortcut: StandardKey.Open
+            onTriggered: openCatalogDialog.open()
+        }
+        Action {
+            id: closeCatalogAction
+            text: qsTr("&Close")
+            enabled: catalog.isOpened
+            onTriggered: catalog.closeCatalog()
+        }
+        Action {
+            id: quitAppAction
+            text: qsTr("E&xit")
+            shortcut: StandardKey.Quit
+            onTriggered: Qt.quit()
+        }
+        Action {
+            id: openMemoAction
+            text: qsTr("&Open memo")
+            onTriggered: {
+                infoDialog.text = catalogView.getSelectedMemoId()
+                infoDialog.visible = true
+            }
+        }
+        Action {
+            id: showOpenedMemosViewAction
+            text: qsTr("Show &Opened Memos Panel")
+            checkable: true
+            checked: true
+            onToggled: openedMemosView.visible = checked
+        }
+        Action {
+            id: showCatalogViewAction
+            text: qsTr("Show &Catalog Panel")
+            checkable: true
+            checked: true
+            onToggled: catalogView.visible = checked
+        }
+        Action {
+            id: showStatusBarAction
+            text: qsTr("Show &Status Bar")
+            checkable: true
+            checked: statusBar.visible
+            onToggled: statusBar.visible = checked
         }
     }
 
@@ -140,14 +176,14 @@ ApplicationWindow {
             title: qsTr("&Edit")
         }
         Menu {
-            title: qsTr("&View")
-        }
-        Menu {
             title: qsTr("&Catalog")
             MenuItem { action: openMemoAction }
         }
         Menu {
             title: qsTr("&Options")
+            MenuItem { action: showOpenedMemosViewAction }
+            MenuItem { action: showCatalogViewAction }
+            MenuItem { action: showStatusBarAction }
         }
     }
 
@@ -166,6 +202,8 @@ ApplicationWindow {
     }*/
 
     statusBar: StatusBar {
+        id: statusBar
+
         RowLayout {
             anchors.fill: parent
             Row {
@@ -185,11 +223,12 @@ ApplicationWindow {
         anchors.fill: parent
         orientation: Qt.Horizontal
         handleDelegate: Rectangle {
-            width: 5
+            width: 4
             color: styleData.pressed ? appearance.selectionColor() : appearance.baseColor()
         }
 
         OpenedMemosView {
+            id: openedMemosView
             width: 200
             height: parent.height
             Layout.maximumWidth: 400
@@ -200,6 +239,8 @@ ApplicationWindow {
             memoId: currentMemoId
             Layout.fillWidth: true
             Layout.minimumWidth: 100
+            Layout.leftMargin: openedMemosView.visible ? 0 : 4
+            Layout.rightMargin: catalogView.visible ? 0 : 4
         }
 
         CatalogView {
@@ -214,29 +255,32 @@ ApplicationWindow {
         }
     }
 
-    FileDialog {
-        id: openCatalogDialog
-        nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
-        folder: shortcuts.documents
-        onAccepted: catalog.loadCatalog(fileUrl)
-    }
+    Item {
+        id: dialogs
 
-    FileDialog {
-        id: newCatalogDialog
-        nameFilters: openCatalogDialog.nameFilters
-        selectExisting: false
-        defaultSuffix: "enot"
-        folder: shortcuts.documents
-        onAccepted: catalog.newCatalog(fileUrl)
-    }
+        FileDialog {
+            id: openCatalogDialog
+            nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
+            folder: shortcuts.documents
+            onAccepted: catalog.loadCatalog(fileUrl)
+        }
 
-    MessageDialog {
-        id: errorDialog
-        icon: StandardIcon.Critical
-    }
+        FileDialog {
+            id: newCatalogDialog
+            nameFilters: openCatalogDialog.nameFilters
+            selectExisting: false
+            folder: shortcuts.documents
+            onAccepted: catalog.newCatalog(fileUrl)
+        }
 
-    MessageDialog {
-        id: infoDialog
-        icon: StandardIcon.Information
+        MessageDialog {
+            id: errorDialog
+            icon: StandardIcon.Critical
+        }
+
+        MessageDialog {
+            id: infoDialog
+            icon: StandardIcon.Information
+        }
     }
 }
