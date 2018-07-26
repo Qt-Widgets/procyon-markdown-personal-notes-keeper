@@ -1,5 +1,3 @@
-import org.orion_project.procyon.catalog 1.0
-
 import QtQuick 2.7
 import QtQml 2.2
 import QtQuick.Controls 1.4
@@ -8,15 +6,16 @@ import QtQuick.Layouts 1.0
 import QtQuick.Window 2.2
 import Qt.labs.settings 1.0
 
-ApplicationWindow {
-    Appearance { id: appearance }
+import org.orion_project.procyon.catalog 1.0
+import "appearance.js" as Appearance
 
+ApplicationWindow {
     id: mainWindow
     visible: true
     width: 10 // dummy default value
     height: 10 // dummy default value
     title: catalog.fileName + ' - ' + Qt.application.name
-    color: appearance.baseColor()
+    color: Appearance.baseColor()
 
     property int currentMemoId: 0
 
@@ -44,14 +43,8 @@ ApplicationWindow {
         onLoaded: {
             textArea.text = text
         }*/
-        onError: {
-            errorDialog.text = message
-            errorDialog.visible = true
-        }
-        onInfo: {
-            infoDialog.text = message
-            infoDialog.visible = true
-        }
+        onError: errorDialog.show(message)
+        onInfo: infoDialog.show(message)
     }
 
     Component.onCompleted: {
@@ -108,10 +101,7 @@ ApplicationWindow {
         Action {
             id: openMemoAction
             text: qsTr("&Open memo")
-            onTriggered: {
-                infoDialog.text = catalogView.getSelectedMemoId()
-                infoDialog.visible = true
-            }
+            onTriggered: openMemoPage(catalogView.getSelectedMemoId())
         }
         Action {
             id: showOpenedMemosViewAction
@@ -208,11 +198,11 @@ ApplicationWindow {
             anchors.fill: parent
             Row {
                 visible: catalog.isOpened
-                Label { text: qsTr("Memos: "); color: appearance.textColorModest() }
+                Label { text: qsTr("Memos: "); color: Appearance.textColorModest() }
                 Label { text: catalog.memoCount }
             }
             Row {
-                Label { text: qsTr("Catalog: "); color: appearance.textColorModest() }
+                Label { text: qsTr("Catalog: "); color: Appearance.textColorModest() }
                 Label { text: catalog.filePath || qsTr("(not selected)") }
             }
             Item { Layout.fillWidth: true }
@@ -224,7 +214,7 @@ ApplicationWindow {
         orientation: Qt.Horizontal
         handleDelegate: Rectangle {
             width: 4
-            color: styleData.pressed ? appearance.selectionColor() : appearance.baseColor()
+            color: styleData.pressed ? Appearance.selectionColor() : Appearance.baseColor()
         }
 
         OpenedMemosView {
@@ -235,8 +225,9 @@ ApplicationWindow {
             Layout.minimumWidth: 100
         }
 
-        MemoView {
-            memoId: currentMemoId
+        MemoPagesView {
+            id: memoPagesView
+            catalog: catalog
             Layout.fillWidth: true
             Layout.minimumWidth: 100
             Layout.leftMargin: openedMemosView.visible ? 0 : 4
@@ -252,6 +243,7 @@ ApplicationWindow {
             Layout.rightMargin: 4
             Layout.bottomMargin: 4
             Layout.topMargin: 4
+            onNeedToOpenMemo: memoPagesView.openPage(memoId)
         }
     }
 
@@ -276,11 +268,22 @@ ApplicationWindow {
         MessageDialog {
             id: errorDialog
             icon: StandardIcon.Critical
+
+            function show(message) {
+                text = message
+                visible = true
+            }
         }
 
         MessageDialog {
             id: infoDialog
             icon: StandardIcon.Information
+
+            function show(message) {
+                text = message
+                visible = true
+            }
         }
     }
+
 }

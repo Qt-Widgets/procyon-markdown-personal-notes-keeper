@@ -23,7 +23,8 @@ SOURCES += \
     CatalogHandler.cpp \
     ../../src/Catalog.cpp \
     ../../src/CatalogStore.cpp \
-    ../../src/SqlHelper.cpp
+    ../../src/SqlHelper.cpp \
+    ../../src/Memo.cpp
 
 RESOURCES += qml.qrc
 
@@ -43,4 +44,5 @@ HEADERS += \
     ../../src/Catalog.h \
     ../../src/CatalogStore.h \
     ../../src/SqlHelper.h \
-    ../../src/CatalogModel.h
+    ../../src/CatalogModel.h \
+    ../../src/Memo.h

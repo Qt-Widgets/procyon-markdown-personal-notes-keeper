@@ -49,6 +49,7 @@ public slots:
     bool closeCatalog();
     void deleteInvalidMruItems();
     void deleteAllMruItems();
+    QString getMemoText(int memoId);
 
 private:
     Catalog *_catalog = nullptr;

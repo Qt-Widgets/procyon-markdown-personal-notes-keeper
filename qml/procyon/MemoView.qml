@@ -4,13 +4,15 @@ import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
-Rectangle {
-    Appearance { id: appearance }
+import org.orion_project.procyon.catalog 1.0
+import "appearance.js" as Appearance
 
-    color: appearance.baseColor()
+Rectangle {
+    color: Appearance.baseColor()
 
     property int memoId: 0
     property bool editMemoMode: false
+    property CatalogHandler catalog: null
 
     function getMemoText(id) {
         return id;
@@ -24,42 +26,49 @@ Rectangle {
         editMemoMode = false;
     }
 
-    Action {
-        id: editMemoAction
-        text: qsTr("Edit")
-        tooltip: qsTr("Edit memo")
-        iconSource: "qrc:/toolbar/memo_edit"
-        shortcut: "Return,Return"
-        enabled: !editMemoMode
-        onTriggered: editMemoMode = true
+    function loadMemo() {
+        textArea.text = catalog.getMemoText(memoId)
     }
-    Action {
-        id: saveMemoAction
-        text: qsTr("Save")
-        tooltip: qsTr("Save changes")
-        iconSource: "qrc:/toolbar/memo_save"
-        shortcut: StandardKey.Save
-        enabled: editMemoMode
-        onTriggered: editingDone(true)
-    }
-    Action {
-        id: cancelMemoAction
-        text: qsTr("Cancel")
-        tooltip: qsTr("Cancel changes")
-        iconSource: "qrc:/toolbar/memo_cancel"
-        shortcut: "Esc,Esc"
-        enabled: editMemoMode
-        onTriggered: editingDone(false)
-    }
-    Action {
-        id: closeMemoAction
-        text: qsTr("Close")
-        tooltip: qsTr("Close memo")
-        iconSource: "qrc:/toolbar/memo_close"
-        shortcut: StandardKey.Close
-        onTriggered: {
-            infoDialog.text = "TODO: close memo"
-            infoDialog.visible = true
+
+    Item  {
+        id: action
+        Action {
+            id: editMemoAction
+            text: qsTr("Edit")
+            tooltip: qsTr("Edit memo")
+            iconSource: "qrc:/toolbar/memo_edit"
+            shortcut: "Return,Return"
+            enabled: !editMemoMode
+            onTriggered: editMemoMode = true
+        }
+        Action {
+            id: saveMemoAction
+            text: qsTr("Save")
+            tooltip: qsTr("Save changes")
+            iconSource: "qrc:/toolbar/memo_save"
+            shortcut: StandardKey.Save
+            enabled: editMemoMode
+            onTriggered: editingDone(true)
+        }
+        Action {
+            id: cancelMemoAction
+            text: qsTr("Cancel")
+            tooltip: qsTr("Cancel changes")
+            iconSource: "qrc:/toolbar/memo_cancel"
+            shortcut: "Esc,Esc"
+            enabled: editMemoMode
+            onTriggered: editingDone(false)
+        }
+        Action {
+            id: closeMemoAction
+            text: qsTr("Close")
+            tooltip: qsTr("Close memo")
+            iconSource: "qrc:/toolbar/memo_close"
+            shortcut: StandardKey.Close
+            onTriggered: {
+                infoDialog.text = "TODO: close memo"
+                infoDialog.visible = true
+            }
         }
     }
 
@@ -72,7 +81,7 @@ Rectangle {
             Rectangle {
                 id: headerTextBackground
 
-                color: editMemoMode ? appearance.editorColor() : appearance.baseColor()
+                color: editMemoMode ? Appearance.editorColor() : Appearance.baseColor()
                 radius: 4
                 height: 30
 
@@ -126,8 +135,7 @@ Rectangle {
 
         TextArea {
             id: textArea
-            text: getMemoText(memoId)
-            textFormat: Qt.RichText
+            textFormat: Qt.PlainText
             readOnly: !editMemoMode
             wrapMode: TextEdit.Wrap
             focus: true

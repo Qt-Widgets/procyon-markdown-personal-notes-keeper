@@ -7,6 +7,7 @@
 
 #include "../../src/Catalog.h"
 #include "../../src/CatalogModel.h"
+#include "../../src/Memo.h"
 
 namespace {
 const int MAX_MRU_FILES_COUNT = 24;
@@ -205,4 +206,14 @@ void CatalogHandler::deleteAllMruItems()
 {
     _recentFiles.clear();
     emit recentFilesChanged();
+}
+
+QString CatalogHandler::getMemoText(int memoId)
+{
+    if (!_catalog) return QString();
+    auto item = _catalog->findById(memoId);
+    if (!item->isMemo()) return QString();
+    _catalog->loadMemo(item->asMemo());
+    // TODO check errors
+    return item->asMemo()->memo()->data();
 }

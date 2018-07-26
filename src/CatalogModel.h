@@ -13,16 +13,6 @@ public:
     {
     }
 
-    enum CatalogModelRoles { ID_ROLE = Qt::UserRole + 1, DISPLAY_ROLE };
-
-    QHash<int, QByteArray> roleNames() const override
-    {
-        return {
-            { ID_ROLE, QByteArrayLiteral("id") },
-            { DISPLAY_ROLE, QByteArrayLiteral("display") }
-        };
-    }
-
     static CatalogItem* catalogItem(const QModelIndex &index)
     {
         return static_cast<CatalogItem*>(index.internalPointer());
@@ -98,27 +88,18 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override
     {
-        if (!index.isValid())
-            return QVariant();
-
-        auto item = catalogItem(index);
-        if (!item) return QVariant();
-
-        auto memo = item->asMemo();
-
-        switch (role)
+        if (index.isValid() && role == Qt::DisplayRole)
         {
-        case ID_ROLE:
-            return item->id();
-
-        case DISPLAY_ROLE:
+            auto item = catalogItem(index);
+            if (!item) return QVariant();
+            auto memo = item->asMemo();
             return QVariantMap({
+                { QStringLiteral("memoId"), item->id() },
                 { QStringLiteral("memoTitle"), item->title() },
                 { QStringLiteral("isFolder"), memo == nullptr },
                 { QStringLiteral("memoIconPath"), (memo && memo->type()) ? memo->type()->iconPath() : QString() }
             });
         }
-
         return QVariant();
     }
 
