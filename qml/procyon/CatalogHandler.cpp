@@ -35,7 +35,7 @@ void CatalogHandler::loadSettings()
     s.beginGroup("State");
     auto lastFile = s.value("catalogFile").toString();
     if (!lastFile.isEmpty())
-        QTimer::singleShot(0, [&, lastFile]{ loadCatalog(lastFile); });
+        QTimer::singleShot(0, [&, lastFile]{ loadCatalogFile(lastFile); });
     s.endGroup();
 }
 
@@ -73,13 +73,30 @@ void CatalogHandler::newCatalog(const QUrl &fileUrl)
         emit error(tr("Unable to create catalog.\n\n%1").arg(res.error()));
 }
 
-void CatalogHandler::loadCatalog(const QUrl &fileUrl)
+void CatalogHandler::loadCatalogUrl(const QUrl &fileUrl)
 {
-    auto fileName = fileUrl.path();
-
+    auto fileName = fileUrl.toString();
     if (fileName.isEmpty())
     {
         qWarning() << "Filename is not set" << fileUrl;
+        return;
+    }
+
+#ifdef Q_OS_WIN
+    // Qt 5.10, 5.11.1: an url returned by FileDialog has format "file:///C:/dir/..."
+    // `fileUrl.path()` strips only "file://" but leaves the slash there ("/C:/dir...")
+    if (fileName.startsWith('/'))
+        fileName = fileName.remove(0, 1);
+#endif
+
+    loadCatalogFile(fileName);
+}
+
+void CatalogHandler::loadCatalogFile(const QString &fileName)
+{
+    if (fileName.isEmpty())
+    {
+        qWarning() << "Filename is not set";
         return;
     }
 

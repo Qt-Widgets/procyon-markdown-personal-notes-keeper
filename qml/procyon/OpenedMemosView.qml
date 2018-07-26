@@ -32,5 +32,6 @@ Rectangle {
         delegate: OpenedMemoItemDelegate { itemSize: parent.width }
         spacing: 3
         anchors.fill: parent
+        focus: true
     }
 }

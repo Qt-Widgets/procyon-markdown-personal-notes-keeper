@@ -88,7 +88,7 @@ Rectangle {
                 Layout.topMargin: 4
                 Layout.fillWidth: true
 
-                TextEdit {
+                TextInput {
                     id: headerText
                     anchors.fill: parent
                     font { pixelSize: 24 }
@@ -96,7 +96,6 @@ Rectangle {
                     readOnly: !editMemoMode
                     selectByMouse: true
                     text: getMemoHeader(memoId)
-                    textFormat: TextEdit.PlainText
                     verticalAlignment: TextEdit.AlignVCenter
                     wrapMode: TextEdit.NoWrap
 

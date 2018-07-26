@@ -51,7 +51,7 @@ Rectangle {
                 width: 16
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Text {
+            Label {
                 text: styleData.value ? styleData.value.memoTitle : ""
                 font { pointSize: 10; bold: styleData.selected }
                 color: styleData.selected ? Appearance.textColorSelected() : Appearance.textColor()

@@ -12,9 +12,9 @@ import "appearance.js" as Appearance
 ApplicationWindow {
     id: mainWindow
     visible: true
-    width: 10 // dummy default value
-    height: 10 // dummy default value
-    title: catalog.fileName + ' - ' + Qt.application.name
+    width: 1024
+    height: 600
+    title: catalog.isOpened ? (catalog.fileName + ' - ' + Qt.application.name) : Qt.application.name
     color: Appearance.baseColor()
 
     property int currentMemoId: 0
@@ -29,7 +29,7 @@ ApplicationWindow {
         property alias openedMemosViewVisible: showOpenedMemosViewAction.checked
         property alias catalogViewWidth: catalogView.width
         property alias catalogViewVisible: showCatalogViewAction.checked
-        property alias statusBarVisible: statusBar.visible
+        property alias statusBarVisible: showStatusBarAction.checked
     }
 
     CatalogHandler {
@@ -48,21 +48,15 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        // Default geometry when no position is stored
-        if (width == 10 || height == 10) {
-            width = 1024
-            height = 600
-            x = Screen.width / 2 - width / 2
-            y = Screen.height / 2 - height / 2
-        }
-        catalog.loadSettings()
-
         // We can't restore visibility of these components automatically
         // because they are on a splitter and it restores their visibility
         // after its panels are restored. So we store action check state instead
         // and use it for setting visibilty of splitter subcomponents at the very end.
         catalogView.visible = showCatalogViewAction.checked
         openedMemosView.visible = showOpenedMemosViewAction.checked
+        statusBar.visible = showStatusBarAction.checked
+
+        catalog.loadSettings()
     }
 
     onClosing: {
@@ -121,7 +115,7 @@ ApplicationWindow {
             id: showStatusBarAction
             text: qsTr("Show &Status Bar")
             checkable: true
-            checked: statusBar.visible
+            checked: true
             onToggled: statusBar.visible = checked
         }
     }
@@ -140,7 +134,7 @@ ApplicationWindow {
                     model: catalog.recentFilesModel
                     MenuItem {
                         text: modelData
-                        onTriggered: catalog.loadCatalog(text)
+                        onTriggered: catalog.loadCatalogFile(text)
                     }
                     onObjectAdded: mruFileMenu.insertItem(index, object)
                     onObjectRemoved: mruFileMenu.removeItem(object)
@@ -254,7 +248,10 @@ ApplicationWindow {
             id: openCatalogDialog
             nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
             folder: shortcuts.documents
-            onAccepted: catalog.loadCatalog(fileUrl)
+            onAccepted: {
+                console.log('File selected: ' + fileUrl)
+                catalog.loadCatalogUrl(fileUrl)
+            }
         }
 
         FileDialog {
@@ -285,5 +282,4 @@ ApplicationWindow {
             }
         }
     }
-
 }

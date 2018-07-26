@@ -45,7 +45,8 @@ public slots:
     void loadSettings();
     void saveSettings();
     void newCatalog(const QUrl &fileUrl);
-    void loadCatalog(const QUrl &fileUrl);
+    void loadCatalogFile(const QString &fileName);
+    void loadCatalogUrl(const QUrl &fileUrl);
     bool closeCatalog();
     void deleteInvalidMruItems();
     void deleteAllMruItems();
