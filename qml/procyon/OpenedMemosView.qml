@@ -1,37 +1,113 @@
-import QtQuick 2.0
+import QtQuick 2.7
+import QtQuick.Layouts 1.0
+import QtQuick.Controls 1.4
+
+import org.orion_project.procyon.catalog 1.0
+import "appearance.js" as Appearance
+
+// TODO: add keyboard switching: Ctrl+Tab / Ctrl+Shift+Tab
 
 Rectangle {
+    property CatalogHandler catalog: null
+    property int currentMemoId: -1
+    signal needToCloseMemo(int memoId)
+    signal needToActivateMemo(int memoId)
+
+    onCurrentMemoIdChanged: {
+        if (currentMemoId < 0) return
+        var index = __getItemIndex(currentMemoId)
+        if (index < 0) {
+            var info = catalog.getMemoInfo(currentMemoId)
+            if (info) {
+                memosListModel.append(info)
+                index = memosListModel.count-1
+            }
+        }
+        memosListView.currentIndex = index
+    }
+
+    function __getItemIndex(memoId) {
+        for (var i = 0; i < memosListModel.count; i++)
+            if (memosListModel.get(i)["memoId"] === memoId)
+                return i
+        return -1
+    }
 
     ListModel {
-        id: demoOpenedMemosData
-        ListElement { memoId: 1; memoTitle: "Проектирование"; memoFolder: "3D print"; memoType: "text/rich" }
-        ListElement { memoId: 2; memoTitle: "dev commands"; memoFolder: "OS/Ubuntu"; memoType: "text/code/bash" }
-        ListElement { memoId: 3; memoTitle: "Read text from file"; memoFolder: "Programming/Python/Code snippets"; memoType: "text/code/python" }
-        ListElement { memoId: 4; memoTitle: "Проектирование"; memoFolder: "3D print"; memoType: "text/rich" }
-        ListElement { memoId: 5; memoTitle: "dev commands"; memoFolder: "OS/Ubuntu"; memoType: "text/code/bash" }
-        ListElement { memoId: 6; memoTitle: "Read text from file"; memoFolder: "Programming/Python/Code snippets"; memoType: "text/code/python" }
-        ListElement { memoId: 7; memoTitle: "Проектирование"; memoFolder: "3D print"; memoType: "text/rich" }
-        ListElement { memoId: 8; memoTitle: "dev commands"; memoFolder: "OS/Ubuntu"; memoType: "text/code/bash" }
-        ListElement { memoId: 9; memoTitle: "Read text from file"; memoFolder: "Programming/Python/Code snippets"; memoType: "text/code/python" }
-        ListElement { memoId: 10; memoTitle: "Проектирование"; memoFolder: "3D print"; memoType: "text/rich" }
-        ListElement { memoId: 11; memoTitle: "dev commands"; memoFolder: "OS/Ubuntu"; memoType: "text/code/bash" }
-        ListElement { memoId: 12; memoTitle: "Read text from file"; memoFolder: "Programming/Python/Code snippets"; memoType: "text/code/python" }
-        ListElement { memoId: 13; memoTitle: "Проектирование"; memoFolder: "3D print"; memoType: "text/rich" }
-        ListElement { memoId: 14; memoTitle: "dev commands"; memoFolder: "OS/Ubuntu"; memoType: "text/code/bash" }
-        ListElement { memoId: 15; memoTitle: "Read text from file"; memoFolder: "Programming/Python/Code snippets"; memoType: "text/code/python" }
-        ListElement { memoId: 16; memoTitle: "Проектирование"; memoFolder: "3D print"; memoType: "text/rich" }
-        ListElement { memoId: 17; memoTitle: "dev commands"; memoFolder: "OS/Ubuntu"; memoType: "text/code/bash" }
-        ListElement { memoId: 18; memoTitle: "Read text from file"; memoFolder: "Programming/Python/Code snippets"; memoType: "text/code/python" }
-        ListElement { memoId: 19; memoTitle: "Проектирование"; memoFolder: "3D print"; memoType: "text/rich" }
-        ListElement { memoId: 20; memoTitle: "dev commands"; memoFolder: "OS/Ubuntu"; memoType: "text/code/bash" }
-        ListElement { memoId: 21; memoTitle: "Read text from file"; memoFolder: "Programming/Python/Code snippets"; memoType: "text/code/python" }
+        id: memosListModel
     }
 
     ListView {
-        model: demoOpenedMemosData
-        delegate: OpenedMemoItemDelegate { itemSize: parent.width }
+        id: memosListView
+        model: memosListModel
         spacing: 3
         anchors.fill: parent
         focus: true
+        delegate: Rectangle {
+            id: memoItemDelegate
+            width: parent.width
+            height: 36 // TODO: should be somehow depended on icon size and font size
+            color: ListView.isCurrentItem ? Appearance.selectionColor() : Appearance.editorColor()
+            property bool selected: ListView.isCurrentItem
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    currentMemoId = model.memoId
+                    needToActivateMemo(model.memoId)
+                }
+            }
+
+            RowLayout {
+                anchors.fill: parent
+                spacing: 6
+
+                Image {
+                    id: memoIcon
+                    source: model.memoIconPath
+                    mipmap: true
+                    smooth: true
+                    Layout.preferredHeight: 24
+                    Layout.preferredWidth: 24
+                    Layout.leftMargin: 6
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    Label {
+                        text: model.memoTitle
+                        color: memoItemDelegate.selected ? Appearance.textColorSelected() : Appearance.textColor()
+                        font.pointSize: Appearance.fontSizeDefaultUI()
+                        font.bold: memoItemDelegate.selected
+                        Layout.fillWidth: true
+                    }
+
+                    Label {
+                        text: model.memoPath
+                        color: memoItemDelegate.selected ? Appearance.textColorSelected() : Appearance.textColorModest()
+                        font.pointSize: Appearance.fontSizeSmallUI()
+                        font.italic: true
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 3
+                    }
+                }
+
+                ColumnLayout {
+                    Image {
+                        id: closeButton
+                        source: "toolbar/memo_close"
+                        Layout.preferredHeight: 16
+                        Layout.preferredWidth: 16
+                        Layout.rightMargin: 3
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: needToCloseMemo(model.memoId)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

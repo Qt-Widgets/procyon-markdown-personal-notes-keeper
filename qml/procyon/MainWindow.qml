@@ -17,7 +17,7 @@ ApplicationWindow {
     title: catalog.isOpened ? (catalog.fileName + ' - ' + Qt.application.name) : Qt.application.name
     color: Appearance.baseColor()
 
-    property int currentMemoId: 0
+    property int currentMemoId: -1
 
     Settings {
         category: "MainWindow"
@@ -64,6 +64,11 @@ ApplicationWindow {
         close.accepted = catalog.closeCatalog()
     }
 
+    onCurrentMemoIdChanged: {
+        openedMemosView.currentMemoId = currentMemoId
+        memoPagesView.currentMemoId = currentMemoId
+    }
+
     Item {
         id: actions
         Action {
@@ -95,7 +100,7 @@ ApplicationWindow {
         Action {
             id: openMemoAction
             text: qsTr("&Open memo")
-            onTriggered: openMemoPage(catalogView.getSelectedMemoId())
+            onTriggered: currentMemoId = catalogView.getSelectedMemoId()
         }
         Action {
             id: showOpenedMemosViewAction
@@ -213,10 +218,16 @@ ApplicationWindow {
 
         OpenedMemosView {
             id: openedMemosView
+            catalog: catalog
             width: 200
             height: parent.height
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
+            onNeedToActivateMemo: mainWindow.currentMemoId = memoId
+            onNeedToCloseMemo: {
+                // TODO
+                infoDialog.show('Memo ' + memoId + ' is about to be closed')
+            }
         }
 
         MemoPagesView {
@@ -237,7 +248,7 @@ ApplicationWindow {
             Layout.rightMargin: 4
             Layout.bottomMargin: 4
             Layout.topMargin: 4
-            onNeedToOpenMemo: memoPagesView.openPage(memoId)
+            onNeedToOpenMemo: currentMemoId = memoId
         }
     }
 

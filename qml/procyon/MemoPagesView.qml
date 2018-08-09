@@ -9,8 +9,23 @@ TabView {
 
     property Component memoViewComponent: null
     property CatalogHandler catalog: null
+    property int currentMemoId: -1
 
-    function getMemoViewComponent() {
+    onCurrentMemoIdChanged: {
+        if (currentMemoId < 0) return
+        var index = __getTabIndex(currentMemoId)
+        if (index < 0) {
+            var tab = addTab(currentMemoId, __getMemoViewComponent())
+            tab.active = true // force memo view creation
+            tab.item.catalog = catalog
+            tab.item.memoId = currentMemoId
+            tab.item.loadMemo()
+            index = count - 1
+        }
+        currentIndex = index
+    }
+
+    function __getMemoViewComponent() {
         if (!memoViewComponent) {
             memoViewComponent = Qt.createComponent("MemoView.qml")
             if (memoViewComponent.status !== Component.Ready) {
@@ -21,25 +36,11 @@ TabView {
         return memoViewComponent
     }
 
-    function getExistedTabIndex(memoId) {
+    function __getTabIndex(memoId) {
         var s = memoId.toString()
         for (var i = 0; i < count; i++)
             if (getTab(i).title === s)
                 return i
         return -1
-    }
-
-    function openPage(memoId) {
-        if (memoId < 0) return
-        var index = getExistedTabIndex(memoId)
-        if (index < 0) {
-            var tab = addTab(memoId, getMemoViewComponent())
-            tab.active = true // force memo view creation
-            tab.item.catalog = catalog
-            tab.item.memoId = memoId
-            tab.item.loadMemo()
-            index = count - 1
-        }
-        currentIndex = index
     }
 }

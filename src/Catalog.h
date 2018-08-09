@@ -16,6 +16,7 @@ class Memo;
 class MemoType
 {
 public:
+    virtual ~MemoType();
     virtual const char* name() const = 0;
     virtual const QIcon& icon() const = 0;
     virtual const QString iconPath() const = 0;
@@ -91,12 +92,13 @@ typedef OperationResult<int> IntResult;
 class CatalogItem
 {
 public:
-    virtual ~CatalogItem() {}
+    virtual ~CatalogItem();
 
     int id() const { return _id; }
     const QString& title() const { return _title; }
     const QString& info() const { return _info; }
     CatalogItem* parent() const { return _parent; }
+    const QString path() const;
 
     bool isFolder() const;
     bool isMemo() const;
@@ -118,7 +120,7 @@ private:
 class FolderItem : public CatalogItem
 {
 public:
-    ~FolderItem() { qDeleteAll(_children); }
+    ~FolderItem();
 
     const QList<CatalogItem*>& children() const { return _children; }
 

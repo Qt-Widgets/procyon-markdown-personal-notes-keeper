@@ -16,7 +16,7 @@ Rectangle {
         return -1
     }
 
-    function getTreeItemIconPath(styleData) {
+    function __getTreeItemIconPath(styleData) {
         if (!styleData.value) return ""
         if (styleData.value.isFolder) {
             if (styleData.isExpanded )
@@ -44,7 +44,7 @@ Rectangle {
         itemDelegate: Row {
             spacing: 4
             Image {
-                source: getTreeItemIconPath(styleData)
+                source: __getTreeItemIconPath(styleData)
                 mipmap: true
                 smooth: true
                 height: 16
@@ -53,7 +53,8 @@ Rectangle {
             }
             Label {
                 text: styleData.value ? styleData.value.memoTitle : ""
-                font { pointSize: 10; bold: styleData.selected }
+                font.pointSize: Appearance.fontSizeDefaultUI()
+                font.bold: styleData.selected
                 color: styleData.selected ? Appearance.textColorSelected() : Appearance.textColor()
                 anchors.verticalCenter: parent.verticalCenter
             }

@@ -51,6 +51,7 @@ public slots:
     void deleteInvalidMruItems();
     void deleteAllMruItems();
     QString getMemoText(int memoId);
+    QMap<QString, QVariant> getMemoInfo(int memoId);
 
 private:
     Catalog *_catalog = nullptr;

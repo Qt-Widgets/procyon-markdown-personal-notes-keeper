@@ -234,3 +234,16 @@ QString CatalogHandler::getMemoText(int memoId)
     // TODO check errors
     return item->asMemo()->memo()->data();
 }
+
+QMap<QString, QVariant> CatalogHandler::getMemoInfo(int memoId)
+{
+    if (!_catalog) return {};
+    auto item = _catalog->findById(memoId);
+    if (!item->isMemo()) return {};
+    return {
+        { "memoId", memoId },
+        { "memoTitle", item->title() },
+        { "memoPath", item->path() },
+        { "memoIconPath", item->asMemo()->type()->iconPath() }
+    };
+}

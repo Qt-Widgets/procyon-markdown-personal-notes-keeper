@@ -4,16 +4,38 @@
 
 #include <QDebug>
 
+MemoType::~MemoType() {}
+
 Memo* PlainTextMemoType::makeMemo() { return new PlainTextMemo(this); }
 Memo* WikiTextMemoType::makeMemo() { return new WikiTextMemo(this); }
 Memo* RichTextMemoType::makeMemo() { return new RichTextMemo(this); }
 
 //------------------------------------------------------------------------------
 
+CatalogItem::~CatalogItem() {}
 bool CatalogItem::isFolder() const { return dynamic_cast<const FolderItem*>(this); }
 bool CatalogItem::isMemo() const { return dynamic_cast<const MemoItem*>(this); }
 FolderItem* CatalogItem::asFolder() { return dynamic_cast<FolderItem*>(this); }
 MemoItem* CatalogItem::asMemo() { return dynamic_cast<MemoItem*>(this); }
+
+const QString CatalogItem::path() const
+{
+    QStringList path;
+    auto p = _parent;
+    while (p)
+    {
+        path.insert(0, p->title());
+        p = p->parent();
+    }
+    return path.join('/');
+}
+
+//------------------------------------------------------------------------------
+
+FolderItem::~FolderItem()
+{
+    qDeleteAll(_children);
+}
 
 //------------------------------------------------------------------------------
 

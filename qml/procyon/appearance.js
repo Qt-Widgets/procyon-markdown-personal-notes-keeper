@@ -23,3 +23,11 @@ function textColorSelected() {
 function textColorModest() {
     return "Gray";
 }
+
+function fontSizeDefaultUI() {
+    return 10
+}
+
+function fontSizeSmallUI() {
+    return 8
+}
