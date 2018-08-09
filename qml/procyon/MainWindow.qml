@@ -219,10 +219,15 @@ ApplicationWindow {
 
         OpenedMemosView {
             id: openedMemosView
+            catalog: catalog
             width: 200
             height: parent.height
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
+            onNeedToCloseMemo: {
+                // TODO
+                infoDialog.show('Memo ' + memoId + ' is about to be closed')
+            }
         }
 
         MemoPagesView {
@@ -243,7 +248,10 @@ ApplicationWindow {
             Layout.rightMargin: 4
             Layout.bottomMargin: 4
             Layout.topMargin: 4
-            onNeedToOpenMemo: memoPagesView.openPage(memoId)
+            onNeedToOpenMemo: {
+                memoPagesView.openPage(memoId)
+                openedMemosView.openPage(memoId)
+            }
         }
     }
 

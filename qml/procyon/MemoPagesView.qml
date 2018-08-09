@@ -9,6 +9,7 @@ TabView {
 
     property Component memoViewComponent: null
     property CatalogHandler catalog: null
+    property int currentMemoId: -1
 
     function getMemoViewComponent() {
         if (!memoViewComponent) {

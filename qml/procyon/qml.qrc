@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>MainWindow.qml</file>
-        <file>OpenedMemoItemDelegate.qml</file>
         <file>MemoView.qml</file>
         <file>fonts/fontello.ttf</file>
         <file>qtquickcontrols2.conf</file>
