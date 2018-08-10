@@ -25,11 +25,25 @@ Rectangle {
             }
             memosListView.currentIndex = index
         }
+        needToActivateMemo(currentMemoId)
+    }
+
+    function memoClosed(memoId) {
+        var index = __getItemIndex(memoId)
+        if (index > -1) {
+            memosListModel.remove(index, 1)
+            memosListView.currentIndex = Math.min(memosListModel.count-1, index)
+            currentMemoId = __getMemoId(memosListView.currentIndex)
+        }
+    }
+
+    function __getMemoId(index) {
+        return (index > -1 && index < memosListModel.count) ? memosListModel.get(index)["memoId"] : 0;
     }
 
     function __getItemIndex(memoId) {
         for (var i = 0; i < memosListModel.count; i++)
-            if (memosListModel.get(i)["memoId"] === memoId)
+            if (__getMemoId(i) === memoId)
                 return i
         return -1
     }
@@ -53,10 +67,7 @@ Rectangle {
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: {
-                    currentMemoId = model.memoId
-                    needToActivateMemo(model.memoId)
-                }
+                onClicked: currentMemoId = model.memoId
             }
 
             RowLayout {

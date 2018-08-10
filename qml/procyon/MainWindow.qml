@@ -17,8 +17,6 @@ ApplicationWindow {
     title: catalog.isOpened ? (catalog.fileName + ' - ' + Qt.application.name) : Qt.application.name
     color: Appearance.baseColor()
 
-    property int currentMemoId: 0
-
     Settings {
         category: "MainWindow"
         property alias windowX: mainWindow.x
@@ -64,21 +62,18 @@ ApplicationWindow {
         close.accepted = catalog.closeCatalog()
     }
 
-    onCurrentMemoIdChanged: {
-        openedMemosView.currentMemoId = currentMemoId
-        memoPagesView.currentMemoId = currentMemoId
-    }
-
     function openMemo(memoId) {
         if (memoId > 0) {
-            currentMemoId = memoId
+            openedMemosView.currentMemoId = memoId
+            memoPagesView.currentMemoId = memoId
         }
     }
 
     function closeMemo(memoId) {
         if (memoId > 0) {
-            // TODO
-            infoDialog.show('Memo ' + memoId + ' is about to be closed')
+            // TODO check if memo was changed and save it
+            openedMemosView.memoClosed(memoId)
+            memoPagesView.closeMemo(memoId)
         }
     }
 
@@ -119,8 +114,8 @@ ApplicationWindow {
             id: closeMemoAction
             text: qsTr("&Close memo")
             shortcut: StandardKey.Close
-            enabled: currentMemoId > 0
-            onTriggered: closeMemo(currentMemoId)
+            enabled: openedMemosView.currentMemoId > 0
+            onTriggered: closeMemo(openedMemosView.currentMemoId)
         }
         Action {
             id: showOpenedMemosViewAction
@@ -196,20 +191,6 @@ ApplicationWindow {
             MenuItem { action: showStatusBarAction }
         }
     }
-
-    /*toolBar: ToolBar {
-        height: 38
-        width: parent.width
-
-        Flow {
-            topPadding: 2
-
-            Row {
-                id: fileActionsToolbarRow
-                ToolButton { action: openCatalogAction }
-            }
-        }
-    }*/
 
     statusBar: StatusBar {
         id: statusBar

@@ -29,6 +29,13 @@ TabView {
         }
     }
 
+    function closeMemo(memoId) {
+        var index = __getTabIndex(memoId)
+        if (index > -1) {
+            removeTab(index)
+        }
+    }
+
     function __getMemoViewComponent() {
         if (!memoViewComponent) {
             memoViewComponent = Qt.createComponent("MemoView.qml")
