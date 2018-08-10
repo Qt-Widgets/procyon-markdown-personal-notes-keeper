@@ -7,6 +7,7 @@
 
 #include "../../src/Catalog.h"
 #include "../../src/CatalogModel.h"
+#include "../../src/CatalogStore.h"
 #include "../../src/Memo.h"
 
 namespace {
@@ -33,9 +34,7 @@ void CatalogHandler::loadSettings()
     emit recentFilesChanged();
 
     s.beginGroup("State");
-    auto lastFile = s.value("catalogFile").toString();
-    if (!lastFile.isEmpty())
-        QTimer::singleShot(0, [&, lastFile]{ loadCatalogFile(lastFile); });
+    _recentFile = s.value("catalogFile").toString();
     s.endGroup();
 }
 
@@ -231,11 +230,17 @@ void CatalogHandler::deleteAllMruItems()
     emit recentFilesChanged();
 }
 
+bool CatalogHandler::isValidId(int memoId) const
+{
+    if (!_catalog) return false;
+    return _catalog->findById(memoId);
+}
+
 QString CatalogHandler::getMemoText(int memoId)
 {
     if (!_catalog) return QString();
     auto item = _catalog->findById(memoId);
-    if (!item->isMemo()) return QString();
+    if (!item || !item->isMemo()) return QString();
     _catalog->loadMemo(item->asMemo());
     // TODO check errors
     return item->asMemo()->memo()->data();
@@ -245,11 +250,26 @@ QMap<QString, QVariant> CatalogHandler::getMemoInfo(int memoId)
 {
     if (!_catalog) return {};
     auto item = _catalog->findById(memoId);
-    if (!item->isMemo()) return {};
+    if (!item || !item->isMemo()) return {};
     return {
         { "memoId", memoId },
         { "memoTitle", item->title() },
         { "memoPath", item->path() },
         { "memoIconPath", item->asMemo()->type()->iconPath() }
     };
+}
+
+QMap<QString, QVariant> CatalogHandler::getStoredSession()
+{
+    return {
+        { "openedMemos", CatalogStore::settingsManager()->readValue("openedMemos", "") },
+        { "activeMemo", CatalogStore::settingsManager()->readValue("activeMemo", 0) },
+        { "expandedFolders", CatalogStore::settingsManager()->readValue("expandedFolders", "") }
+    };
+}
+
+void CatalogHandler::storeSession(const QMap<QString, QVariant>& session)
+{
+    for (const auto& key : session.keys())
+        CatalogStore::settingsManager()->writeValue(key, session[key]);
 }

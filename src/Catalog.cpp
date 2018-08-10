@@ -73,8 +73,12 @@ CatalorResult Catalog::open(const QString& fileName)
     }
 
     for (FolderItem* item: folders.items.values())
+    {
+        catalog->_allFolders[item->id()] = item;
+
         if (!item->parent())
             catalog->_items.append(item);
+    }
 
     MemosResult memos = CatalogStore::memoManager()->selectAll();
     if (!memos.error.isEmpty())
@@ -163,7 +167,9 @@ QString Catalog::createFolder(FolderItem* parent, const QString& title)
     }
 
     (parent ? parent->_children : _items).append(folder);
+    _allFolders.insert(folder->id(), folder);
     // TODO sort items after inserting
+
     return QString();
 }
 
@@ -173,6 +179,8 @@ QString Catalog::removeFolder(FolderItem* item)
     if (!res.isEmpty()) return res;
 
     (item->parent() ? item->parent()->asFolder()->_children : _items).removeOne(item);
+    _allFolders.remove(item->id());
+
     delete item;
     return QString();
 }

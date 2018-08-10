@@ -42,6 +42,22 @@ Rectangle {
         currentMemoId = 0
     }
 
+    function getAllIdsStr() {
+        var ids = []
+        for (var i = 0; i < memosListModel.count; i++)
+            ids.push(__getMemoId(i))
+        return ids.join(';')
+    }
+
+    function setAllIdsStr(idsStr, activeId) {
+        var memoIdsStr = idsStr.split(';')
+        for (var i = 0; i < memoIdsStr.length; i++) {
+            var memoId = parseInt(memoIdsStr[i])
+            if (memoId > 0 && catalog.isValidId(memoId))
+                currentMemoId = memoId
+        }
+    }
+
     function __getMemoId(index) {
         return (index > -1 && index < memosListModel.count) ? memosListModel.get(index)["memoId"] : 0;
     }

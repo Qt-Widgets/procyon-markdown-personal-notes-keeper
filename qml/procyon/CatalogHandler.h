@@ -19,6 +19,7 @@ class CatalogHandler : public QObject
     Q_PROPERTY(const QStringList& recentFilesModel READ recentFiles NOTIFY recentFilesChanged)
     // TODO: can't read recentFilesModel.count or recentFilesModel.empty in qml, so use this property
     Q_PROPERTY(bool hasRecentFiles READ hasRecentFiles NOTIFY recentFilesChanged)
+    Q_PROPERTY(QString recentFile READ recentFile NOTIFY recentFilesChanged)
 
 public:
     explicit CatalogHandler(QObject *parent = nullptr);
@@ -31,6 +32,7 @@ public:
     QAbstractItemModel* catalogModel() const;
     const QStringList& recentFiles() const { return _recentFiles; }
     bool hasRecentFiles() const { return !_recentFiles.empty(); }
+    QString recentFile() const { return _recentFile; }
 
 signals:
     void error(const QString &message) const;
@@ -52,13 +54,17 @@ public slots:
     void deleteAllMruItems();
     bool sameFile(const QString &fileName) const;
     bool sameUrl(const QUrl &fileUrl) const;
+    bool isValidId(int memoId) const;
     QString getMemoText(int memoId);
     QMap<QString, QVariant> getMemoInfo(int memoId);
+    QMap<QString, QVariant> getStoredSession();
+    void storeSession(const QMap<QString, QVariant>& session);
 
 private:
     Catalog *_catalog = nullptr;
     CatalogModel *_catalogModel = nullptr;
     QStringList _recentFiles;
+    QString _recentFile;
 
     void catalogOpened(Catalog *catalog);
     void addToRecent(const QString &fileName);

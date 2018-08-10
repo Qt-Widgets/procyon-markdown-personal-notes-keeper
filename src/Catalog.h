@@ -187,6 +187,7 @@ private:
     QString _fileName;
     QList<CatalogItem*> _items;
     QMap<int, MemoItem*> _allMemos;
+    QMap<int, FolderItem*> _allFolders;
 };
 
 #endif // CATALOG_H

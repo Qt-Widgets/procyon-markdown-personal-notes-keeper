@@ -16,6 +16,41 @@ Rectangle {
         return 0
     }
 
+    function getExpandedIdsStr() {
+        var expandedIds = []
+        __getExpandedIds(null, expandedIds)
+        return expandedIds.join(';')
+    }
+
+    function setExpandedIdsStr(expandedIdsStr) {
+        var expandedIds = []
+        var expandedStr = expandedIdsStr.split(';')
+        for (var i = 0; i < expandedStr.length; i++)
+            expandedIds.push(parseInt(expandedStr[i]))
+        __setExpandedIds(null, expandedIds)
+    }
+
+    function __getExpandedIds(parentIndex, expandedIds) {
+        var rowCount = catalogModel.rowCount(parentIndex)
+        for (var row = 0; row < rowCount; row++) {
+            var index = catalogModel.index(row, 0, parentIndex)
+            if (catalogTreeView.isExpanded(index))
+                expandedIds.push(catalogModel.data(index).memoId)
+            __getExpandedIds(index, expandedIds)
+        }
+    }
+
+    function __setExpandedIds(parentIndex, expandedIds) {
+        var rowCount = catalogModel.rowCount(parentIndex)
+        for (var row = 0; row < rowCount; row++) {
+            var index = catalogModel.index(row, 0, parentIndex)
+            var indexData = catalogModel.data(index)
+            if (expandedIds.indexOf(indexData.memoId) > -1)
+                catalogTreeView.expand(index)
+            __setExpandedIds(index, expandedIds)
+        }
+    }
+
     function __getTreeItemIconPath(styleData) {
         if (!styleData.value) return ""
         if (styleData.value.isFolder) {
@@ -27,6 +62,7 @@ Rectangle {
     }
 
     TreeView {
+        id: catalogTreeView
         model: catalogModel
         headerVisible: false
         anchors.fill: parent

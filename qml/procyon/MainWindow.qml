@@ -55,6 +55,9 @@ ApplicationWindow {
         statusBar.visible = showStatusBarAction.checked
 
         catalog.loadSettings()
+
+        if (catalog.recentFile)
+            loadCatalogFile(catalog.recentFile)
     }
 
     onClosing: {
@@ -70,22 +73,40 @@ ApplicationWindow {
     function loadCatalogFile(fileName) {
         if (!catalog.sameFile(fileName) && closeCatalog()) {
             catalog.loadCatalogFile(fileName)
-            // TODO restore catalog session
+            restoreSession()
         }
     }
 
     function loadCatalogUrl(fileUrl) {
         if (!catalog.sameUrl(fileUrl) && closeCatalog()) {
             catalog.loadCatalogUrl(fileUrl)
-            // TODO restore catalog session
+            restoreSession()
         }
+    }
+
+    function restoreSession() {
+        var session = catalog.getStoredSession()
+
+        openedMemosView.setAllIdsStr(session["openedMemos"])
+        catalogView.setExpandedIdsStr(session["expandedFolders"])
+
+        var activeMemoId = session["activeMemo"]
+        if (activeMemoId > 0)
+            openedMemosView.currentMemoId = activeMemoId
+    }
+
+    function storeSession() {
+        catalog.storeSession({
+            "openedMemos": openedMemosView.getAllIdsStr(),
+            "activeMemo": openedMemosView.currentMemoId,
+            "expandedFolders": catalogView.getExpandedIdsStr()
+        })
     }
 
     function closeCatalog() {
         // TODO check if memos were changed and save them
-        // TODO save opened memos list and active memo id
-        openedMemosView.allMemosClosed()
-        memoPagesView.closeAllMemos()
+        if (catalog.isOpened) storeSession()
+        closeAllMemos()
         catalog.closeCatalog()
         return true
     }
@@ -103,6 +124,11 @@ ApplicationWindow {
             openedMemosView.memoClosed(memoId)
             memoPagesView.closeMemo(memoId)
         }
+    }
+
+    function closeAllMemos() {
+        openedMemosView.allMemosClosed()
+        memoPagesView.closeAllMemos()
     }
 
     Item {
@@ -135,15 +161,21 @@ ApplicationWindow {
         }
         Action {
             id: openMemoAction
-            text: qsTr("&Open memo")
+            text: qsTr("&Open Memo")
             onTriggered: openMemo(catalogView.getSelectedMemoId())
         }
         Action {
             id: closeMemoAction
-            text: qsTr("&Close memo")
+            text: qsTr("&Close Memo")
             shortcut: StandardKey.Close
             enabled: openedMemosView.currentMemoId > 0
             onTriggered: closeMemo(openedMemosView.currentMemoId)
+        }
+        Action {
+            id: closeAllMemosAction
+            text: qsTr("Close &All Memos")
+            enabled: openedMemosView.currentMemoId > 0
+            onTriggered: closeAllMemos()
         }
         Action {
             id: showOpenedMemosViewAction
@@ -211,6 +243,7 @@ ApplicationWindow {
             title: qsTr("&Catalog")
             MenuItem { action: openMemoAction }
             MenuItem { action: closeMemoAction }
+            MenuItem { action: closeAllMemosAction }
         }
         Menu {
             title: qsTr("&Options")
@@ -231,6 +264,13 @@ ApplicationWindow {
                 Label { text: catalog.memoCount }
             }
             Row {
+                visible: catalog.isOpened
+                leftPadding: 6
+                Label { text: qsTr("Opened: "); color: Appearance.textColorModest() }
+                Label { text: memoPagesView.count }
+            }
+            Row {
+                leftPadding: 6
                 Label { text: qsTr("Catalog: "); color: Appearance.textColorModest() }
                 Label { text: catalog.filePath || qsTr("(not selected)") }
             }
