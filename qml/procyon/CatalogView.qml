@@ -11,9 +11,9 @@ Rectangle {
     function getSelectedMemoId() {
         if (memoSelector.hasSelection && memoSelector.currentIndex) {
             var indexData = catalogModel.data(memoSelector.currentIndex)
-            return (indexData && !indexData.isFolder) ? indexData.memoId : -1
+            return (indexData && !indexData.isFolder) ? indexData.memoId : 0
         }
-        return -1
+        return 0
     }
 
     function __getTreeItemIconPath(styleData) {

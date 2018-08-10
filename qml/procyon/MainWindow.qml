@@ -17,7 +17,7 @@ ApplicationWindow {
     title: catalog.isOpened ? (catalog.fileName + ' - ' + Qt.application.name) : Qt.application.name
     color: Appearance.baseColor()
 
-    property int currentMemoId: -1
+    property int currentMemoId: 0
 
     Settings {
         category: "MainWindow"
@@ -69,6 +69,19 @@ ApplicationWindow {
         memoPagesView.currentMemoId = currentMemoId
     }
 
+    function openMemo(memoId) {
+        if (memoId > 0) {
+            currentMemoId = memoId
+        }
+    }
+
+    function closeMemo(memoId) {
+        if (memoId > 0) {
+            // TODO
+            infoDialog.show('Memo ' + memoId + ' is about to be closed')
+        }
+    }
+
     Item {
         id: actions
         Action {
@@ -100,7 +113,14 @@ ApplicationWindow {
         Action {
             id: openMemoAction
             text: qsTr("&Open memo")
-            onTriggered: currentMemoId = catalogView.getSelectedMemoId()
+            onTriggered: openMemo(catalogView.getSelectedMemoId())
+        }
+        Action {
+            id: closeMemoAction
+            text: qsTr("&Close memo")
+            shortcut: StandardKey.Close
+            enabled: currentMemoId > 0
+            onTriggered: closeMemo(currentMemoId)
         }
         Action {
             id: showOpenedMemosViewAction
@@ -167,6 +187,7 @@ ApplicationWindow {
         Menu {
             title: qsTr("&Catalog")
             MenuItem { action: openMemoAction }
+            MenuItem { action: closeMemoAction }
         }
         Menu {
             title: qsTr("&Options")
@@ -223,11 +244,8 @@ ApplicationWindow {
             height: parent.height
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
-            onNeedToActivateMemo: mainWindow.currentMemoId = memoId
-            onNeedToCloseMemo: {
-                // TODO
-                infoDialog.show('Memo ' + memoId + ' is about to be closed')
-            }
+            onNeedToActivateMemo: openMemo(memoId)
+            onNeedToCloseMemo: closeMemo(memoId)
         }
 
         MemoPagesView {
@@ -237,6 +255,7 @@ ApplicationWindow {
             Layout.minimumWidth: 100
             Layout.leftMargin: openedMemosView.visible ? 0 : 4
             Layout.rightMargin: catalogView.visible ? 0 : 4
+            onNeedToCloseMemo: closeMemo(memoId)
         }
 
         CatalogView {
@@ -248,7 +267,7 @@ ApplicationWindow {
             Layout.rightMargin: 4
             Layout.bottomMargin: 4
             Layout.topMargin: 4
-            onNeedToOpenMemo: currentMemoId = memoId
+            onNeedToOpenMemo: openMemo(memoId)
         }
     }
 

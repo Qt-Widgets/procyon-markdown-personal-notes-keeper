@@ -13,6 +13,7 @@ Rectangle {
     property int memoId: 0
     property bool editMemoMode: false
     property CatalogHandler catalog: null
+    property var signalProxy
 
     function getMemoText(id) {
         return id;
@@ -64,11 +65,8 @@ Rectangle {
             text: qsTr("Close")
             tooltip: qsTr("Close memo")
             iconSource: "qrc:/toolbar/memo_close"
-            shortcut: StandardKey.Close
-            onTriggered: {
-                infoDialog.text = "TODO: close memo"
-                infoDialog.visible = true
-            }
+            //shortcut: StandardKey.Close <-- this shortcut is in MainWindow
+            onTriggered: signalProxy.needToCloseMemo(memoId)
         }
     }
 

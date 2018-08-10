@@ -4,25 +4,29 @@ import QtQuick.Controls 1.4
 import org.orion_project.procyon.catalog 1.0
 
 TabView {
+    id: self
     tabsVisible: false
     frameVisible: false
 
     property Component memoViewComponent: null
     property CatalogHandler catalog: null
-    property int currentMemoId: -1
+    property int currentMemoId: 0
+    signal needToCloseMemo(int memoId)
 
     onCurrentMemoIdChanged: {
-        if (currentMemoId < 0) return
-        var index = __getTabIndex(currentMemoId)
-        if (index < 0) {
-            var tab = addTab(currentMemoId, __getMemoViewComponent())
-            tab.active = true // force memo view creation
-            tab.item.catalog = catalog
-            tab.item.memoId = currentMemoId
-            tab.item.loadMemo()
-            index = count - 1
+        if (currentMemoId > 0) {
+            var index = __getTabIndex(currentMemoId)
+            if (index < 0) {
+                var tab = addTab(currentMemoId, __getMemoViewComponent())
+                tab.active = true // force memo view creation
+                tab.item.catalog = catalog
+                tab.item.signalProxy = self
+                tab.item.memoId = currentMemoId
+                tab.item.loadMemo()
+                index = count - 1
+            }
+            currentIndex = index
         }
-        currentIndex = index
     }
 
     function __getMemoViewComponent() {

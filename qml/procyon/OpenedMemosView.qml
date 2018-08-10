@@ -9,21 +9,22 @@ import "appearance.js" as Appearance
 
 Rectangle {
     property CatalogHandler catalog: null
-    property int currentMemoId: -1
+    property int currentMemoId: 0
     signal needToCloseMemo(int memoId)
     signal needToActivateMemo(int memoId)
 
     onCurrentMemoIdChanged: {
-        if (currentMemoId < 0) return
-        var index = __getItemIndex(currentMemoId)
-        if (index < 0) {
-            var info = catalog.getMemoInfo(currentMemoId)
-            if (info) {
-                memosListModel.append(info)
-                index = memosListModel.count-1
+        if (currentMemoId > 0) {
+            var index = __getItemIndex(currentMemoId)
+            if (index < 0) {
+                var info = catalog.getMemoInfo(currentMemoId)
+                if (info) {
+                    memosListModel.append(info)
+                    index = memosListModel.count-1
+                }
             }
+            memosListView.currentIndex = index
         }
-        memosListView.currentIndex = index
     }
 
     function __getItemIndex(memoId) {
