@@ -37,6 +37,11 @@ Rectangle {
         }
     }
 
+    function allMemosClosed() {
+        memosListModel.clear()
+        currentMemoId = 0
+    }
+
     function __getMemoId(index) {
         return (index > -1 && index < memosListModel.count) ? memosListModel.get(index)["memoId"] : 0;
     }

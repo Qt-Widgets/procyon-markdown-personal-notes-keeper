@@ -36,6 +36,11 @@ TabView {
         }
     }
 
+    function closeAllMemos() {
+        while (count > 0)
+            removeTab(count-1)
+    }
+
     function __getMemoViewComponent() {
         if (!memoViewComponent) {
             memoViewComponent = Qt.createComponent("MemoView.qml")

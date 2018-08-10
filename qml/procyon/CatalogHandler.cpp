@@ -54,16 +54,45 @@ void CatalogHandler::saveSettings()
     s.endGroup();
 }
 
+bool CatalogHandler::sameFile(const QString &fileName) const
+{
+    if (!_catalog) return false;
+
+    // Check if we try to open the same file as already opened
+    auto curPath = QFileInfo(_catalog->fileName()).canonicalFilePath();
+    auto newPath = QFileInfo(fileName).canonicalFilePath();
+    return curPath == newPath;
+}
+
+bool CatalogHandler::sameUrl(const QUrl &fileUrl) const
+{
+    if (!_catalog) return false;
+
+    return sameFile(fileUrl.toString());
+}
+
+QString CatalogHandler::urlToFileName(const QUrl &fileUrl) const
+{
+#ifdef Q_OS_WIN
+    auto fileName = fileUrl.toString();
+    // Qt 5.10, 5.11.1: an url returned by FileDialog has format "file:///C:/dir/..."
+    // `fileUrl.path()` strips only "file://" but leaves the slash there ("/C:/dir...")
+    if (fileName.startsWith('/'))
+        fileName = fileName.remove(0, 1);
+    return fileName;
+#else
+    return fileUrl.path();
+#endif
+}
+
 void CatalogHandler::newCatalog(const QUrl &fileUrl)
 {
-    auto fileName = fileUrl.path();
+    auto fileName = urlToFileName(fileUrl);
     if (fileName.isEmpty())
     {
         qWarning() << "Filename is not set" << fileUrl;
         return;
     }
-
-    if (!closeCatalog()) return;
 
     // TODO: FileDialog.defaultSuffix doesn't work even in Qt 5.10 despite of it was introduced there
     auto res = Catalog::create(fileName.endsWith(DEFAULT_EXT) ? fileName : fileName + DEFAULT_EXT);
@@ -75,19 +104,12 @@ void CatalogHandler::newCatalog(const QUrl &fileUrl)
 
 void CatalogHandler::loadCatalogUrl(const QUrl &fileUrl)
 {
-    auto fileName = fileUrl.toString();
+    auto fileName = urlToFileName(fileUrl);
     if (fileName.isEmpty())
     {
         qWarning() << "Filename is not set" << fileUrl;
         return;
     }
-
-#ifdef Q_OS_WIN
-    // Qt 5.10, 5.11.1: an url returned by FileDialog has format "file:///C:/dir/..."
-    // `fileUrl.path()` strips only "file://" but leaves the slash there ("/C:/dir...")
-    if (fileName.startsWith('/'))
-        fileName = fileName.remove(0, 1);
-#endif
 
     loadCatalogFile(fileName);
 }
@@ -106,16 +128,6 @@ void CatalogHandler::loadCatalogFile(const QString &fileName)
         return;
     }
 
-    if (_catalog)
-    {
-        // Check if we try to open the same file as already opened
-        auto curPath = QFileInfo(_catalog->fileName()).canonicalFilePath();
-        auto newPath = QFileInfo(fileName).canonicalFilePath();
-        if (curPath == newPath) return;
-    }
-
-    if (!closeCatalog()) return;
-
     auto res = Catalog::open(fileName);
     if (res.ok())
         catalogOpened(res.result());
@@ -123,13 +135,10 @@ void CatalogHandler::loadCatalogFile(const QString &fileName)
         emit error(tr("Unable to load catalog.\n\n%1").arg(res.error()));
 }
 
-bool CatalogHandler::closeCatalog()
+void CatalogHandler::closeCatalog()
 {
     if (!_catalog)
-        return true;
-
-    // TODO check if some opened memos were changed
-    // TODO save catalog session
+        return;
 
     if (_catalogModel)
     {
@@ -145,7 +154,6 @@ bool CatalogHandler::closeCatalog()
     emit memoCountChanged();
     emit catalogModelChanged();
     emit isOpenedChanged();
-    return true;
 }
 
 QString CatalogHandler::filePath() const
@@ -183,8 +191,6 @@ void CatalogHandler::catalogOpened(Catalog *catalog)
     _catalogModel = new CatalogModel(catalog);
 
     addToRecent(catalog->fileName());
-
-    // TODO restore catalog session
 
     emit fileNameChanged();
     emit memoCountChanged();

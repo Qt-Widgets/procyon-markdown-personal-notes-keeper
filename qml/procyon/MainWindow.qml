@@ -59,7 +59,35 @@ ApplicationWindow {
 
     onClosing: {
         catalog.saveSettings()
-        close.accepted = catalog.closeCatalog()
+        close.accepted = closeCatalog()
+    }
+
+    function createNewCatalog(fileUrl) {
+        if (closeCatalog())
+            catalog.newCatalog(fileUrl)
+    }
+
+    function loadCatalogFile(fileName) {
+        if (!catalog.sameFile(fileName) && closeCatalog()) {
+            catalog.loadCatalogFile(fileName)
+            // TODO restore catalog session
+        }
+    }
+
+    function loadCatalogUrl(fileUrl) {
+        if (!catalog.sameUrl(fileUrl) && closeCatalog()) {
+            catalog.loadCatalogUrl(fileUrl)
+            // TODO restore catalog session
+        }
+    }
+
+    function closeCatalog() {
+        // TODO check if memos were changed and save them
+        // TODO save opened memos list and active memo id
+        openedMemosView.allMemosClosed()
+        memoPagesView.closeAllMemos()
+        catalog.closeCatalog()
+        return true
     }
 
     function openMemo(memoId) {
@@ -97,7 +125,7 @@ ApplicationWindow {
             id: closeCatalogAction
             text: qsTr("&Close")
             enabled: catalog.isOpened
-            onTriggered: catalog.closeCatalog()
+            onTriggered: closeCatalog()
         }
         Action {
             id: quitAppAction
@@ -154,7 +182,7 @@ ApplicationWindow {
                     model: catalog.recentFilesModel
                     MenuItem {
                         text: modelData
-                        onTriggered: catalog.loadCatalogFile(text)
+                        onTriggered: loadCatalogFile(text)
                     }
                     onObjectAdded: mruFileMenu.insertItem(index, object)
                     onObjectRemoved: mruFileMenu.removeItem(object)
@@ -259,10 +287,7 @@ ApplicationWindow {
             id: openCatalogDialog
             nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
             folder: shortcuts.documents
-            onAccepted: {
-                console.log('File selected: ' + fileUrl)
-                catalog.loadCatalogUrl(fileUrl)
-            }
+            onAccepted: loadCatalogUrl(fileUrl)
         }
 
         FileDialog {
@@ -270,7 +295,7 @@ ApplicationWindow {
             nameFilters: openCatalogDialog.nameFilters
             selectExisting: false
             folder: shortcuts.documents
-            onAccepted: catalog.newCatalog(fileUrl)
+            onAccepted: createNewCatalog(fileUrl)
         }
 
         MessageDialog {

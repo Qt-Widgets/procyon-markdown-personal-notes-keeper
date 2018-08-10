@@ -47,9 +47,11 @@ public slots:
     void newCatalog(const QUrl &fileUrl);
     void loadCatalogFile(const QString &fileName);
     void loadCatalogUrl(const QUrl &fileUrl);
-    bool closeCatalog();
+    void closeCatalog();
     void deleteInvalidMruItems();
     void deleteAllMruItems();
+    bool sameFile(const QString &fileName) const;
+    bool sameUrl(const QUrl &fileUrl) const;
     QString getMemoText(int memoId);
     QMap<QString, QVariant> getMemoInfo(int memoId);
 
@@ -60,6 +62,7 @@ private:
 
     void catalogOpened(Catalog *catalog);
     void addToRecent(const QString &fileName);
+    QString urlToFileName(const QUrl &fileUrl) const;
 };
 
 #endif // CATALOGHANDLER_H
