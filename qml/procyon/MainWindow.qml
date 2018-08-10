@@ -87,19 +87,19 @@ ApplicationWindow {
     function restoreSession() {
         var session = catalog.getStoredSession()
 
-        openedMemosView.setAllIdsStr(session["openedMemos"])
-        catalogView.setExpandedIdsStr(session["expandedFolders"])
+        openedMemosView.setAllIdsStr(session.openedMemos)
+        catalogView.setExpandedIdsStr(session.expandedFolders)
 
-        var activeMemoId = session["activeMemo"]
+        var activeMemoId = session.activeMemo
         if (activeMemoId > 0)
             openedMemosView.currentMemoId = activeMemoId
     }
 
     function storeSession() {
         catalog.storeSession({
-            "openedMemos": openedMemosView.getAllIdsStr(),
-            "activeMemo": openedMemosView.currentMemoId,
-            "expandedFolders": catalogView.getExpandedIdsStr()
+            openedMemos: openedMemosView.getAllIdsStr(),
+            activeMemo: openedMemosView.currentMemoId,
+            expandedFolders: catalogView.getExpandedIdsStr()
         })
     }
 

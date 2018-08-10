@@ -45,7 +45,7 @@ Rectangle {
     function getAllIdsStr() {
         var ids = []
         for (var i = 0; i < memosListModel.count; i++)
-            ids.push(__getMemoId(i))
+            ids.push(memosListModel.get(i).memoId)
         return ids.join(';')
     }
 
@@ -59,7 +59,7 @@ Rectangle {
     }
 
     function __getMemoId(index) {
-        return (index > -1 && index < memosListModel.count) ? memosListModel.get(index)["memoId"] : 0;
+        return (index > -1 && index < memosListModel.count) ? memosListModel.get(index).memoId : 0;
     }
 
     function __getItemIndex(memoId) {

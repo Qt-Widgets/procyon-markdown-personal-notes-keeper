@@ -15,19 +15,15 @@ Rectangle {
     property CatalogHandler catalog: null
     property var signalProxy
 
-    function getMemoText(id) {
-        return id;
-    }
-
-    function getMemoHeader(id) {
-        return "Header " + id;
-    }
-
     function editingDone(ok) {
         editMemoMode = false;
     }
 
     function loadMemo() {
+        var info = catalog.getMemoInfo(memoId)
+        headerText.text = info.memoTitle
+        memoPathText.text = info.memoPath
+
         textArea.text = catalog.getMemoText(memoId)
     }
 
@@ -128,6 +124,15 @@ Rectangle {
                 ToolButton { action: cancelMemoAction; visible: editMemoMode }
                 ToolButton { action: closeMemoAction }
             }
+        }
+
+        Label {
+            id: memoPathText
+            Layout.fillWidth: true
+            color: Appearance.textColorModest()
+            font.pointSize: Appearance.fontSizeSmallUI()
+            font.italic: true
+            leftPadding: 4
         }
 
         TextArea {
