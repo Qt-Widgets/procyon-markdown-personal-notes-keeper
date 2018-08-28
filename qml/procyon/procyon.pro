@@ -24,7 +24,11 @@ SOURCES += \
     ../../src/Catalog.cpp \
     ../../src/CatalogStore.cpp \
     ../../src/SqlHelper.cpp \
-    ../../src/Memo.cpp
+    ../../src/Memo.cpp \
+    DocumentHandler.cpp \
+    ../../src/hl/HighlightingRule.cpp \
+    ../../src/hl/PythonSyntaxHighlighter.cpp \
+    ../../src/hl/ShellMemoSyntaxHighlighter.cpp
 
 RESOURCES += qml.qrc
 
@@ -45,4 +49,8 @@ HEADERS += \
     ../../src/CatalogStore.h \
     ../../src/SqlHelper.h \
     ../../src/CatalogModel.h \
-    ../../src/Memo.h
+    ../../src/Memo.h \
+    DocumentHandler.h \
+    ../../src/hl/HighlightingRule.h \
+    ../../src/hl/PythonSyntaxHighlighter.h \
+    ../../src/hl/ShellMemoSyntaxHighlighter.h

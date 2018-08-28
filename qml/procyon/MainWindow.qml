@@ -32,15 +32,6 @@ ApplicationWindow {
 
     CatalogHandler {
         id: catalog
-        /*document: textArea.textDocument
-        cursorPosition: textArea.cursorPosition
-        selectionStart: textArea.selectionStart
-        selectionEnd: textArea.selectionEnd
-        textColor: colorDialog.color
-        Component.onCompleted: document.load("qrc:/texteditor.html")
-        onLoaded: {
-            textArea.text = text
-        }*/
         onError: errorDialog.show(message)
         onInfo: infoDialog.show(message)
     }
@@ -131,6 +122,10 @@ ApplicationWindow {
         memoPagesView.closeAllMemos()
     }
 
+    function applyMemoFont() {
+        console.log('Font selected: ' + catalog.memoFont)
+    }
+
     Item {
         id: actions
         Action {
@@ -179,24 +174,39 @@ ApplicationWindow {
         }
         Action {
             id: showOpenedMemosViewAction
-            text: qsTr("Show &Opened Memos Panel")
+            text: qsTr("&Opened Memos Panel")
             checkable: true
             checked: true
             onToggled: openedMemosView.visible = checked
         }
         Action {
             id: showCatalogViewAction
-            text: qsTr("Show &Catalog Panel")
+            text: qsTr("&Catalog Panel")
             checkable: true
             checked: true
             onToggled: catalogView.visible = checked
         }
         Action {
             id: showStatusBarAction
-            text: qsTr("Show &Status Bar")
+            text: qsTr("&Status Bar")
             checkable: true
             checked: true
             onToggled: statusBar.visible = checked
+        }
+        Action {
+            id: chooseMemoFontAction
+            text: qsTr("Choose Memo Font...")
+            onTriggered: {
+                memoFontDialog.font = catalog.memoFont
+                memoFontDialog.open()
+            }
+        }
+        Action {
+            id: memoWordWrapAction
+            text: qsTr("Word Wrap")
+            checkable: true
+            checked: catalog.memoWordWrap
+            onToggled: catalog.memoWordWrap = checked
         }
     }
 
@@ -237,6 +247,12 @@ ApplicationWindow {
             MenuItem { action: quitAppAction }
         }
         Menu {
+            title: qsTr("&View")
+            MenuItem { action: showOpenedMemosViewAction }
+            MenuItem { action: showCatalogViewAction }
+            MenuItem { action: showStatusBarAction }
+        }
+        Menu {
             title: qsTr("&Edit")
         }
         Menu {
@@ -247,9 +263,8 @@ ApplicationWindow {
         }
         Menu {
             title: qsTr("&Options")
-            MenuItem { action: showOpenedMemosViewAction }
-            MenuItem { action: showCatalogViewAction }
-            MenuItem { action: showStatusBarAction }
+            MenuItem { action: chooseMemoFontAction }
+            MenuItem { action: memoWordWrapAction }
         }
     }
 
@@ -336,6 +351,14 @@ ApplicationWindow {
             selectExisting: false
             folder: shortcuts.documents
             onAccepted: createNewCatalog(fileUrl)
+        }
+
+        FontDialog {
+            id: memoFontDialog
+            onAccepted: {
+                catalog.memoFont = font
+                applyMemoFont()
+            }
         }
 
         MessageDialog {

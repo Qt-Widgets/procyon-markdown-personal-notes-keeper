@@ -2,6 +2,7 @@
 #define CATALOGHANDLER_H
 
 #include <QAbstractItemModel>
+#include <QFont>
 #include <QObject>
 #include <QUrl>
 
@@ -20,6 +21,8 @@ class CatalogHandler : public QObject
     // TODO: can't read recentFilesModel.count or recentFilesModel.empty in qml, so use this property
     Q_PROPERTY(bool hasRecentFiles READ hasRecentFiles NOTIFY recentFilesChanged)
     Q_PROPERTY(QString recentFile READ recentFile NOTIFY recentFilesChanged)
+    Q_PROPERTY(QFont memoFont READ memoFont WRITE setMemoFont NOTIFY memoFontChanged)
+    Q_PROPERTY(bool memoWordWrap READ memoWordWrap WRITE setMemoWordWrap NOTIFY memoWordWrapChanged)
 
 public:
     explicit CatalogHandler(QObject *parent = nullptr);
@@ -33,6 +36,10 @@ public:
     const QStringList& recentFiles() const { return _recentFiles; }
     bool hasRecentFiles() const { return !_recentFiles.empty(); }
     QString recentFile() const { return _recentFile; }
+    QFont memoFont() const { return _memoFont; }
+    void setMemoFont(const QFont& font);
+    bool memoWordWrap() const { return _memoWordWrap; }
+    void setMemoWordWrap(bool on);
 
 signals:
     void error(const QString &message) const;
@@ -42,6 +49,8 @@ signals:
     void catalogModelChanged() const;
     void recentFilesChanged() const;
     void isOpenedChanged() const;
+    void memoFontChanged() const;
+    void memoWordWrapChanged() const;
 
 public slots:
     void loadSettings();
@@ -65,6 +74,8 @@ private:
     CatalogModel *_catalogModel = nullptr;
     QStringList _recentFiles;
     QString _recentFile;
+    QFont _memoFont;
+    bool _memoWordWrap;
 
     void catalogOpened(Catalog *catalog);
     void addToRecent(const QString &fileName);

@@ -10,6 +10,7 @@
 #include <QQuickStyle>
 
 #include "CatalogHandler.h"
+#include "DocumentHandler.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +34,7 @@ int main(int argc, char *argv[])
 #endif
 
     qmlRegisterType<CatalogHandler>("org.orion_project.procyon.catalog", 1, 0, "CatalogHandler");
+    qmlRegisterType<DocumentHandler>("org.orion_project.procyon.document", 1, 0, "DocumentHandler");
 
     QStringList selectors;
 #ifdef QT_EXTRA_FILE_SELECTOR

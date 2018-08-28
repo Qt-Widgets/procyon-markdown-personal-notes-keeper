@@ -121,7 +121,7 @@ Rectangle {
                         text: model.memoPath
                         color: memoItemDelegate.selected ? Appearance.textColorSelected() : Appearance.textColorModest()
                         font.pointSize: Appearance.fontSizeSmallUI()
-                        font.italic: true
+                        //font.italic: true
                         Layout.fillWidth: true
                         Layout.bottomMargin: 3
                     }

@@ -36,6 +36,11 @@ void CatalogHandler::loadSettings()
     s.beginGroup("State");
     _recentFile = s.value("catalogFile").toString();
     s.endGroup();
+
+    s.beginGroup("View");
+    _memoFont = qvariant_cast<QFont>(s.value("memoFont", QFont("Arial", 12)));
+    _memoWordWrap = s.value("wordWrap", false).toBool();
+    s.endGroup();
 }
 
 void CatalogHandler::saveSettings()
@@ -50,6 +55,11 @@ void CatalogHandler::saveSettings()
 
     s.beginGroup("State");
     s.setValue("catalogFile", _catalog ? _catalog->fileName() : QString());
+    s.endGroup();
+
+    s.beginGroup("View");
+    s.setValue("memoFont", _memoFont);
+    s.setValue("wordWrap", _memoWordWrap);
     s.endGroup();
 }
 
@@ -272,4 +282,16 @@ void CatalogHandler::storeSession(const QMap<QString, QVariant>& session)
 {
     for (const auto& key : session.keys())
         CatalogStore::settingsManager()->writeValue(key, session[key]);
+}
+
+void CatalogHandler::setMemoFont(const QFont& font)
+{
+    _memoFont = font;
+    emit memoFontChanged();
+}
+
+void CatalogHandler::setMemoWordWrap(bool on)
+{
+    _memoWordWrap = on;
+    emit memoWordWrapChanged();
 }

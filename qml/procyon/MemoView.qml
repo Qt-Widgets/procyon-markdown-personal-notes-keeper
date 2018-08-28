@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 
 import org.orion_project.procyon.catalog 1.0
+import org.orion_project.procyon.document 1.0
 import "appearance.js" as Appearance
 
 Rectangle {
@@ -14,6 +15,17 @@ Rectangle {
     property bool editMemoMode: false
     property CatalogHandler catalog: null
     property var signalProxy
+
+    Connections {
+        target: catalog
+        onMemoFontChanged: textArea.font = catalog.memoFont
+        onMemoWordWrapChanged: textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
+    }
+
+    DocumentHandler {
+        id: document
+        target: textArea
+    }
 
     function editingDone(ok) {
         editMemoMode = false;
@@ -25,6 +37,9 @@ Rectangle {
         memoPathText.text = info.memoPath
 
         textArea.text = catalog.getMemoText(memoId)
+        textArea.font = catalog.memoFont
+        textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
+        document.applyTextStyles()
     }
 
     Item  {
@@ -131,7 +146,7 @@ Rectangle {
             Layout.fillWidth: true
             color: Appearance.textColorModest()
             font.pointSize: Appearance.fontSizeSmallUI()
-            font.italic: true
+            //font.italic: true
             leftPadding: 4
         }
 
@@ -140,6 +155,7 @@ Rectangle {
             textFormat: Qt.PlainText
             readOnly: !editMemoMode
             wrapMode: TextEdit.Wrap
+            font.pointSize: 11
             focus: true
             selectByMouse: true
             selectByKeyboard: true
