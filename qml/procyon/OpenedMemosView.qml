@@ -82,7 +82,7 @@ Rectangle {
         delegate: Rectangle {
             id: memoItemDelegate
             width: parent.width
-            height: 36 // TODO: should be somehow depended on icon size and font size
+            height: 40 // TODO: should be somehow depended on icon size and font size
             color: ListView.isCurrentItem ? Appearance.selectionColor() : Appearance.editorColor()
             property bool selected: ListView.isCurrentItem
 
@@ -107,7 +107,8 @@ Rectangle {
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 0
+                    Layout.fillHeight: true
+                    spacing: 3
 
                     Label {
                         text: model.memoTitle
@@ -121,9 +122,7 @@ Rectangle {
                         text: model.memoPath
                         color: memoItemDelegate.selected ? Appearance.textColorSelected() : Appearance.textColorModest()
                         font.pointSize: Appearance.fontSizeSmallUI()
-                        //font.italic: true
                         Layout.fillWidth: true
-                        Layout.bottomMargin: 3
                     }
                 }
 

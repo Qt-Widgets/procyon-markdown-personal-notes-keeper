@@ -27,10 +27,6 @@ Rectangle {
         target: textArea
     }
 
-    function editingDone(ok) {
-        editMemoMode = false;
-    }
-
     function loadMemo() {
         var info = catalog.getMemoInfo(memoId)
         headerText.text = info.memoTitle
@@ -42,43 +38,13 @@ Rectangle {
         document.applyTextStyles()
     }
 
-    Item  {
-        id: action
-        Action {
-            id: editMemoAction
-            text: qsTr("Edit")
-            tooltip: qsTr("Edit memo")
-            iconSource: "qrc:/toolbar/memo_edit"
-            shortcut: "Return,Return"
-            enabled: !editMemoMode
-            onTriggered: editMemoMode = true
+    function editingDone(ok) {
+        if (ok) {
+            console.log('TODO: check if modified and save')
+        } else {
+            console.log('TODO: Reload memo to discard changes')
         }
-        Action {
-            id: saveMemoAction
-            text: qsTr("Save")
-            tooltip: qsTr("Save changes")
-            iconSource: "qrc:/toolbar/memo_save"
-            shortcut: StandardKey.Save
-            enabled: editMemoMode
-            onTriggered: editingDone(true)
-        }
-        Action {
-            id: cancelMemoAction
-            text: qsTr("Cancel")
-            tooltip: qsTr("Cancel changes")
-            iconSource: "qrc:/toolbar/memo_cancel"
-            shortcut: "Esc,Esc"
-            enabled: editMemoMode
-            onTriggered: editingDone(false)
-        }
-        Action {
-            id: closeMemoAction
-            text: qsTr("Close")
-            tooltip: qsTr("Close memo")
-            iconSource: "qrc:/toolbar/memo_close"
-            //shortcut: StandardKey.Close <-- this shortcut is in MainWindow
-            onTriggered: signalProxy.needToCloseMemo(memoId)
-        }
+        editMemoMode = false;
     }
 
     ColumnLayout {
@@ -134,10 +100,29 @@ Rectangle {
 
                 Layout.topMargin: 4
 
-                ToolButton { action: editMemoAction; visible: !editMemoMode }
-                ToolButton { action: saveMemoAction; visible: editMemoMode }
-                ToolButton { action: cancelMemoAction; visible: editMemoMode }
-                ToolButton { action: closeMemoAction }
+                ToolButton {
+                    visible: !editMemoMode
+                    tooltip: qsTr("Edit memo")
+                    iconSource: "qrc:/toolbar/memo_edit"
+                    onClicked: editMemoMode = true
+                }
+                ToolButton {
+                    visible: editMemoMode
+                    tooltip: qsTr("Save changes")
+                    iconSource: "qrc:/toolbar/memo_save"
+                    onClicked: editingDone(true)
+                }
+                ToolButton {
+                    visible: editMemoMode
+                    tooltip: qsTr("Cancel changes")
+                    iconSource: "qrc:/toolbar/memo_cancel"
+                    onClicked: editingDone(false)
+                }
+                ToolButton {
+                    tooltip: qsTr("Close memo")
+                    iconSource: "qrc:/toolbar/memo_close"
+                    onClicked: signalProxy.needToCloseMemo(memoId)
+                }
             }
         }
 
@@ -146,7 +131,6 @@ Rectangle {
             Layout.fillWidth: true
             color: Appearance.textColorModest()
             font.pointSize: Appearance.fontSizeSmallUI()
-            //font.italic: true
             leftPadding: 4
         }
 

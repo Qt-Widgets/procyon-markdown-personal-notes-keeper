@@ -47,6 +47,8 @@ ApplicationWindow {
 
         catalog.loadSettings()
 
+        memoWordWrapAction.checked = catalog.memoWordWrap
+
         if (catalog.recentFile)
             loadCatalogFile(catalog.recentFile)
     }
@@ -122,91 +124,183 @@ ApplicationWindow {
         memoPagesView.closeAllMemos()
     }
 
-    function applyMemoFont() {
-        console.log('Font selected: ' + catalog.memoFont)
-    }
-
     Item {
         id: actions
-        Action {
-            id: newCatalogAction
-            text: qsTr("&New...")
-            shortcut: StandardKey.New
-            onTriggered: newCatalogDialog.open()
-        }
-        Action {
-            id: openCatalogAction
-            text: qsTr("&Open...")
-            tooltip: qsTr("Open catalog")
-            iconSource: "qrc:/icon/folder_opened"
-            shortcut: StandardKey.Open
-            onTriggered: openCatalogDialog.open()
-        }
-        Action {
-            id: closeCatalogAction
-            text: qsTr("&Close")
-            enabled: catalog.isOpened
-            onTriggered: closeCatalog()
-        }
-        Action {
-            id: quitAppAction
-            text: qsTr("E&xit")
-            shortcut: StandardKey.Quit
-            onTriggered: Qt.quit()
-        }
-        Action {
-            id: openMemoAction
-            text: qsTr("&Open Memo")
-            onTriggered: openMemo(catalogView.getSelectedMemoId())
-        }
-        Action {
-            id: closeMemoAction
-            text: qsTr("&Close Memo")
-            shortcut: StandardKey.Close
-            enabled: openedMemosView.currentMemoId > 0
-            onTriggered: closeMemo(openedMemosView.currentMemoId)
-        }
-        Action {
-            id: closeAllMemosAction
-            text: qsTr("Close &All Memos")
-            enabled: openedMemosView.currentMemoId > 0
-            onTriggered: closeAllMemos()
-        }
-        Action {
-            id: showOpenedMemosViewAction
-            text: qsTr("&Opened Memos Panel")
-            checkable: true
-            checked: true
-            onToggled: openedMemosView.visible = checked
-        }
-        Action {
-            id: showCatalogViewAction
-            text: qsTr("&Catalog Panel")
-            checkable: true
-            checked: true
-            onToggled: catalogView.visible = checked
-        }
-        Action {
-            id: showStatusBarAction
-            text: qsTr("&Status Bar")
-            checkable: true
-            checked: true
-            onToggled: statusBar.visible = checked
-        }
-        Action {
-            id: chooseMemoFontAction
-            text: qsTr("Choose Memo Font...")
-            onTriggered: {
-                memoFontDialog.font = catalog.memoFont
-                memoFontDialog.open()
+        Item {
+            id: actionsFile
+            Action {
+                id: newCatalogAction
+                text: qsTr("&New...")
+                iconName: "document-new"
+                shortcut: StandardKey.New
+                onTriggered: newCatalogDialog.open()
+            }
+            Action {
+                id: openCatalogAction
+                text: qsTr("&Open...")
+                tooltip: qsTr("Open catalog")
+                iconName: "document-open"
+                shortcut: StandardKey.Open
+                onTriggered: openCatalogDialog.open()
+            }
+            Action {
+                id: closeCatalogAction
+                text: qsTr("&Close")
+                enabled: catalog.isOpened
+                onTriggered: closeCatalog()
+            }
+            Action {
+                id: quitAppAction
+                text: qsTr("E&xit")
+                iconName: "application-exit"
+                shortcut: StandardKey.Quit
+                onTriggered: Qt.quit()
             }
         }
-        Action {
-            id: memoWordWrapAction
-            text: qsTr("Word Wrap")
-            checkable: true
-            checked: catalog.memoWordWrap
-            onToggled: catalog.memoWordWrap = checked
+        Item {
+            id: actionsEdit
+            Action {
+                id: editUndoAction
+                text: qsTr("&Undo")
+                iconName: "edit-undo"
+                //shortcut: StandardKey.Undo -- Ambiguous shortcut overload
+                enabled: !!activeFocusItem && activeFocusItem["undo"]
+                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.undo()
+            }
+            Action {
+                id: editRedoAction
+                text: qsTr("&Redo")
+                iconName: "edit-redo"
+                //shortcut: StandardKey.Redo -- Ambiguous shortcut overload
+                enabled: !!activeFocusItem && activeFocusItem["redo"]
+                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.redo()
+            }
+            Action {
+                id: editCutAction
+                text: qsTr("Cu&t")
+                iconName: "edit-cut"
+                //shortcut: StandardKey.Cut -- Ambiguous shortcut overload
+                enabled: !!activeFocusItem && activeFocusItem["cut"]
+                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.cut()
+            }
+            Action {
+                id: editCopyAction
+                text: qsTr("&Copy")
+                iconName: "edit-copy"
+                //shortcut: StandardKey.Copy -- Ambiguous shortcut overload
+                enabled: !!activeFocusItem && !!activeFocusItem["copy"]
+                onTriggered: activeFocusItem.copy()
+            }
+            Action {
+                id: editPasteAction
+                text: qsTr("&Paste")
+                iconName: "edit-paste"
+                //shortcut: StandardKey.Paste -- Ambiguous shortcut overload
+                enabled: !!activeFocusItem && activeFocusItem["paste"]
+                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.paste()
+            }
+            Action {
+                id: editSelectAllAction
+                text: qsTr("Select &All")
+                iconName: "edit-select-all"
+                //shortcut: StandardKey.SelectAll -- Ambiguous shortcut overload
+                enabled: (!!activeFocusItem && !!activeFocusItem["selectAll"])
+                onTriggered: activeFocusItem.selectAll()
+            }
+        }
+        Item {
+            id: actionsView
+            Action {
+                id: showOpenedMemosViewAction
+                text: qsTr("&Opened Memos Panel")
+                checkable: true
+                checked: true
+                onToggled: openedMemosView.visible = checked
+            }
+            Action {
+                id: showCatalogViewAction
+                text: qsTr("&Catalog Panel")
+                checkable: true
+                checked: true
+                onToggled: catalogView.visible = checked
+            }
+            Action {
+                id: showStatusBarAction
+                text: qsTr("&Status Bar")
+                checkable: true
+                checked: true
+                onToggled: statusBar.visible = checked
+            }
+        }
+        Item {
+            id: actionsCatalog
+            Action {
+                id: openMemoAction
+                text: qsTr("&Open Memo")
+                onTriggered: openMemo(catalogView.getSelectedMemoId())
+            }
+            Action {
+                id: closeMemoAction
+                text: qsTr("&Close Memo")
+                iconSource: "qrc:/toolbar/memo_close"
+                shortcut: StandardKey.Close
+                enabled: openedMemosView.currentMemoId > 0
+                onTriggered: closeMemo(openedMemosView.currentMemoId)
+            }
+            Action {
+                id: closeAllMemosAction
+                text: qsTr("Close &All Memos")
+                enabled: openedMemosView.currentMemoId > 0
+                onTriggered: closeAllMemos()
+            }
+            Action {
+                id: editMemoAction
+                text: qsTr("&Edit Memo")
+                tooltip: qsTr("Edit memo")
+                iconSource: "qrc:/toolbar/memo_edit"
+                shortcut: "Return,Return"
+                enabled: !!memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
+                onTriggered: memoPagesView.currentMemoPage.editMemoMode = true
+            }
+            Action {
+                id: saveMemoAction
+                text: qsTr("&Save Memo")
+                tooltip: qsTr("Save changes")
+                iconSource: "qrc:/toolbar/memo_save"
+                shortcut: StandardKey.Save
+                enabled: !!memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
+                onTriggered: memoPagesView.currentMemoPage.editingDone(true)
+            }
+            Action {
+                id: cancelMemoAction
+                text: qsTr("Cancel")
+                tooltip: qsTr("Cancel changes")
+                iconSource: "qrc:/toolbar/memo_cancel"
+                shortcut: "Esc,Esc"
+                enabled: !!memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
+                onTriggered: memoPagesView.currentMemoPage.editingDone(false)
+            }
+        }
+        Item {
+            id: actionsOptions
+            Action {
+                id: chooseMemoFontAction
+                text: qsTr("Choose Memo Font...")
+                onTriggered: {
+                    memoFontDialog.font = catalog.memoFont
+                    memoFontDialog.open()
+                }
+            }
+            Action {
+                id: memoWordWrapAction
+                text: qsTr("Word Wrap")
+                checkable: true
+                onToggled: catalog.memoWordWrap = checked
+            }
         }
     }
 
@@ -247,17 +341,30 @@ ApplicationWindow {
             MenuItem { action: quitAppAction }
         }
         Menu {
+            title: qsTr("&Edit")
+            MenuItem { action: editUndoAction }
+            MenuItem { action: editRedoAction }
+            MenuSeparator {}
+            MenuItem { action: editCutAction }
+            MenuItem { action: editCopyAction }
+            MenuItem { action: editPasteAction }
+            MenuSeparator {}
+            MenuItem { action: editSelectAllAction }
+        }
+        Menu {
             title: qsTr("&View")
             MenuItem { action: showOpenedMemosViewAction }
             MenuItem { action: showCatalogViewAction }
             MenuItem { action: showStatusBarAction }
         }
         Menu {
-            title: qsTr("&Edit")
-        }
-        Menu {
             title: qsTr("&Catalog")
             MenuItem { action: openMemoAction }
+            MenuSeparator {}
+            MenuItem { action: editMemoAction }
+            MenuItem { action: saveMemoAction }
+            MenuItem { action: cancelMemoAction }
+            MenuSeparator {}
             MenuItem { action: closeMemoAction }
             MenuItem { action: closeAllMemosAction }
         }
@@ -355,10 +462,7 @@ ApplicationWindow {
 
         FontDialog {
             id: memoFontDialog
-            onAccepted: {
-                catalog.memoFont = font
-                applyMemoFont()
-            }
+            onAccepted: catalog.memoFont = font
         }
 
         MessageDialog {

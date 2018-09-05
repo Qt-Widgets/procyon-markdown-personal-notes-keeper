@@ -11,6 +11,7 @@ TabView {
     property Component memoViewComponent: null
     property CatalogHandler catalog: null
     property int currentMemoId: 0
+    property MemoView currentMemoPage: null
     signal needToCloseMemo(int memoId)
 
     onCurrentMemoIdChanged: {
@@ -27,6 +28,11 @@ TabView {
             }
             currentIndex = index
         }
+    }
+
+    onCurrentIndexChanged: {
+        currentMemoPage = (currentIndex < 0) ? null : getTab(currentIndex).item
+        //console.log('CURRENT = ' + (currentMemoPage ? currentMemoPage.memoId : 'none'))
     }
 
     function closeMemo(memoId) {
