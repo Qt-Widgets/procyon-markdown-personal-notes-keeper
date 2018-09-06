@@ -19,6 +19,7 @@ Rectangle {
             if (index < 0) {
                 var info = catalog.getMemoInfo(currentMemoId)
                 if (info) {
+                    info["modified"] = false
                     memosListModel.append(info)
                     index = memosListModel.count-1
                 }
@@ -58,6 +59,12 @@ Rectangle {
         }
     }
 
+    function markMemoModified(memoId, modified) {
+        var index = __getItemIndex(memoId)
+        if (index > -1)
+            memosListModel.setProperty(index, "modified", modified)
+    }
+
     function __getMemoId(index) {
         return (index > -1 && index < memosListModel.count) ? memosListModel.get(index).memoId : 0;
     }
@@ -93,16 +100,35 @@ Rectangle {
 
             RowLayout {
                 anchors.fill: parent
-                spacing: 6
 
-                Image {
-                    id: memoIcon
-                    source: model.memoIconPath
-                    mipmap: true
-                    smooth: true
-                    Layout.preferredHeight: 24
-                    Layout.preferredWidth: 24
-                    Layout.leftMargin: 6
+                Rectangle {
+                    id: iconPlace
+                    color: memoItemDelegate.color
+                    Layout.preferredHeight: 40
+                    Layout.preferredWidth: 36
+                    Layout.leftMargin: 0
+
+                    Image {
+                        id: memoIcon
+                        source: model.memoIconPath
+                        mipmap: true
+                        smooth: true
+                        anchors.left: iconPlace.left
+                        anchors.top: iconPlace.top
+                        anchors.leftMargin: 6
+                        anchors.topMargin: 6
+                        width: 24
+                        height: 24
+                    }
+
+                    Image {
+                        visible: model.modified
+                        source: "qrc:/icon/modified"
+                        anchors.left: iconPlace.left
+                        anchors.top: iconPlace.top
+                        anchors.leftMargin: 2
+                        anchors.topMargin: 2
+                    }
                 }
 
                 ColumnLayout {

@@ -13,6 +13,7 @@ TabView {
     property int currentMemoId: 0
     property MemoView currentMemoPage: null
     signal needToCloseMemo(int memoId)
+    signal memoModified(int memoId, bool modified)
 
     onCurrentMemoIdChanged: {
         if (currentMemoId > 0) {

@@ -164,8 +164,8 @@ ApplicationWindow {
                 text: qsTr("&Undo")
                 iconName: "edit-undo"
                 //shortcut: StandardKey.Undo -- Ambiguous shortcut overload
-                enabled: !!activeFocusItem && activeFocusItem["undo"]
-                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                enabled: activeFocusItem && ("undo" in activeFocusItem)
+                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
                 onTriggered: activeFocusItem.undo()
             }
             Action {
@@ -173,8 +173,8 @@ ApplicationWindow {
                 text: qsTr("&Redo")
                 iconName: "edit-redo"
                 //shortcut: StandardKey.Redo -- Ambiguous shortcut overload
-                enabled: !!activeFocusItem && activeFocusItem["redo"]
-                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                enabled: activeFocusItem && ("redo" in activeFocusItem)
+                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
                 onTriggered: activeFocusItem.redo()
             }
             Action {
@@ -182,8 +182,8 @@ ApplicationWindow {
                 text: qsTr("Cu&t")
                 iconName: "edit-cut"
                 //shortcut: StandardKey.Cut -- Ambiguous shortcut overload
-                enabled: !!activeFocusItem && activeFocusItem["cut"]
-                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                enabled: activeFocusItem && ("cut" in activeFocusItem)
+                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
                 onTriggered: activeFocusItem.cut()
             }
             Action {
@@ -191,7 +191,7 @@ ApplicationWindow {
                 text: qsTr("&Copy")
                 iconName: "edit-copy"
                 //shortcut: StandardKey.Copy -- Ambiguous shortcut overload
-                enabled: !!activeFocusItem && !!activeFocusItem["copy"]
+                enabled: activeFocusItem && ("copy" in activeFocusItem)
                 onTriggered: activeFocusItem.copy()
             }
             Action {
@@ -199,7 +199,7 @@ ApplicationWindow {
                 text: qsTr("&Paste")
                 iconName: "edit-paste"
                 //shortcut: StandardKey.Paste -- Ambiguous shortcut overload
-                enabled: !!activeFocusItem && activeFocusItem["paste"]
+                enabled: activeFocusItem && ("paste" in activeFocusItem)
                          && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
                 onTriggered: activeFocusItem.paste()
             }
@@ -208,7 +208,7 @@ ApplicationWindow {
                 text: qsTr("Select &All")
                 iconName: "edit-select-all"
                 //shortcut: StandardKey.SelectAll -- Ambiguous shortcut overload
-                enabled: (!!activeFocusItem && !!activeFocusItem["selectAll"])
+                enabled: activeFocusItem && ("selectAll" in activeFocusItem)
                 onTriggered: activeFocusItem.selectAll()
             }
         }
@@ -263,7 +263,7 @@ ApplicationWindow {
                 tooltip: qsTr("Edit memo")
                 iconSource: "qrc:/toolbar/memo_edit"
                 shortcut: "Return,Return"
-                enabled: !!memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
+                enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
                 onTriggered: memoPagesView.currentMemoPage.editMemoMode = true
             }
             Action {
@@ -272,7 +272,7 @@ ApplicationWindow {
                 tooltip: qsTr("Save changes")
                 iconSource: "qrc:/toolbar/memo_save"
                 shortcut: StandardKey.Save
-                enabled: !!memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
+                enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
                 onTriggered: memoPagesView.currentMemoPage.editingDone(true)
             }
             Action {
@@ -281,7 +281,7 @@ ApplicationWindow {
                 tooltip: qsTr("Cancel changes")
                 iconSource: "qrc:/toolbar/memo_cancel"
                 shortcut: "Esc,Esc"
-                enabled: !!memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
+                enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
                 onTriggered: memoPagesView.currentMemoPage.editingDone(false)
             }
         }
@@ -427,6 +427,7 @@ ApplicationWindow {
             Layout.leftMargin: openedMemosView.visible ? 0 : 4
             Layout.rightMargin: catalogView.visible ? 0 : 4
             onNeedToCloseMemo: closeMemo(memoId)
+            onMemoModified: openedMemosView.markMemoModified(memoId, modified)
         }
 
         CatalogView {

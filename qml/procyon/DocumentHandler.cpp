@@ -20,10 +20,13 @@ void DocumentHandler::setTarget(QQuickItem *target)
     if (doc.canConvert<QQuickTextDocument*>())
     {
         auto qqdoc = doc.value<QQuickTextDocument*>();
-        if (qqdoc)
+        if (qqdoc) {
             _doc = qqdoc->textDocument();
+            connect(_doc, &QTextDocument::modificationChanged, [&](bool changed){
+                if (!_isMemoProcessing) emit documentModified(changed);
+            });
+        }
     }
-    emit targetChanged();
 }
 
 void DocumentHandler::applyTextStyles()

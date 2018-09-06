@@ -25,6 +25,7 @@ Rectangle {
     DocumentHandler {
         id: document
         target: textArea
+        onDocumentModified: signalProxy.memoModified(memoId, changed)
     }
 
     function loadMemo() {
@@ -32,10 +33,12 @@ Rectangle {
         headerText.text = info.memoTitle
         memoPathText.text = info.memoPath
 
+        document.isMemoProcessing = true
         textArea.text = catalog.getMemoText(memoId)
         textArea.font = catalog.memoFont
         textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
         document.applyTextStyles()
+        document.isMemoProcessing = false
     }
 
     function editingDone(ok) {
