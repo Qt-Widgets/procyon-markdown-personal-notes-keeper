@@ -37,7 +37,6 @@ void DocumentHandler::applyTextStyles()
     // Should be applied after hyperlinks to get correct finish style.
     applyHighlighter();
     _doc->setUndoRedoEnabled(true);
-    _doc->setModified(false);
 }
 
 void DocumentHandler::processHyperlinks()

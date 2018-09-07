@@ -37,9 +37,8 @@ TabView {
 
     function saveMemo(memoId) {
         var index = __getTabIndex(memoId)
-        if (index > -1) {
-            return getTab(index).item.save(catalog)
-        }
+        if (index > -1)
+            return getTab(index).item.saveChanges()
         return ""
     }
 

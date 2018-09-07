@@ -13,13 +13,22 @@ Rectangle {
     signal needToCloseMemo(int memoId)
     signal needToActivateMemo(int memoId)
 
+    Connections {
+        target: catalog
+        onMemoChanged: {
+            var index = __getItemIndex(memoData.memoId)
+            if (index >= 0)
+                memosListModel.setProperty(index, "memoTitle", memoData.memoTitle)
+        }
+    }
+
     onCurrentMemoIdChanged: {
         if (currentMemoId > 0) {
             var index = __getItemIndex(currentMemoId)
             if (index < 0) {
                 var info = catalog.getMemoInfo(currentMemoId)
                 if (info) {
-                    info["modified"] = false
+                    info.modified = false
                     memosListModel.append(info)
                     index = memosListModel.count-1
                 }

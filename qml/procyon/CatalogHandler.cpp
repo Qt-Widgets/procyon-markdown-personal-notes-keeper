@@ -251,9 +251,42 @@ QString CatalogHandler::getMemoText(int memoId) const
     if (!_catalog) return QString();
     auto item = _catalog->findById(memoId);
     if (!item || !item->isMemo()) return QString();
-    _catalog->loadMemo(item->asMemo());
-    // TODO check errors
+    auto memoItem = item->asMemo();
+    if (!memoItem->memo())
+    {
+        auto res = _catalog->loadMemo(memoItem);
+        if (!res.isEmpty())
+        {
+            emit error(tr("Failed to load memo %1: %2").arg(memoId).arg(res));
+            return QString();
+        }
+    }
     return item->asMemo()->memo()->data();
+}
+
+QString CatalogHandler::saveMemo(const QMap<QString, QVariant>& data)
+{
+    if (!_catalog) return QString();
+
+    int memoId = data["memoId"].toInt();
+    auto item = _catalog->findById(memoId);
+    if (!item || !item->isMemo()) return QString();
+    auto memoItem = item->asMemo();
+    if (!memoItem->memo())
+        return QString("Unable to save memo %1: memo must be loaded before saving but it is not").arg(memoId);
+
+    auto memo = memoItem->type()->makeMemo();
+    // TODO preserve additional non editable data - dates, etc.
+    memo->setId(memoItem->memo()->id());
+    memo->setTitle(data["memoTitle"].toString());
+    memo->setData(data["memoText"].toString());
+
+    QString res = _catalog->updateMemo(memoItem, memo);
+
+    if (res.isEmpty())
+        emit memoChanged(data);
+
+    return res;
 }
 
 QMap<QString, QVariant> CatalogHandler::getMemoInfo(int memoId)

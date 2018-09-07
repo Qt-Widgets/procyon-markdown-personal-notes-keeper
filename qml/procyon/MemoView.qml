@@ -1,4 +1,4 @@
-import QtQuick 2.7
+﻿import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.0
@@ -28,36 +28,56 @@ Rectangle {
         onDocumentModified: signalProxy.memoModified(memoId, changed)
     }
 
+    onCatalogChanged: {
+        textArea.font = catalog.memoFont
+        textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
+    }
+
     function loadMemo() {
         var info = catalog.getMemoInfo(memoId)
-        headerText.text = info.memoTitle
+
         memoPathText.text = info.memoPath
+
+        headerText.isProcessing = true
+        headerText.text = info.memoTitle
+        headerText.isModified = false
+        headerText.isProcessing = false
 
         document.isMemoProcessing = true
         textArea.text = catalog.getMemoText(memoId)
-        textArea.font = catalog.memoFont
-        textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
         document.applyTextStyles()
+        document.isMemoModified = false
         document.isMemoProcessing = false
     }
 
-    function editingDone(ok) {
-        if (ok) {
-            console.log('TODO: check if modified and save')
-        } else {
-            console.log('TODO: Reload memo to discard changes')
-        }
-        editMemoMode = false;
-        document.isMemoModified = false
-    }
-
     function isModified() {
-        return document.isMemoModified
+        return document.isMemoModified || headerText.isModified
     }
 
-    function save(catalog) {
-        console.log("SAVE " + memoId)
-        return "Something went wrong!"
+    function saveChanges() {
+        var info = {}
+        info.memoId = memoId
+        info.memoTitle = headerText.text.trim()
+        info.memoText = textArea.text
+        var res = catalog.saveMemo(info)
+        if (res === "") {
+            headerText.isModified = false
+
+            document.isMemoProcessing = true
+            document.applyTextStyles()
+            document.isMemoModified = false
+            document.isMemoProcessing = false
+
+            editMemoMode = false
+            signalProxy.memoModified(memoId, false)
+        }
+        return res
+    }
+
+    function cancelEditing() {
+        loadMemo()
+        editMemoMode = false
+        signalProxy.memoModified(memoId, false)
     }
 
     ColumnLayout {
@@ -85,6 +105,15 @@ Rectangle {
                     selectByMouse: true
                     verticalAlignment: TextEdit.AlignVCenter
                     wrapMode: TextEdit.NoWrap
+
+                    property bool isProcessing: false
+                    property bool isModified: false
+
+                    onTextChanged: {
+                        isModified = true
+                        if (!isProcessing)
+                            signalProxy.memoModified(memoId, true)
+                    }
 
                     MouseArea {
                         anchors.fill: parent
@@ -122,13 +151,13 @@ Rectangle {
                     visible: editMemoMode
                     tooltip: qsTr("Save changes")
                     iconSource: "qrc:/toolbar/memo_save"
-                    onClicked: editingDone(true)
+                    onClicked: saveChanges()
                 }
                 ToolButton {
                     visible: editMemoMode
                     tooltip: qsTr("Cancel changes")
                     iconSource: "qrc:/toolbar/memo_cancel"
-                    onClicked: editingDone(false)
+                    onClicked: cancelEditing()
                 }
                 ToolButton {
                     tooltip: qsTr("Close memo")

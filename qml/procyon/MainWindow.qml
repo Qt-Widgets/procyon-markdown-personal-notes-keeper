@@ -318,7 +318,7 @@ ApplicationWindow {
                 iconSource: "qrc:/toolbar/memo_save"
                 shortcut: StandardKey.Save
                 enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
-                onTriggered: memoPagesView.currentMemoPage.editingDone(true)
+                onTriggered: memoPagesView.currentMemoPage.saveChanges()
             }
             Action {
                 id: cancelMemoAction
@@ -327,7 +327,7 @@ ApplicationWindow {
                 iconSource: "qrc:/toolbar/memo_cancel"
                 shortcut: "Esc,Esc"
                 enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
-                onTriggered: memoPagesView.currentMemoPage.editingDone(false)
+                onTriggered: memoPagesView.currentMemoPage.cancelEditing()
             }
         }
         Item {

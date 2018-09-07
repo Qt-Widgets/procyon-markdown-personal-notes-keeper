@@ -175,13 +175,9 @@ public:
     QString removeFolder(FolderItem* item);
     QString createMemo(FolderItem* parent, Memo *memo);
     QString updateMemo(MemoItem* item, Memo* memo);
+    QString updateMemo(const Memo& memo);
     QString removeMemo(MemoItem* item);
     QString loadMemo(MemoItem* item);
-
-signals:
-    void memoCreated(MemoItem*);
-    void memoRemoved(MemoItem*);
-    void memoUpdated(MemoItem*);
 
 private:
     QString _fileName;

@@ -205,8 +205,6 @@ QString Catalog::createMemo(FolderItem* parent, Memo *memo)
     _allMemos.insert(item->id(), item);
     // TODO sort items after inserting
 
-    emit memoCreated(item);
-
     return QString();
 }
 
@@ -225,8 +223,6 @@ QString Catalog::updateMemo(MemoItem* item, Memo *memo)
     item->_type = memo->type();
     item->_title = memo->title();
     item->_info = info;
-
-    emit memoUpdated(item);
 
     // TODO sort items after renaming
     return QString();
@@ -253,8 +249,6 @@ QString Catalog::removeMemo(MemoItem* item)
 
     (item->parent() ? item->parent()->asFolder()->_children : _items).removeOne(item);
     _allMemos.remove(item->id());
-
-    emit memoRemoved(item);
 
     delete item;
     return QString();

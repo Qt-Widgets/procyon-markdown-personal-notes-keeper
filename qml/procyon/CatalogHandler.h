@@ -51,6 +51,7 @@ signals:
     void isOpenedChanged() const;
     void memoFontChanged() const;
     void memoWordWrapChanged() const;
+    void memoChanged(const QMap<QString, QVariant>& memoData) const;
 
 public slots:
     void loadSettings();
@@ -68,6 +69,7 @@ public slots:
     QMap<QString, QVariant> getMemoInfo(int memoId);
     QMap<QString, QVariant> getStoredSession();
     void storeSession(const QMap<QString, QVariant>& session);
+    QString saveMemo(const QMap<QString, QVariant>& data);
 
 private:
     Catalog *_catalog = nullptr;
