@@ -33,19 +33,30 @@ TabView {
 
     onCurrentIndexChanged: {
         currentMemoPage = (currentIndex < 0) ? null : getTab(currentIndex).item
-        //console.log('CURRENT = ' + (currentMemoPage ? currentMemoPage.memoId : 'none'))
+    }
+
+    function saveMemo(memoId) {
+        var index = __getTabIndex(memoId)
+        if (index > -1) {
+            getTab(index).item.save(catalog)
+        }
     }
 
     function closeMemo(memoId) {
         var index = __getTabIndex(memoId)
-        if (index > -1) {
+        if (index > -1)
+            // TODO: tons of warnings about invalid parent are occurred here, don't know how to fix
             removeTab(index)
-        }
     }
 
     function closeAllMemos() {
         while (count > 0)
             removeTab(count-1)
+    }
+
+    function isMemoModified(memoId) {
+        var index = __getTabIndex(memoId)
+        return (index > -1) && getTab(index).item.isModified()
     }
 
     function __getMemoViewComponent() {

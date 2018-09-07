@@ -77,3 +77,13 @@ void DocumentHandler::applyHighlighter()
     else
         _highlighter.reset();
 }
+
+bool DocumentHandler::isMemoModified() const
+{
+    return _doc && _doc->isModified();
+}
+
+void DocumentHandler::setMemoModified(bool on)
+{
+    if (_doc) _doc->setModified(on);
+}

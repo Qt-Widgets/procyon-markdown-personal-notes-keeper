@@ -15,6 +15,7 @@ class DocumentHandler : public QObject
     Q_OBJECT
     Q_PROPERTY(QQuickItem *target READ target WRITE setTarget NOTIFY dummyNotify)
     Q_PROPERTY(bool isMemoProcessing READ isMemoProcessing WRITE setMemoProcessing NOTIFY dummyNotify)
+    Q_PROPERTY(bool isMemoModified READ isMemoModified WRITE setMemoModified NOTIFY dummyNotify)
 
 public:
     explicit DocumentHandler(QObject *parent = nullptr);
@@ -23,6 +24,8 @@ public:
     void setTarget(QQuickItem *target);
     bool isMemoProcessing() const { return _isMemoProcessing; }
     void setMemoProcessing(bool on) { _isMemoProcessing = on; }
+    bool isMemoModified() const;
+    void setMemoModified(bool on);
 
 signals:
     void dummyNotify();

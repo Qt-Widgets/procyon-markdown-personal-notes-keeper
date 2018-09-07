@@ -246,7 +246,7 @@ bool CatalogHandler::isValidId(int memoId) const
     return _catalog->findById(memoId);
 }
 
-QString CatalogHandler::getMemoText(int memoId)
+QString CatalogHandler::getMemoText(int memoId) const
 {
     if (!_catalog) return QString();
     auto item = _catalog->findById(memoId);

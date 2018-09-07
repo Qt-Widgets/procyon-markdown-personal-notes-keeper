@@ -48,6 +48,15 @@ Rectangle {
             console.log('TODO: Reload memo to discard changes')
         }
         editMemoMode = false;
+        document.isMemoModified = false
+    }
+
+    function isModified() {
+        return document.isMemoModified
+    }
+
+    function save(catalog) {
+        console.log("SAVE " + memoId)
     }
 
     ColumnLayout {
@@ -73,7 +82,6 @@ Rectangle {
                     leftPadding: 4
                     readOnly: !editMemoMode
                     selectByMouse: true
-                    text: getMemoHeader(memoId)
                     verticalAlignment: TextEdit.AlignVCenter
                     wrapMode: TextEdit.NoWrap
 
@@ -153,9 +161,4 @@ Rectangle {
             Layout.fillHeight: true
         }
     }
-
-    MessageDialog {
-        id: infoDialog
-    }
-
 }

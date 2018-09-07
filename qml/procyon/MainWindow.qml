@@ -109,14 +109,24 @@ ApplicationWindow {
             openedMemosView.currentMemoId = memoId
             memoPagesView.currentMemoId = memoId
         }
+        else
+            console.log("MainWindow.openMemo(): invalid memoId=" + memoId)
     }
 
     function closeMemo(memoId) {
         if (memoId > 0) {
-            // TODO check if memo was changed and save it
-            openedMemosView.memoClosed(memoId)
-            memoPagesView.closeMemo(memoId)
+            if (memoPagesView.isMemoModified(memoId))
+                saveAndCloseMemoDialog.show(memoId)
+            else
+                forceCloseMemo(memoId)
         }
+        else
+            console.log("MainWindow.closeMemo(): invalid memoId=" + memoId)
+    }
+
+    function forceCloseMemo(memoId) {
+        openedMemosView.memoClosed(memoId)
+        memoPagesView.closeMemo(memoId)
     }
 
     function closeAllMemos() {
@@ -415,8 +425,8 @@ ApplicationWindow {
             height: parent.height
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
-            onNeedToActivateMemo: openMemo(memoId)
-            onNeedToCloseMemo: closeMemo(memoId)
+            onNeedToActivateMemo: mainWindow.openMemo(memoId)
+            onNeedToCloseMemo: mainWindow.closeMemo(memoId)
         }
 
         MemoPagesView {
@@ -426,7 +436,7 @@ ApplicationWindow {
             Layout.minimumWidth: 100
             Layout.leftMargin: openedMemosView.visible ? 0 : 4
             Layout.rightMargin: catalogView.visible ? 0 : 4
-            onNeedToCloseMemo: closeMemo(memoId)
+            onNeedToCloseMemo: mainWindow.closeMemo(memoId)
             onMemoModified: openedMemosView.markMemoModified(memoId, modified)
         }
 
@@ -439,7 +449,7 @@ ApplicationWindow {
             Layout.rightMargin: 4
             Layout.bottomMargin: 4
             Layout.topMargin: 4
-            onNeedToOpenMemo: openMemo(memoId)
+            onNeedToOpenMemo: mainWindow.openMemo(memoId)
         }
     }
 
@@ -484,6 +494,28 @@ ApplicationWindow {
                 text = message
                 visible = true
             }
+        }
+
+        MessageDialog {
+            id: saveAndCloseMemoDialog
+            icon: StandardIcon.Question
+            standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Cancel
+            property int closingMemoId: 0
+
+            function show(memoId) {
+                var info = catalog.getMemoInfo(memoId)
+                text = info.memoPath + "/<b>" + info.memoTitle + "</b><p>has been changed. Save changes?"
+                closingMemoId = memoId
+                visible = true
+            }
+
+            onYes: {
+                memoPagesView.saveMemo(closingMemoId)
+                // TODO process errors
+                forceCloseMemo(closingMemoId)
+            }
+
+            onNo: forceCloseMemo(closingMemoId)
         }
     }
 }

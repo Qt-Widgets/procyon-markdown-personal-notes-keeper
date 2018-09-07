@@ -64,7 +64,7 @@ public slots:
     bool sameFile(const QString &fileName) const;
     bool sameUrl(const QUrl &fileUrl) const;
     bool isValidId(int memoId) const;
-    QString getMemoText(int memoId);
+    QString getMemoText(int memoId) const;
     QMap<QString, QVariant> getMemoInfo(int memoId);
     QMap<QString, QVariant> getStoredSession();
     void storeSession(const QMap<QString, QVariant>& session);
