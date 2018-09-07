@@ -17,6 +17,8 @@ ApplicationWindow {
     title: catalog.isOpened ? (catalog.fileName + ' - ' + Qt.application.name) : Qt.application.name
     color: Appearance.baseColor()
 
+    property bool forceClosing: false
+
     Settings {
         category: "MainWindow"
         property alias windowX: mainWindow.x
@@ -54,26 +56,37 @@ ApplicationWindow {
     }
 
     onClosing: {
-        catalog.saveSettings()
-        close.accepted = closeCatalog()
+        if (!forceClosing) {
+            close.accepted = false
+            catalog.saveSettings()
+            closeCatalog(function() {
+                forceClosing = true
+                mainWindow.close()
+            })
+        }
     }
 
     function createNewCatalog(fileUrl) {
-        if (closeCatalog())
+        closeCatalog(function() {
             catalog.newCatalog(fileUrl)
+        });
     }
 
     function loadCatalogFile(fileName) {
-        if (!catalog.sameFile(fileName) && closeCatalog()) {
-            catalog.loadCatalogFile(fileName)
-            restoreSession()
+        if (!catalog.sameFile(fileName)) {
+            closeCatalog(function() {
+                catalog.loadCatalogFile(fileName)
+                restoreSession()
+            })
         }
     }
 
     function loadCatalogUrl(fileUrl) {
-        if (!catalog.sameUrl(fileUrl) && closeCatalog()) {
-            catalog.loadCatalogUrl(fileUrl)
-            restoreSession()
+        if (!catalog.sameUrl(fileUrl)) {
+            closeCatalog(function() {
+                catalog.loadCatalogUrl(fileUrl)
+                restoreSession()
+            })
         }
     }
 
@@ -96,12 +109,16 @@ ApplicationWindow {
         })
     }
 
-    function closeCatalog() {
-        // TODO check if memos were changed and save them
-        if (catalog.isOpened) storeSession()
-        closeAllMemos()
-        catalog.closeCatalog()
-        return true
+    function closeCatalog(onAccept) {
+        if (!catalog.isOpened) {
+            onAccept()
+            return
+        }
+        storeSession()
+        closeAllMemos(function() {
+            catalog.closeCatalog()
+            onAccept()
+        })
     }
 
     function openMemo(memoId) {
@@ -109,19 +126,37 @@ ApplicationWindow {
             openedMemosView.currentMemoId = memoId
             memoPagesView.currentMemoId = memoId
         }
-        else
-            console.log("MainWindow.openMemo(): invalid memoId=" + memoId)
     }
 
     function closeMemo(memoId) {
         if (memoId > 0) {
             if (memoPagesView.isMemoModified(memoId))
-                saveAndCloseMemoDialog.show(memoId)
+                saveAndCloseMemoDialog.show(memoId,
+                                            memoPagesView.saveMemo,
+                                            forceCloseMemo)
             else
                 forceCloseMemo(memoId)
         }
-        else
-            console.log("MainWindow.closeMemo(): invalid memoId=" + memoId)
+    }
+
+    function closeAllMemos(onAccept) {
+        var changedMemos = memoPagesView.getModifiedMemos()
+        if (changedMemos.length === 0) {
+            forceCloseAllMemos()
+            if (onAccept) onAccept()
+        }
+        else if (changedMemos.length === 1) {
+            saveAndCloseMemoDialog.show(changedMemos[0].memoId,
+                                        memoPagesView.saveMemo,
+                                        function() {
+                                            forceCloseAllMemos()
+                                            if (onAccept) onAccept()
+                                        })
+        }
+        else {
+            console.log("TODO show dialog with multi-selector")
+            if (onAccept) onAccept()
+        }
     }
 
     function forceCloseMemo(memoId) {
@@ -129,7 +164,7 @@ ApplicationWindow {
         memoPagesView.closeMemo(memoId)
     }
 
-    function closeAllMemos() {
+    function forceCloseAllMemos() {
         openedMemosView.allMemosClosed()
         memoPagesView.closeAllMemos()
     }
@@ -500,22 +535,35 @@ ApplicationWindow {
             id: saveAndCloseMemoDialog
             icon: StandardIcon.Question
             standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Cancel
-            property int closingMemoId: 0
+            property int memoId: 0
+            property var saveMethod: null
+            property var closeMethod: null
 
-            function show(memoId) {
+            function show(memoId, saveMethod, closeMethod) {
                 var info = catalog.getMemoInfo(memoId)
-                text = info.memoPath + "/<b>" + info.memoTitle + "</b><p>has been changed. Save changes?"
-                closingMemoId = memoId
+                text = info.memoPath + "/<b>" + info.memoTitle + "</b><p>Save changes?"
+                saveAndCloseMemoDialog.memoId = memoId
+                saveAndCloseMemoDialog.saveMethod = saveMethod
+                saveAndCloseMemoDialog.closeMethod = closeMethod
                 visible = true
             }
 
             onYes: {
-                memoPagesView.saveMemo(closingMemoId)
-                // TODO process errors
-                forceCloseMemo(closingMemoId)
+                if (saveMethod) {
+                    var error = saveMethod(memoId)
+                    if (error !== "") {
+                        errorDialog.show(error)
+                        return
+                    }
+                    if (closeMethod)
+                        closeMethod(memoId)
+                }
             }
 
-            onNo: forceCloseMemo(closingMemoId)
+            onNo: {
+                if (closeMethod)
+                    closeMethod(memoId)
+            }
         }
     }
 }

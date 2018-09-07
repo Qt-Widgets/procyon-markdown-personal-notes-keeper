@@ -57,6 +57,7 @@ Rectangle {
 
     function save(catalog) {
         console.log("SAVE " + memoId)
+        return "Something went wrong!"
     }
 
     ColumnLayout {

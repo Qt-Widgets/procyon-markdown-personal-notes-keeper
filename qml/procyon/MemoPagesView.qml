@@ -38,8 +38,9 @@ TabView {
     function saveMemo(memoId) {
         var index = __getTabIndex(memoId)
         if (index > -1) {
-            getTab(index).item.save(catalog)
+            return getTab(index).item.save(catalog)
         }
+        return ""
     }
 
     function closeMemo(memoId) {
@@ -57,6 +58,20 @@ TabView {
     function isMemoModified(memoId) {
         var index = __getTabIndex(memoId)
         return (index > -1) && getTab(index).item.isModified()
+    }
+
+    function getModifiedMemos() {
+        var memoList = []
+        for (var i = 0; i < count; i++) {
+            var memoView = getTab(i).item
+            if (memoView.isModified()) {
+                console.log("Modified: " + memoView.memoId)
+                var info = catalog.getMemoInfo(memoView.memoId)
+                info.checked = false
+                memoList.push(info)
+            }
+        }
+        return memoList
     }
 
     function __getMemoViewComponent() {

@@ -5,11 +5,11 @@ import QtQml.Models 2.2
 import "appearance.js" as Appearance
 
 Rectangle {
-    property variant catalogModel
+    property variant catalogModel: null
     signal needToOpenMemo(int memoId)
 
     function getSelectedMemoId() {
-        if (memoSelector.hasSelection && memoSelector.currentIndex) {
+        if (catalogModel && memoSelector.hasSelection && memoSelector.currentIndex) {
             var indexData = catalogModel.data(memoSelector.currentIndex)
             return (indexData && !indexData.isFolder) ? indexData.memoId : 0
         }
@@ -31,6 +31,7 @@ Rectangle {
     }
 
     function __getExpandedIds(parentIndex, expandedIds) {
+        if (!catalogModel) return
         var rowCount = catalogModel.rowCount(parentIndex)
         for (var row = 0; row < rowCount; row++) {
             var index = catalogModel.index(row, 0, parentIndex)
@@ -41,6 +42,7 @@ Rectangle {
     }
 
     function __setExpandedIds(parentIndex, expandedIds) {
+        if (!catalogModel) return
         var rowCount = catalogModel.rowCount(parentIndex)
         for (var row = 0; row < rowCount; row++) {
             var index = catalogModel.index(row, 0, parentIndex)
