@@ -8,6 +8,7 @@
         <file>OpenedMemosView.qml</file>
         <file>appearance.js</file>
         <file>MemoPagesView.qml</file>
+        <file>MainController.qml</file>
     </qresource>
     <qresource prefix="/icon">
         <file alias="main">../../img/icon/main.svg</file>

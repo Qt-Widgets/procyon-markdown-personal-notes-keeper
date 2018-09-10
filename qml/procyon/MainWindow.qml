@@ -38,6 +38,10 @@ ApplicationWindow {
         onInfo: infoDialog.show(message)
     }
 
+    MainController {
+
+    }
+
     Component.onCompleted: {
         // We can't restore visibility of these components automatically
         // because they are on a splitter and it restores their visibility
@@ -52,127 +56,131 @@ ApplicationWindow {
         memoWordWrapAction.checked = catalog.memoWordWrap
 
         if (catalog.recentFile)
-            loadCatalogFile(catalog.recentFile)
+            operations.loadCatalogFile(catalog.recentFile)
     }
 
     onClosing: {
         if (!forceClosing) {
             close.accepted = false
             catalog.saveSettings()
-            closeCatalog(function() {
+            operations.closeCatalog(function() {
                 forceClosing = true
                 mainWindow.close()
             })
         }
     }
 
-    function createNewCatalog(fileUrl) {
-        closeCatalog(function() {
-            catalog.newCatalog(fileUrl)
-        });
-    }
+    Item {
+        id: operations
 
-    function loadCatalogFile(fileName) {
-        if (!catalog.sameFile(fileName)) {
+        function createNewCatalog(fileUrl) {
             closeCatalog(function() {
-                catalog.loadCatalogFile(fileName)
-                restoreSession()
+                catalog.newCatalog(fileUrl)
+            });
+        }
+
+        function loadCatalogFile(fileName) {
+            if (!catalog.sameFile(fileName)) {
+                closeCatalog(function() {
+                    catalog.loadCatalogFile(fileName)
+                    restoreSession()
+                })
+            }
+        }
+
+        function loadCatalogUrl(fileUrl) {
+            if (!catalog.sameUrl(fileUrl)) {
+                closeCatalog(function() {
+                    catalog.loadCatalogUrl(fileUrl)
+                    restoreSession()
+                })
+            }
+        }
+
+        function closeCatalog(onAccept) {
+            if (!catalog.isOpened) {
+                onAccept()
+                return
+            }
+            storeSession()
+            closeAllMemos(function() {
+                catalog.closeCatalog()
+                onAccept()
             })
         }
-    }
 
-    function loadCatalogUrl(fileUrl) {
-        if (!catalog.sameUrl(fileUrl)) {
-            closeCatalog(function() {
-                catalog.loadCatalogUrl(fileUrl)
-                restoreSession()
+        function restoreSession() {
+            var session = catalog.getStoredSession()
+
+            openedMemosView.setAllIdsStr(session.openedMemos)
+            catalogView.setExpandedIdsStr(session.expandedFolders)
+
+            var activeMemoId = session.activeMemo
+            if (activeMemoId > 0)
+                openedMemosView.currentMemoId = activeMemoId
+        }
+
+        function storeSession() {
+            catalog.storeSession({
+                openedMemos: openedMemosView.getAllIdsStr(),
+                activeMemo: openedMemosView.currentMemoId,
+                expandedFolders: catalogView.getExpandedIdsStr()
             })
         }
-    }
 
-    function restoreSession() {
-        var session = catalog.getStoredSession()
-
-        openedMemosView.setAllIdsStr(session.openedMemos)
-        catalogView.setExpandedIdsStr(session.expandedFolders)
-
-        var activeMemoId = session.activeMemo
-        if (activeMemoId > 0)
-            openedMemosView.currentMemoId = activeMemoId
-    }
-
-    function storeSession() {
-        catalog.storeSession({
-            openedMemos: openedMemosView.getAllIdsStr(),
-            activeMemo: openedMemosView.currentMemoId,
-            expandedFolders: catalogView.getExpandedIdsStr()
-        })
-    }
-
-    function closeCatalog(onAccept) {
-        if (!catalog.isOpened) {
-            onAccept()
-            return
+        function openMemo(memoId) {
+            if (memoId > 0) {
+                openedMemosView.currentMemoId = memoId
+                memoPagesView.currentMemoId = memoId
+            }
         }
-        storeSession()
-        closeAllMemos(function() {
-            catalog.closeCatalog()
-            onAccept()
-        })
-    }
 
-    function openMemo(memoId) {
-        if (memoId > 0) {
-            openedMemosView.currentMemoId = memoId
-            memoPagesView.currentMemoId = memoId
+        function closeMemo(memoId) {
+            if (memoId > 0) {
+                if (memoPagesView.isMemoModified(memoId))
+                    saveAndCloseMemoDialog.show(memoId,
+                                                memoPagesView.saveMemo,
+                                                forceCloseMemo)
+                else
+                    forceCloseMemo(memoId)
+            }
         }
-    }
 
-    function closeMemo(memoId) {
-        if (memoId > 0) {
-            if (memoPagesView.isMemoModified(memoId))
-                saveAndCloseMemoDialog.show(memoId,
+        function closeAllMemos(onAccept) {
+            var changedMemos = memoPagesView.getModifiedMemos()
+            if (changedMemos.length === 0) {
+                forceCloseAllMemos()
+                if (onAccept) onAccept()
+            }
+            else if (changedMemos.length === 1) {
+                saveAndCloseMemoDialog.show(changedMemos[0].memoId,
                                             memoPagesView.saveMemo,
-                                            forceCloseMemo)
-            else
-                forceCloseMemo(memoId)
+                                            function() {
+                                                forceCloseAllMemos()
+                                                if (onAccept) onAccept()
+                                            })
+            }
+            else {
+                console.log("TODO show dialog with multi-selector")
+                if (onAccept) onAccept()
+            }
         }
-    }
 
-    function closeAllMemos(onAccept) {
-        var changedMemos = memoPagesView.getModifiedMemos()
-        if (changedMemos.length === 0) {
-            forceCloseAllMemos()
-            if (onAccept) onAccept()
+        function forceCloseMemo(memoId) {
+            openedMemosView.memoClosed(memoId)
+            memoPagesView.closeMemo(memoId)
         }
-        else if (changedMemos.length === 1) {
-            saveAndCloseMemoDialog.show(changedMemos[0].memoId,
-                                        memoPagesView.saveMemo,
-                                        function() {
-                                            forceCloseAllMemos()
-                                            if (onAccept) onAccept()
-                                        })
-        }
-        else {
-            console.log("TODO show dialog with multi-selector")
-            if (onAccept) onAccept()
-        }
-    }
 
-    function forceCloseMemo(memoId) {
-        openedMemosView.memoClosed(memoId)
-        memoPagesView.closeMemo(memoId)
-    }
-
-    function forceCloseAllMemos() {
-        openedMemosView.allMemosClosed()
-        memoPagesView.closeAllMemos()
+        function forceCloseAllMemos() {
+            openedMemosView.allMemosClosed()
+            memoPagesView.closeAllMemos()
+        }
     }
 
     Item {
         id: actions
         Item {
-            id: actionsFile
+            id: fileActions
             Action {
                 id: newCatalogAction
                 text: qsTr("&New...")
@@ -192,7 +200,7 @@ ApplicationWindow {
                 id: closeCatalogAction
                 text: qsTr("&Close")
                 enabled: catalog.isOpened
-                onTriggered: closeCatalog()
+                onTriggered: operations.closeCatalog()
             }
             Action {
                 id: quitAppAction
@@ -203,7 +211,9 @@ ApplicationWindow {
             }
         }
         Item {
-            id: actionsEdit
+            id: editActions
+            // TODO: how to display edit actions shortcuts in the main menu?
+            // They clash with built-in shortcuts of TextArea
             Action {
                 id: editUndoAction
                 text: qsTr("&Undo")
@@ -258,7 +268,7 @@ ApplicationWindow {
             }
         }
         Item {
-            id: actionsView
+            id: viewActions
             Action {
                 id: showOpenedMemosViewAction
                 text: qsTr("&Opened Memos Panel")
@@ -282,11 +292,11 @@ ApplicationWindow {
             }
         }
         Item {
-            id: actionsCatalog
+            id: catalogActions
             Action {
                 id: openMemoAction
                 text: qsTr("&Open Memo")
-                onTriggered: openMemo(catalogView.getSelectedMemoId())
+                onTriggered: operations.openMemo(catalogView.getSelectedMemoId())
             }
             Action {
                 id: closeMemoAction
@@ -294,13 +304,13 @@ ApplicationWindow {
                 iconSource: "qrc:/toolbar/memo_close"
                 shortcut: StandardKey.Close
                 enabled: openedMemosView.currentMemoId > 0
-                onTriggered: closeMemo(openedMemosView.currentMemoId)
+                onTriggered: operations.closeMemo(openedMemosView.currentMemoId)
             }
             Action {
                 id: closeAllMemosAction
                 text: qsTr("Close &All Memos")
                 enabled: openedMemosView.currentMemoId > 0
-                onTriggered: closeAllMemos()
+                onTriggered: operations.closeAllMemos()
             }
             Action {
                 id: editMemoAction
@@ -331,7 +341,7 @@ ApplicationWindow {
             }
         }
         Item {
-            id: actionsOptions
+            id: optionsActions
             Action {
                 id: chooseMemoFontAction
                 text: qsTr("Choose Memo Font...")
@@ -363,7 +373,7 @@ ApplicationWindow {
                     model: catalog.recentFilesModel
                     MenuItem {
                         text: modelData
-                        onTriggered: loadCatalogFile(text)
+                        onTriggered: operations.loadCatalogFile(text)
                     }
                     onObjectAdded: mruFileMenu.insertItem(index, object)
                     onObjectRemoved: mruFileMenu.removeItem(object)
@@ -386,6 +396,7 @@ ApplicationWindow {
             MenuItem { action: quitAppAction }
         }
         Menu {
+            id: editMenu
             title: qsTr("&Edit")
             MenuItem { action: editUndoAction }
             MenuItem { action: editRedoAction }
@@ -397,12 +408,14 @@ ApplicationWindow {
             MenuItem { action: editSelectAllAction }
         }
         Menu {
+            id: viewMenu
             title: qsTr("&View")
             MenuItem { action: showOpenedMemosViewAction }
             MenuItem { action: showCatalogViewAction }
             MenuItem { action: showStatusBarAction }
         }
         Menu {
+            id: catalogMenu
             title: qsTr("&Catalog")
             MenuItem { action: openMemoAction }
             MenuSeparator {}
@@ -414,6 +427,7 @@ ApplicationWindow {
             MenuItem { action: closeAllMemosAction }
         }
         Menu {
+            id: optionsMenu
             title: qsTr("&Options")
             MenuItem { action: chooseMemoFontAction }
             MenuItem { action: memoWordWrapAction }
@@ -460,8 +474,8 @@ ApplicationWindow {
             height: parent.height
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
-            onNeedToActivateMemo: mainWindow.openMemo(memoId)
-            onNeedToCloseMemo: mainWindow.closeMemo(memoId)
+            onNeedToActivateMemo: operations.openMemo(memoId)
+            onNeedToCloseMemo: operations.closeMemo(memoId)
         }
 
         MemoPagesView {
@@ -471,7 +485,7 @@ ApplicationWindow {
             Layout.minimumWidth: 100
             Layout.leftMargin: openedMemosView.visible ? 0 : 4
             Layout.rightMargin: catalogView.visible ? 0 : 4
-            onNeedToCloseMemo: mainWindow.closeMemo(memoId)
+            onNeedToCloseMemo: operations.closeMemo(memoId)
             onMemoModified: openedMemosView.markMemoModified(memoId, modified)
         }
 
@@ -484,7 +498,7 @@ ApplicationWindow {
             Layout.rightMargin: 4
             Layout.bottomMargin: 4
             Layout.topMargin: 4
-            onNeedToOpenMemo: mainWindow.openMemo(memoId)
+            onNeedToOpenMemo: operations.openMemo(memoId)
         }
     }
 
@@ -495,7 +509,7 @@ ApplicationWindow {
             id: openCatalogDialog
             nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
             folder: shortcuts.documents
-            onAccepted: loadCatalogUrl(fileUrl)
+            onAccepted: operations.loadCatalogUrl(fileUrl)
         }
 
         FileDialog {
@@ -503,7 +517,7 @@ ApplicationWindow {
             nameFilters: openCatalogDialog.nameFilters
             selectExisting: false
             folder: shortcuts.documents
-            onAccepted: createNewCatalog(fileUrl)
+            onAccepted: operations.createNewCatalog(fileUrl)
         }
 
         FontDialog {
