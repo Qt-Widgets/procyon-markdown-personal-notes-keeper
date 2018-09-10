@@ -9,12 +9,12 @@ import "appearance.js" as Appearance
 
 Rectangle {
     property CatalogHandler catalog: null
+    property MainController controller: null
     property int currentMemoId: 0
-    signal needToCloseMemo(int memoId)
-    signal needToActivateMemo(int memoId)
 
     Connections {
         target: catalog
+
         onMemoChanged: {
             var index = __getItemIndex(memoData.memoId)
             if (index >= 0)
@@ -22,34 +22,43 @@ Rectangle {
         }
     }
 
-    onCurrentMemoIdChanged: {
-        if (currentMemoId > 0) {
-            var index = __getItemIndex(currentMemoId)
+    Connections {
+        target: controller
+
+        onMemoOpened: {
+            if (memoId === currentMemoId) return
+            var index = __getItemIndex(memoId)
             if (index < 0) {
-                var info = catalog.getMemoInfo(currentMemoId)
+                var info = catalog.getMemoInfo(memoId)
                 if (info) {
                     info.modified = false
                     memosListModel.append(info)
                     index = memosListModel.count-1
                 }
             }
+            currentMemoId = memoId
             memosListView.currentIndex = index
         }
-        needToActivateMemo(currentMemoId)
-    }
 
-    function memoClosed(memoId) {
-        var index = __getItemIndex(memoId)
-        if (index > -1) {
-            memosListModel.remove(index, 1)
-            memosListView.currentIndex = Math.min(memosListModel.count-1, index)
-            currentMemoId = __getMemoId(memosListView.currentIndex)
+        onMemoClosed: {
+            var index = __getItemIndex(memoId)
+            if (index > -1) {
+                memosListModel.remove(index, 1)
+                memosListView.currentIndex = Math.min(memosListModel.count-1, index)
+                currentMemoId = __getMemoId(memosListView.currentIndex)
+            }
         }
-    }
 
-    function allMemosClosed() {
-        memosListModel.clear()
-        currentMemoId = 0
+        onAllMemosClosed: {
+            memosListModel.clear()
+            currentMemoId = 0
+        }
+
+        onMemoModified: {
+            var index = __getItemIndex(memoId)
+            if (index > -1)
+                memosListModel.setProperty(index, "modified", modified)
+        }
     }
 
     function getAllIdsStr() {
@@ -64,14 +73,8 @@ Rectangle {
         for (var i = 0; i < memoIdsStr.length; i++) {
             var memoId = parseInt(memoIdsStr[i])
             if (memoId > 0 && catalog.isValidId(memoId))
-                currentMemoId = memoId
+                controller.needToOpenMemo(memoId)
         }
-    }
-
-    function markMemoModified(memoId, modified) {
-        var index = __getItemIndex(memoId)
-        if (index > -1)
-            memosListModel.setProperty(index, "modified", modified)
     }
 
     function __getMemoId(index) {
@@ -95,16 +98,23 @@ Rectangle {
         spacing: 3
         anchors.fill: parent
         focus: true
+
+        onCurrentIndexChanged: {
+            var memoId = __getMemoId(currentIndex)
+            if (memoId > 0 &&  memoId !== currentMemoId)
+                controller.needToOpenMemo(memoId)
+        }
+
         delegate: Rectangle {
             id: memoItemDelegate
             width: parent.width
-            height: 40 // TODO: should be somehow depended on icon size and font size
+            height: 40
             color: ListView.isCurrentItem ? Appearance.selectionColor() : Appearance.editorColor()
             property bool selected: ListView.isCurrentItem
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: currentMemoId = model.memoId
+                onClicked: memosListView.currentIndex = index
             }
 
             RowLayout {
@@ -170,7 +180,7 @@ Rectangle {
                         Layout.rightMargin: 3
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: needToCloseMemo(model.memoId)
+                            onClicked: controller.needToCloseMemo(model.memoId)
                         }
                     }
                 }

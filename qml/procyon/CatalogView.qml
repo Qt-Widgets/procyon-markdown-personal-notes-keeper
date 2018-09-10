@@ -5,8 +5,8 @@ import QtQml.Models 2.2
 import "appearance.js" as Appearance
 
 Rectangle {
+    property MainController controller: null
     property variant catalogModel: null
-    signal needToOpenMemo(int memoId)
 
     function getSelectedMemoId() {
         if (catalogModel && memoSelector.hasSelection && memoSelector.currentIndex) {
@@ -106,7 +106,7 @@ Rectangle {
                 else
                     expand(index)
             }
-            else needToOpenMemo(indexData.memoId)
+            else controller.needToOpenMemo(indexData.memoId)
         }
 
         TableViewColumn { role: "display" }

@@ -14,7 +14,7 @@ Rectangle {
     property int memoId: 0
     property bool editMemoMode: false
     property CatalogHandler catalog: null
-    property var signalProxy
+    property MainController controller: null
 
     Connections {
         target: catalog
@@ -25,7 +25,7 @@ Rectangle {
     DocumentHandler {
         id: document
         target: textArea
-        onDocumentModified: signalProxy.memoModified(memoId, changed)
+        onDocumentModified: controller.memoModified(memoId, changed)
     }
 
     onCatalogChanged: {
@@ -69,7 +69,7 @@ Rectangle {
             document.isMemoProcessing = false
 
             editMemoMode = false
-            signalProxy.memoModified(memoId, false)
+            controller.memoModified(memoId, false)
         }
         return res
     }
@@ -77,7 +77,7 @@ Rectangle {
     function cancelEditing() {
         loadMemo()
         editMemoMode = false
-        signalProxy.memoModified(memoId, false)
+        controller.memoModified(memoId, false)
     }
 
     ColumnLayout {
@@ -112,7 +112,7 @@ Rectangle {
                     onTextChanged: {
                         isModified = true
                         if (!isProcessing)
-                            signalProxy.memoModified(memoId, true)
+                            controller.memoModified(memoId, true)
                     }
 
                     MouseArea {
@@ -162,7 +162,7 @@ Rectangle {
                 ToolButton {
                     tooltip: qsTr("Close memo")
                     iconSource: "qrc:/toolbar/memo_close"
-                    onClicked: signalProxy.needToCloseMemo(memoId)
+                    onClicked: controller.needToCloseMemo(memoId)
                 }
             }
         }

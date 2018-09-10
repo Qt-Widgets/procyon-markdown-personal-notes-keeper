@@ -8,31 +8,43 @@ TabView {
     tabsVisible: false
     frameVisible: false
 
-    property Component memoViewComponent: null
     property CatalogHandler catalog: null
-    property int currentMemoId: 0
+    property MainController controller: null
+    property Component memoViewComponent: null
     property MemoView currentMemoPage: null
-    signal needToCloseMemo(int memoId)
-    signal memoModified(int memoId, bool modified)
+    property int currentMemoId: 0
 
-    onCurrentMemoIdChanged: {
-        if (currentMemoId > 0) {
-            var index = __getTabIndex(currentMemoId)
+    Connections {
+        target: controller
+
+        onMemoOpened: {
+            if (memoId === currentMemoId) return
+            var index = __getTabIndex(memoId)
             if (index < 0) {
-                var tab = addTab(currentMemoId, __getMemoViewComponent())
+                var tab = addTab(memoId, __getMemoViewComponent())
                 tab.active = true // force memo view creation
                 tab.item.catalog = catalog
-                tab.item.signalProxy = self
-                tab.item.memoId = currentMemoId
+                tab.item.controller = controller
+                tab.item.memoId = memoId
                 tab.item.loadMemo()
                 index = count - 1
             }
             currentIndex = index
+            currentMemoId = memoId
+            currentMemoPage = (currentIndex < 0) ? null : getTab(currentIndex).item
         }
-    }
 
-    onCurrentIndexChanged: {
-        currentMemoPage = (currentIndex < 0) ? null : getTab(currentIndex).item
+        onMemoClosed: {
+            var index = __getTabIndex(memoId)
+            if (index > -1)
+                // TODO: tons of warnings about invalid parent are occurred here, don't know how to fix
+                removeTab(index)
+        }
+
+        onAllMemosClosed: {
+            while (count > 0)
+                removeTab(count-1)
+        }
     }
 
     function saveMemo(memoId) {
@@ -40,18 +52,6 @@ TabView {
         if (index > -1)
             return getTab(index).item.saveChanges()
         return ""
-    }
-
-    function closeMemo(memoId) {
-        var index = __getTabIndex(memoId)
-        if (index > -1)
-            // TODO: tons of warnings about invalid parent are occurred here, don't know how to fix
-            removeTab(index)
-    }
-
-    function closeAllMemos() {
-        while (count > 0)
-            removeTab(count-1)
     }
 
     function isMemoModified(memoId) {
@@ -64,7 +64,6 @@ TabView {
         for (var i = 0; i < count; i++) {
             var memoView = getTab(i).item
             if (memoView.isModified()) {
-                console.log("Modified: " + memoView.memoId)
                 var info = catalog.getMemoInfo(memoView.memoId)
                 info.checked = false
                 memoList.push(info)
@@ -85,9 +84,8 @@ TabView {
     }
 
     function __getTabIndex(memoId) {
-        var s = memoId.toString()
         for (var i = 0; i < count; i++)
-            if (getTab(i).title === s)
+            if (getTab(i).item.memoId === memoId)
                 return i
         return -1
     }

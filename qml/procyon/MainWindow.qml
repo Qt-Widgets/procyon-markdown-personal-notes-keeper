@@ -39,7 +39,9 @@ ApplicationWindow {
     }
 
     MainController {
-
+        id: controller
+        onNeedToOpenMemo: operations.openMemo(memoId)
+        onNeedToCloseMemo: operations.closeMemo(memoId)
     }
 
     Component.onCompleted: {
@@ -129,10 +131,8 @@ ApplicationWindow {
         }
 
         function openMemo(memoId) {
-            if (memoId > 0) {
-                openedMemosView.currentMemoId = memoId
-                memoPagesView.currentMemoId = memoId
-            }
+            // No special activity is required
+            controller.memoOpened(memoId)
         }
 
         function closeMemo(memoId) {
@@ -140,23 +140,23 @@ ApplicationWindow {
                 if (memoPagesView.isMemoModified(memoId))
                     saveAndCloseMemoDialog.show(memoId,
                                                 memoPagesView.saveMemo,
-                                                forceCloseMemo)
+                                                controller.memoClosed)
                 else
-                    forceCloseMemo(memoId)
+                    controller.memoClosed(memoId)
             }
         }
 
         function closeAllMemos(onAccept) {
             var changedMemos = memoPagesView.getModifiedMemos()
             if (changedMemos.length === 0) {
-                forceCloseAllMemos()
+                controller.allMemosClosed()
                 if (onAccept) onAccept()
             }
             else if (changedMemos.length === 1) {
                 saveAndCloseMemoDialog.show(changedMemos[0].memoId,
                                             memoPagesView.saveMemo,
                                             function() {
-                                                forceCloseAllMemos()
+                                                controller.allMemosClosed()
                                                 if (onAccept) onAccept()
                                             })
             }
@@ -164,16 +164,6 @@ ApplicationWindow {
                 console.log("TODO show dialog with multi-selector")
                 if (onAccept) onAccept()
             }
-        }
-
-        function forceCloseMemo(memoId) {
-            openedMemosView.memoClosed(memoId)
-            memoPagesView.closeMemo(memoId)
-        }
-
-        function forceCloseAllMemos() {
-            openedMemosView.allMemosClosed()
-            memoPagesView.closeAllMemos()
         }
     }
 
@@ -360,6 +350,7 @@ ApplicationWindow {
     }
 
     menuBar: MenuBar {
+        id: mainMenu
         Menu {
             id: fileMenu
             title: qsTr("&File")
@@ -460,6 +451,7 @@ ApplicationWindow {
     }
 
     SplitView {
+        id: centralArea
         anchors.fill: parent
         orientation: Qt.Horizontal
         handleDelegate: Rectangle {
@@ -470,27 +462,26 @@ ApplicationWindow {
         OpenedMemosView {
             id: openedMemosView
             catalog: catalog
+            controller: controller
             width: 200
             height: parent.height
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
-            onNeedToActivateMemo: operations.openMemo(memoId)
-            onNeedToCloseMemo: operations.closeMemo(memoId)
         }
 
         MemoPagesView {
             id: memoPagesView
             catalog: catalog
+            controller: controller
             Layout.fillWidth: true
             Layout.minimumWidth: 100
             Layout.leftMargin: openedMemosView.visible ? 0 : 4
             Layout.rightMargin: catalogView.visible ? 0 : 4
-            onNeedToCloseMemo: operations.closeMemo(memoId)
-            onMemoModified: openedMemosView.markMemoModified(memoId, modified)
         }
 
         CatalogView {
             id: catalogView
+            controller: controller
             catalogModel: catalog.model
             width: 200
             Layout.maximumWidth: 400
@@ -498,7 +489,6 @@ ApplicationWindow {
             Layout.rightMargin: 4
             Layout.bottomMargin: 4
             Layout.topMargin: 4
-            onNeedToOpenMemo: operations.openMemo(memoId)
         }
     }
 
