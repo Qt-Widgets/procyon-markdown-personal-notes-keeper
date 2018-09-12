@@ -185,7 +185,7 @@ QString Catalog::removeFolder(FolderItem* item)
     return QString();
 }
 
-QString Catalog::createMemo(FolderItem* parent, Memo *memo)
+MemoResult Catalog::createMemo(FolderItem* parent, Memo *memo)
 {
     auto item = new MemoItem;
     item->_memo = memo;
@@ -198,14 +198,14 @@ QString Catalog::createMemo(FolderItem* parent, Memo *memo)
     if (!res.isEmpty())
     {
         delete item;
-        return res;
+        return MemoResult::fail(res);
     }
 
     (parent ? parent->asFolder()->_children : _items).append(item);
     _allMemos.insert(item->id(), item);
     // TODO sort items after inserting
 
-    return QString();
+    return MemoResult::ok(item);
 }
 
 QString Catalog::updateMemo(MemoItem* item, Memo *memo)

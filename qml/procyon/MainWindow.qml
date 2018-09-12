@@ -34,8 +34,14 @@ ApplicationWindow {
 
     CatalogHandler {
         id: catalog
+
         onError: errorDialog.show(message)
         onInfo: infoDialog.show(message)
+
+        onMemoCreated: {
+            controller.openMemo(memoId)
+            editMemoAction.trigger()
+        }
     }
 
     MainController {
@@ -288,7 +294,7 @@ ApplicationWindow {
                 id: newMemoAction
                 text: qsTr("New &Memo")
                 enabled: catalogView.selectedFolderId > 0
-                onTriggered: controller.newMemo(catalogView.selectedFolderId)
+                onTriggered: catalog.createMemo(catalogView.selectedFolderId)
             }
             Action {
                 id: deleteMemoAction
@@ -316,7 +322,7 @@ ApplicationWindow {
                 iconSource: "qrc:/toolbar/memo_edit"
                 shortcut: "Return,Return"
                 enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
-                onTriggered: memoPagesView.currentMemoPage.editMemoMode = true
+                onTriggered: memoPagesView.currentMemoPage.beginEditing()
             }
             Action {
                 id: saveMemoAction

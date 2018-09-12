@@ -84,9 +84,6 @@ private:
     TResult _result;
 };
 
-typedef OperationResult<Catalog*> CatalorResult;
-typedef OperationResult<int> IntResult;
-
 //------------------------------------------------------------------------------
 
 class CatalogItem
@@ -131,8 +128,6 @@ private:
     friend class FolderManager;
 };
 
-typedef OperationResult<FolderItem*> FolderResult;
-
 //------------------------------------------------------------------------------
 
 class MemoItem : public CatalogItem
@@ -150,6 +145,13 @@ private:
     friend class Catalog;
     friend class MemoManager;
 };
+
+//------------------------------------------------------------------------------
+
+typedef OperationResult<int> IntResult;
+typedef OperationResult<MemoItem*> MemoResult;
+typedef OperationResult<FolderItem*> FolderResult;
+typedef OperationResult<Catalog*> CatalorResult;
 
 //------------------------------------------------------------------------------
 
@@ -176,7 +178,7 @@ public:
     QString renameFolder(FolderItem* item, const QString& title);
     FolderResult createFolder(FolderItem* parent, const QString& title);
     QString removeFolder(FolderItem* item);
-    QString createMemo(FolderItem* parent, Memo *memo);
+    MemoResult createMemo(FolderItem* parent, Memo *memo);
     QString updateMemo(MemoItem* item, Memo* memo);
     QString updateMemo(const Memo& memo);
     QString removeMemo(MemoItem* item);

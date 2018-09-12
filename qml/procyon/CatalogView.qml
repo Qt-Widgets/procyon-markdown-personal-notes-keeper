@@ -169,7 +169,7 @@ Rectangle {
         }
         MenuItem {
             text: qsTr("New &Memo...")
-            onTriggered: controller.createMemo(selectedFolderId)
+            onTriggered: catalog.createMemo(selectedFolderId)
         }
         MenuSeparator {}
         MenuItem {

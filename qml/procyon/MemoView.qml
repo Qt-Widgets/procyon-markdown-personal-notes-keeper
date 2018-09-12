@@ -62,6 +62,11 @@ Rectangle {
         return document.isMemoModified || headerText.isModified
     }
 
+    function beginEditing() {
+        editMemoMode = true
+        textArea.focus = true
+    }
+
     function saveChanges() {
         var info = {}
         info.memoId = memoId

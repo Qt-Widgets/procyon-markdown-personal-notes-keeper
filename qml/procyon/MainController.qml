@@ -18,11 +18,6 @@ Item {
 
     signal memoModified(int memoId, bool modified)
 
-    function createMemo(parentFolderId) {
-        if (parentFolderId < 1) return
-        console.log("TODO: Create memo in " + parentFolderId)
-    }
-
     function deleteMemo(memoId) {
         if (memoId < 1) return
         console.log("TODO: Delete memo " + memoId)

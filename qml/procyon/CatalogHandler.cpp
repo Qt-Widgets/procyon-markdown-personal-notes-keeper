@@ -311,6 +311,34 @@ QString CatalogHandler::saveMemo(const QMap<QString, QVariant>& data)
     return QString();
 }
 
+void CatalogHandler::createMemo(int folderId)
+{
+    if (!_catalog) return;
+
+    // TODO: select memo type
+    auto memoType = plainTextMemoType();
+
+    auto parentItem = _catalog->findFolderById(folderId);
+
+    auto memo = memoType->makeMemo();
+    auto res = _catalog->createMemo(parentItem, memo);
+    if (!res.ok())
+        return error(res.error());
+
+    // TODO: merge (_catalogModel->itemAdded) and (emit itemCreated) into single method and signal raised by CatalogModel
+    QModelIndex parentIndex = parentItem ? _catalogModel->findIndex(parentItem) : QModelIndex();
+    _catalogModel->itemAdded(parentIndex);
+
+    MemoItem* newItem = res.result();
+    QModelIndex newIndex = _catalogModel->findIndex(newItem, parentIndex);
+    emit itemCreated(parentIndex, newIndex);
+
+    emit memoCountChanged();
+    emit memoCreated(res.result()->id());
+
+    qInfo() << "New memo created in" << folderId << ":" << newItem->id();
+}
+
 QMap<QString, QVariant> CatalogHandler::getFolderInfo(int folderId)
 {
     if (!_catalog) return {};
@@ -348,6 +376,7 @@ QString CatalogHandler::createFolder(int parentFolderId, const QString& title)
     auto res = _catalog->createFolder(parentItem, title);
     if (!res.ok()) return res.error();
 
+    // TODO: merge (_catalogModel->itemAdded) and (emit itemCreated) into single method and signal raised by CatalogModel
     QModelIndex parentIndex = parentItem ? _catalogModel->findIndex(parentItem) : QModelIndex();
     _catalogModel->itemAdded(parentIndex);
 

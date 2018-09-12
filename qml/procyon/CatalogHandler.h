@@ -53,6 +53,7 @@ signals:
     void memoWordWrapChanged() const;
     void memoChanged(const QMap<QString, QVariant>& memoData) const;
     void folderRenamed(int folderId) const;
+    void memoCreated(int memoId) const;
 
     // TODO it should be signal of CatalogModel
     void itemCreated(const QModelIndex& parentIndex, const QModelIndex& newIndex) const;
@@ -79,6 +80,7 @@ public slots:
     QMap<QString, QVariant> getMemoInfo(int memoId);
     QString getMemoText(int memoId) const;
     QString saveMemo(const QMap<QString, QVariant>& data);
+    void createMemo(int folderId);
 
     QMap<QString, QVariant> getFolderInfo(int folderId);
     QString renameFolder(int folderId, const QString& newTitle);
