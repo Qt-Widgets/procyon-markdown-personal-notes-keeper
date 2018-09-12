@@ -94,10 +94,10 @@ public:
             if (!item) return QVariant();
             auto memo = item->asMemo();
             return QVariantMap({
-                { QStringLiteral("memoId"), item->id() },
-                { QStringLiteral("memoTitle"), item->title() },
+                { QStringLiteral("itemId"), item->id() },
+                { QStringLiteral("itemTitle"), item->title() },
                 { QStringLiteral("isFolder"), memo == nullptr },
-                { QStringLiteral("memoIconPath"), (memo && memo->type()) ? memo->type()->iconPath() : QString() }
+                { QStringLiteral("iconPath"), (memo && memo->type()) ? memo->type()->iconPath() : QString() }
             });
         }
         return QVariant();
@@ -105,6 +105,11 @@ public:
 
     void itemRenamed(const QModelIndex &index)
     {
+        if (!index.isValid())
+        {
+            qWarning() << "CatalogModel::itemRenamed(): invalid index";
+            return;
+        }
         emit dataChanged(index, index);
     }
 

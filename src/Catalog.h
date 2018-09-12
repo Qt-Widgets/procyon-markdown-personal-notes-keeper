@@ -166,7 +166,8 @@ public:
 
     const QString& fileName() const { return _fileName; }
     const QList<CatalogItem*>& items() const { return _items; }
-    CatalogItem* findById(int id) const;
+    MemoItem* findMemoById(int id) const;
+    FolderItem* findFolderById(int id) const;
 
     IntResult countMemos() const;
 
@@ -184,6 +185,8 @@ private:
     QList<CatalogItem*> _items;
     QMap<int, MemoItem*> _allMemos;
     QMap<int, FolderItem*> _allFolders;
+
+
 };
 
 #endif // CATALOG_H

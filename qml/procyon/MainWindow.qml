@@ -40,7 +40,7 @@ ApplicationWindow {
 
     MainController {
         id: controller
-        onNeedToOpenMemo: operations.openMemo(memoId)
+        catalog: catalog
         onNeedToCloseMemo: operations.closeMemo(memoId)
     }
 
@@ -130,11 +130,6 @@ ApplicationWindow {
             })
         }
 
-        function openMemo(memoId) {
-            // No special activity is required
-            controller.memoOpened(memoId)
-        }
-
         function closeMemo(memoId) {
             if (memoId > 0) {
                 if (memoPagesView.isMemoModified(memoId))
@@ -164,6 +159,14 @@ ApplicationWindow {
                 console.log("TODO show dialog with multi-selector")
                 if (onAccept) onAccept()
             }
+        }
+
+        function deleteMemo(memoId) {
+
+        }
+
+        function newMemo() {
+
         }
     }
 
@@ -286,7 +289,19 @@ ApplicationWindow {
             Action {
                 id: openMemoAction
                 text: qsTr("&Open Memo")
-                onTriggered: operations.openMemo(catalogView.getSelectedMemoId())
+                enabled: catalogView.selectedMemoId > 0
+                onTriggered: controller.openMemo(catalogView.selectedMemoId)
+            }
+            Action {
+                id: newMemoAction
+                text: qsTr("New Memo")
+                onTriggered: operations.newMemo()
+            }
+            Action {
+                id: deleteMemoAction
+                text: qsTr("Delete Memo")
+                enabled: catalogView.selectedMemoId > 0
+                onTriggered: operations.deleteMemo(catalogView.selectedMemoId)
             }
             Action {
                 id: closeMemoAction
@@ -305,7 +320,6 @@ ApplicationWindow {
             Action {
                 id: editMemoAction
                 text: qsTr("&Edit Memo")
-                tooltip: qsTr("Edit memo")
                 iconSource: "qrc:/toolbar/memo_edit"
                 shortcut: "Return,Return"
                 enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
@@ -314,7 +328,6 @@ ApplicationWindow {
             Action {
                 id: saveMemoAction
                 text: qsTr("&Save Memo")
-                tooltip: qsTr("Save changes")
                 iconSource: "qrc:/toolbar/memo_save"
                 shortcut: StandardKey.Save
                 enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
@@ -322,12 +335,17 @@ ApplicationWindow {
             }
             Action {
                 id: cancelMemoAction
-                text: qsTr("Cancel")
-                tooltip: qsTr("Cancel changes")
+                text: qsTr("Cancel Changes")
                 iconSource: "qrc:/toolbar/memo_cancel"
                 shortcut: "Esc,Esc"
                 enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
                 onTriggered: memoPagesView.currentMemoPage.cancelEditing()
+            }
+            Action {
+                id: renameFolderAction
+                text: qsTr("Rename Folder...")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.renameFolder(catalogView.selectedFolderId)
             }
         }
         Item {
@@ -408,7 +426,11 @@ ApplicationWindow {
         Menu {
             id: catalogMenu
             title: qsTr("&Catalog")
+            MenuItem { action: renameFolderAction }
+            MenuSeparator {}
             MenuItem { action: openMemoAction }
+            MenuItem { action: newMemoAction }
+            MenuItem { action: deleteMemoAction }
             MenuSeparator {}
             MenuItem { action: editMemoAction }
             MenuItem { action: saveMemoAction }

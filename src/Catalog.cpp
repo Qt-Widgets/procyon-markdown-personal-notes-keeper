@@ -261,12 +261,32 @@ IntResult Catalog::countMemos() const
     return res.isEmpty() ? IntResult::ok(count) : IntResult::fail(res);
 }
 
-CatalogItem* Catalog::findById(int id) const
+namespace {
+
+template <typename TItem>
+TItem* findInContainerById(const QMap<int, TItem*>& container, int id)
 {
-    if (!_allMemos.contains(id))
+    if (id <= 0)
     {
-        qCritical() << "Inconsistent state! _allMemos does not contain memo" << id;
+        qCritical() << "Invalid folder or memo id" << id;
         return nullptr;
     }
-    return _allMemos[id];
+    if (!container.contains(id))
+    {
+        qCritical() << "Inconsistent state! Catalog does not contain folder or memo" << id;
+        return nullptr;
+    }
+    return container[id];
+}
+
+} // namespace
+
+MemoItem* Catalog::findMemoById(int id) const
+{
+    return findInContainerById(_allMemos, id);
+}
+
+FolderItem* Catalog::findFolderById(int id) const
+{
+    return findInContainerById(_allFolders, id);
 }

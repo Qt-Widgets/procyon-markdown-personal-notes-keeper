@@ -10,6 +10,10 @@
 #include "../../src/CatalogStore.h"
 #include "../../src/Memo.h"
 
+// We may not translate some messages as they point to an inconsistent
+// program state and they are not a message to a user but a reason to debug
+#define NO_TRANSLATE QString
+
 namespace {
 const int MAX_MRU_FILES_COUNT = 24;
 QString DEFAULT_EXT = ".enot";
@@ -163,6 +167,7 @@ void CatalogHandler::closeCatalog()
     emit memoCountChanged();
     emit catalogModelChanged();
     emit isOpenedChanged();
+    qInfo() << "Catalog closed";
 }
 
 QString CatalogHandler::filePath() const
@@ -196,6 +201,8 @@ QAbstractItemModel* CatalogHandler::catalogModel() const
 
 void CatalogHandler::catalogOpened(Catalog *catalog)
 {
+    qInfo() << "Catalog opened" << catalog->fileName();
+
     _catalog = catalog;
     _catalogModel = new CatalogModel(catalog);
 
@@ -243,15 +250,28 @@ void CatalogHandler::deleteAllMruItems()
 bool CatalogHandler::isValidId(int memoId) const
 {
     if (!_catalog) return false;
-    return _catalog->findById(memoId);
+    return _catalog->findMemoById(memoId);
+}
+
+QMap<QString, QVariant> CatalogHandler::getMemoInfo(int memoId)
+{
+    if (!_catalog) return {};
+    auto item = _catalog->findMemoById(memoId);
+    if (!item) return {};
+    return {
+        { "memoId", memoId },
+        { "memoTitle", item->title() },
+        { "memoPath", item->path() },
+        { "memoIconPath", item->asMemo()->type()->iconPath() }
+    };
 }
 
 QString CatalogHandler::getMemoText(int memoId) const
 {
     if (!_catalog) return QString();
-    auto item = _catalog->findById(memoId);
-    if (!item || !item->isMemo()) return QString();
-    auto memoItem = item->asMemo();
+    auto memoItem = _catalog->findMemoById(memoId);
+    if (!memoItem)
+        return NO_TRANSLATE("ERROR: Memo id=%1 is not found in the catalog").arg(memoId);
     if (!memoItem->memo())
     {
         auto res = _catalog->loadMemo(memoItem);
@@ -261,7 +281,7 @@ QString CatalogHandler::getMemoText(int memoId) const
             return QString();
         }
     }
-    return item->asMemo()->memo()->data();
+    return memoItem->memo()->data();
 }
 
 QString CatalogHandler::saveMemo(const QMap<QString, QVariant>& data)
@@ -269,11 +289,11 @@ QString CatalogHandler::saveMemo(const QMap<QString, QVariant>& data)
     if (!_catalog) return QString();
 
     int memoId = data["memoId"].toInt();
-    auto item = _catalog->findById(memoId);
-    if (!item || !item->isMemo()) return QString();
-    auto memoItem = item->asMemo();
+    auto memoItem = _catalog->findMemoById(memoId);
+    if (!memoItem)
+        return NO_TRANSLATE("Memo id=%1 is not found in the catalog").arg(memoId);
     if (!memoItem->memo())
-        return QString("Unable to save memo %1: memo must be loaded before saving but it is not").arg(memoId);
+        return NO_TRANSLATE("Unable to save memo %1: memo must be loaded before saving but it is not").arg(memoId);
 
     auto memo = memoItem->type()->makeMemo();
     // TODO preserve additional non editable data - dates, etc.
@@ -281,25 +301,43 @@ QString CatalogHandler::saveMemo(const QMap<QString, QVariant>& data)
     memo->setTitle(data["memoTitle"].toString());
     memo->setData(data["memoText"].toString());
 
-    QString res = _catalog->updateMemo(memoItem, memo);
+    auto res = _catalog->updateMemo(memoItem, memo);
+    if (!res.isEmpty()) return res;
 
-    if (res.isEmpty())
-        emit memoChanged(data);
+    _catalogModel->itemRenamed(_catalogModel->findIndex(memoItem));
+    emit memoChanged(data);
 
-    return res;
+    qInfo() << "Memo" << memoId << "saved";
+    return QString();
 }
 
-QMap<QString, QVariant> CatalogHandler::getMemoInfo(int memoId)
+QMap<QString, QVariant> CatalogHandler::getFolderInfo(int folderId)
 {
     if (!_catalog) return {};
-    auto item = _catalog->findById(memoId);
-    if (!item || !item->isMemo()) return {};
+    auto item = _catalog->findFolderById(folderId);
+    if (!item) return {};
     return {
-        { "memoId", memoId },
-        { "memoTitle", item->title() },
-        { "memoPath", item->path() },
-        { "memoIconPath", item->asMemo()->type()->iconPath() }
+        { "folderId", folderId },
+        { "folderTitle", item->title() },
+        { "folderPath", item->path() },
     };
+}
+
+QString CatalogHandler::renameFolder(int folderId, const QString& newTitle)
+{
+    if (!_catalog) return {};
+    auto item = _catalog->findFolderById(folderId);
+    if (!item)
+        return NO_TRANSLATE("Folder id=%1 is not found in the catalog").arg(folderId);
+
+    auto res = _catalog->renameFolder(item, newTitle);
+    if (!res.isEmpty()) return res;
+
+    _catalogModel->itemRenamed(_catalogModel->findIndex(item));
+    emit folderRenamed(folderId);
+
+    qInfo() << "Folder" << folderId << "renamed";
+    return QString();
 }
 
 QMap<QString, QVariant> CatalogHandler::getStoredSession()

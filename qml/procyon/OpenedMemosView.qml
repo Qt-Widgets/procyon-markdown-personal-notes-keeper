@@ -20,6 +20,15 @@ Rectangle {
             if (index >= 0)
                 memosListModel.setProperty(index, "memoTitle", memoData.memoTitle)
         }
+
+        onFolderRenamed: {
+            // TODO: We can't say if a memo is in one of subfolders
+            // of the given folder, so just update all paths for now
+            for (var i = 0; i < memosListModel.count; i++) {
+                var info = catalog.getMemoInfo(memosListModel.get(i).memoId)
+                memosListModel.setProperty(i, "memoPath", info.memoPath)
+            }
+        }
     }
 
     Connections {
@@ -73,7 +82,7 @@ Rectangle {
         for (var i = 0; i < memoIdsStr.length; i++) {
             var memoId = parseInt(memoIdsStr[i])
             if (memoId > 0 && catalog.isValidId(memoId))
-                controller.needToOpenMemo(memoId)
+                controller.openMemo(memoId)
         }
     }
 
@@ -83,7 +92,7 @@ Rectangle {
 
     function __getItemIndex(memoId) {
         for (var i = 0; i < memosListModel.count; i++)
-            if (__getMemoId(i) === memoId)
+            if (memosListModel.get(i).memoId === memoId)
                 return i
         return -1
     }
@@ -102,7 +111,7 @@ Rectangle {
         onCurrentIndexChanged: {
             var memoId = __getMemoId(currentIndex)
             if (memoId > 0 &&  memoId !== currentMemoId)
-                controller.needToOpenMemo(memoId)
+                controller.openMemo(memoId)
         }
 
         delegate: Rectangle {

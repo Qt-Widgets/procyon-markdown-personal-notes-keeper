@@ -52,24 +52,33 @@ signals:
     void memoFontChanged() const;
     void memoWordWrapChanged() const;
     void memoChanged(const QMap<QString, QVariant>& memoData) const;
+    void folderRenamed(int folderId) const;
 
 public slots:
     void loadSettings();
     void saveSettings();
+
     void newCatalog(const QUrl &fileUrl);
+    bool sameFile(const QString &fileName) const;
+    bool sameUrl(const QUrl &fileUrl) const;
     void loadCatalogFile(const QString &fileName);
     void loadCatalogUrl(const QUrl &fileUrl);
     void closeCatalog();
-    void deleteInvalidMruItems();
-    void deleteAllMruItems();
-    bool sameFile(const QString &fileName) const;
-    bool sameUrl(const QUrl &fileUrl) const;
-    bool isValidId(int memoId) const;
-    QString getMemoText(int memoId) const;
-    QMap<QString, QVariant> getMemoInfo(int memoId);
+
     QMap<QString, QVariant> getStoredSession();
     void storeSession(const QMap<QString, QVariant>& session);
+
+    void deleteInvalidMruItems();
+    void deleteAllMruItems();
+
+    bool isValidId(int memoId) const;
+
+    QMap<QString, QVariant> getMemoInfo(int memoId);
+    QString getMemoText(int memoId) const;
     QString saveMemo(const QMap<QString, QVariant>& data);
+
+    QMap<QString, QVariant> getFolderInfo(int folderId);
+    QString renameFolder(int folderId, const QString& newTitle);
 
 private:
     Catalog *_catalog = nullptr;

@@ -18,8 +18,16 @@ Rectangle {
 
     Connections {
         target: catalog
+
         onMemoFontChanged: textArea.font = catalog.memoFont
         onMemoWordWrapChanged: textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
+
+        onFolderRenamed: {
+            // TODO: We can't say if the memo is in one of subfolders
+            // of the given folder, so just update path anyway
+            var info = catalog.getMemoInfo(memoId)
+            memoPathText.text = info.memoPath
+        }
     }
 
     DocumentHandler {
@@ -124,18 +132,50 @@ Rectangle {
                     Menu {
                         id: headerContextMenu
                         MenuItem {
-                            text: qsTr("Copy")
-                            onTriggered: headerText.copy()
-                            iconName: "edit-copy"
+                            text: qsTr("&Undo")
+                            iconName: "edit-undo"
+                            visible: editMemoMode
+                            enabled: headerText.canUndo
+                            onTriggered: headerText.undo()
+                        }
+                        MenuItem {
+                            text: qsTr("&Redo")
+                            iconName: "edit-redo"
+                            visible: editMemoMode
+                            enabled: headerText.canRedo
+                            onTriggered: headerText.redo()
                         }
                         MenuSeparator {}
                         MenuItem {
-                            text: qsTr("Select All")
+                            text: qsTr("Cu&t")
+                            iconName: "edit-cut"
+                            visible: editMemoMode
+                            enabled: headerText.selectionEnd > headerText.selectionStart
+                            onTriggered: headerText.cut()
+                        }
+                        MenuItem {
+                            text: qsTr("&Copy")
+                            iconName: "edit-copy"
+                            enabled: headerText.selectionEnd > headerText.selectionStart
+                            onTriggered: headerText.copy()
+                        }
+                        MenuItem {
+                            text: qsTr("&Paste")
+                            iconName: "edit-paste"
+                            visible: editMemoMode
+                            enabled: headerText.canPaste
+                            onTriggered: headerText.paste()
+                        }
+                        MenuSeparator {}
+                        MenuItem {
+                            text: qsTr("Select &All")
+                            iconName: "edit-select-all"
                             onTriggered: headerText.selectAll()
                         }
                     }
                 }
             }
+
             RowLayout {
                 id: headerToolbar
 

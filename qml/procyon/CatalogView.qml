@@ -7,14 +7,10 @@ import "appearance.js" as Appearance
 Rectangle {
     property MainController controller: null
     property variant catalogModel: null
-
-    function getSelectedMemoId() {
-        if (catalogModel && memoSelector.hasSelection && memoSelector.currentIndex) {
-            var indexData = catalogModel.data(memoSelector.currentIndex)
-            return (indexData && !indexData.isFolder) ? indexData.memoId : 0
-        }
-        return 0
-    }
+    property int selectedFolderId: 0
+    property int selectedMemoId: 0
+    property string selectedTitle: ""
+    property string selectedIconSource: ""
 
     function getExpandedIdsStr() {
         var expandedIds = []
@@ -36,7 +32,7 @@ Rectangle {
         for (var row = 0; row < rowCount; row++) {
             var index = catalogModel.index(row, 0, parentIndex)
             if (catalogTreeView.isExpanded(index))
-                expandedIds.push(catalogModel.data(index).memoId)
+                expandedIds.push(catalogModel.data(index).itemId)
             __getExpandedIds(index, expandedIds)
         }
     }
@@ -47,7 +43,7 @@ Rectangle {
         for (var row = 0; row < rowCount; row++) {
             var index = catalogModel.index(row, 0, parentIndex)
             var indexData = catalogModel.data(index)
-            if (expandedIds.indexOf(indexData.memoId) > -1)
+            if (expandedIds.indexOf(indexData.itemId) > -1)
                 catalogTreeView.expand(index)
             __setExpandedIds(index, expandedIds)
         }
@@ -60,7 +56,30 @@ Rectangle {
                 return "qrc:/icon/folder_opened"
             return "qrc:/icon/folder_closed"
         }
-        return styleData.value.memoIconPath
+        return styleData.value.iconPath
+    }
+
+    function __updateSelection(index) {
+        var folderId = 0
+        var memoId = 0
+        var title = ""
+        var iconSource = ""
+        var indexData = catalogModel.data(index)
+        if ("itemId" in indexData) {
+            if (indexData.isFolder) {
+                folderId = indexData.itemId
+                iconSource = "qrc:/icon/folder_closed"
+            }
+            else {
+                memoId = indexData.itemId
+                iconSource = indexData.iconPath
+            }
+            title = indexData.itemTitle
+        }
+        selectedFolderId = folderId
+        selectedMemoId = memoId
+        selectedTitle = title
+        selectedIconSource = iconSource
     }
 
     TreeView {
@@ -72,6 +91,7 @@ Rectangle {
         selection: ItemSelectionModel {
             id: memoSelector
             model: catalogModel
+            onCurrentChanged: __updateSelection(current)
         }
 
         rowDelegate: Rectangle {
@@ -90,7 +110,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
             }
             Label {
-                text: styleData.value ? styleData.value.memoTitle : ""
+                text: styleData.value ? styleData.value.itemTitle : ""
                 font.pointSize: Appearance.fontSizeDefaultUI()
                 font.bold: styleData.selected
                 color: styleData.selected ? Appearance.textColorSelected() : Appearance.textColor()
@@ -106,9 +126,46 @@ Rectangle {
                 else
                     expand(index)
             }
-            else controller.needToOpenMemo(indexData.memoId)
+            else controller.openMemo(indexData.itemId)
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: {
+                if (selectedFolderId > 0) folderContextMenu.popup()
+                else if(selectedMemoId > 0) memoContextMenu.popup()
+            }
         }
 
         TableViewColumn { role: "display" }
+    }
+
+    Menu {
+        id: folderContextMenu
+        MenuItem {
+            text: selectedTitle
+            iconSource: selectedIconSource
+            enabled: false
+        }
+        MenuSeparator {}
+        MenuItem {
+            text: qsTr("Rename Folder...")
+            onTriggered: controller.renameFolder(selectedFolderId)
+        }
+    }
+
+    Menu {
+        id: memoContextMenu
+        MenuItem {
+            text: selectedTitle
+            iconSource: selectedIconSource
+            enabled: false
+        }
+        MenuSeparator {}
+        MenuItem {
+            text: qsTr("&Open Memo")
+            onTriggered: controller.openMemo(selectedMemoId)
+        }
     }
 }
