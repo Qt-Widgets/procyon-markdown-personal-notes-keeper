@@ -10,17 +10,25 @@ Item {
     property CatalogHandler catalog: null
 
     signal memoOpened(int memoId)
-
     signal needToCloseMemo(int memoId)
     signal memoClosed(int memoId)
-
     signal allMemosClosed()
-
     signal memoModified(int memoId, bool modified)
 
+    function makePath(itemPath, itemTitle) {
+        var path = itemPath.length ? (itemPath + "/") : ""
+        var title = itemTitle.length ? itemTitle : ("&lt;" + qsTr("Untitled") + "&gt;")
+        return path + "<b>" + title + "</b>"
+    }
+
     function deleteMemo(memoId) {
-        if (memoId < 1) return
-        console.log("TODO: Delete memo " + memoId)
+        var info = catalog.getMemoInfo(memoId)
+        if (info.memoId)
+            deleteDialog.show(
+                qsTr("Delete memo?"),
+                makePath(info.memoPath, info.memoTitle),
+                function() { catalog.deleteMemo(memoId) }
+            )
     }
 
     function openMemo(memoId) {
@@ -39,8 +47,13 @@ Item {
     }
 
     function deleteFolder(folderId) {
-        if (folderId < 1) return
-        console.log("TODO: Delete folder " + folderId)
+        var info = catalog.getFolderInfo(folderId)
+        if (info.folderId)
+            deleteDialog.show(
+                qsTr("Delete folder and all its content?"),
+                makePath(info.folderPath, info.folderTitle),
+                function() { catalog.deleteFolder(folderId) }
+            )
     }
 
     function __showDialog(dialog, message) {
@@ -86,7 +99,7 @@ Item {
             folderId = parentFolderId
             if (folderId > 0) {
                 var info = catalog.getFolderInfo(folderId)
-                if (info.folderPath.length > 0)
+                if (info.folderPath.length)
                     pathLabel.text = info.folderPath + "/" + info.folderTitle + "/"
                 else pathLabel.text = ""
             }
@@ -103,7 +116,7 @@ Item {
             folderDialog.folderId = folderId
             var info = catalog.getFolderInfo(folderId)
             folderTitle = info.folderTitle
-            pathLabel.text = info.folderPath.length > 0 ? (info.folderPath + "/") : ""
+            pathLabel.text = info.folderPath.length ? (info.folderPath + "/") : ""
             titleLabel.text = info.folderTitle + ":"
             titleEditor.text = info.folderTitle
             doCreate = false
@@ -128,5 +141,21 @@ Item {
             if (res.length > 0)
                 __showDialog(errorDialog, res)
         }
+    }
+
+    MessageDialog {
+        id: deleteDialog
+        icon: StandardIcon.Question
+        standardButtons: StandardButton.Yes | StandardButton.No
+
+        property var deleteMethod
+
+        function show(question, subject, method) {
+            text = subject + "<p>" + question
+            deleteMethod = method
+            visible = true
+        }
+
+        onYes: deleteMethod()
     }
 }

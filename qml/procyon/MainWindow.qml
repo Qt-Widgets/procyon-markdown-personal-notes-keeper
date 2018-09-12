@@ -42,6 +42,8 @@ ApplicationWindow {
             controller.openMemo(memoId)
             editMemoAction.trigger()
         }
+
+        onMemoDeleted: controller.memoClosed(memoId)
     }
 
     MainController {

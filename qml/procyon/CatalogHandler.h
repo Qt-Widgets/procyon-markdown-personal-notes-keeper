@@ -54,9 +54,10 @@ signals:
     void memoChanged(const QMap<QString, QVariant>& memoData) const;
     void folderRenamed(int folderId) const;
     void memoCreated(int memoId) const;
+    void memoDeleted(int memoId) const;
 
-    // TODO it should be signal of CatalogModel
-    void itemCreated(const QModelIndex& parentIndex, const QModelIndex& newIndex) const;
+    void needExpandIndex(const QModelIndex& index) const;
+    void needSelectIndex(const QModelIndex& index) const;
 
 public slots:
     void loadSettings();
@@ -81,10 +82,12 @@ public slots:
     QString getMemoText(int memoId) const;
     QString saveMemo(const QMap<QString, QVariant>& data);
     void createMemo(int folderId);
+    void deleteMemo(int memoId);
 
     QMap<QString, QVariant> getFolderInfo(int folderId);
     QString renameFolder(int folderId, const QString& newTitle);
     QString createFolder(int parentFolderId, const QString& title);
+    void deleteFolder(int folderId);
 
 private:
     Catalog *_catalog = nullptr;

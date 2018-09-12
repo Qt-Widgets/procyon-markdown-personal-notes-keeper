@@ -184,13 +184,14 @@ public:
     QString removeMemo(MemoItem* item);
     QString loadMemo(MemoItem* item);
 
+    void fillSubitemsFlat(FolderItem* root, QVector<CatalogItem*> &subitems);
+    void fillMemoIdsFlat(FolderItem* root, QVector<int> &ids);
+
 private:
     QString _fileName;
     QList<CatalogItem*> _items;
     QMap<int, MemoItem*> _allMemos;
     QMap<int, FolderItem*> _allFolders;
-
-
 };
 
 #endif // CATALOG_H

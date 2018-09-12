@@ -175,10 +175,17 @@ FolderResult Catalog::createFolder(FolderItem* parent, const QString& title)
 
 QString Catalog::removeFolder(FolderItem* item)
 {
+    QVector<CatalogItem*> subitems;
+    fillSubitemsFlat(item, subitems);
+
     QString res = CatalogStore::folderManager()->remove(item);
     if (!res.isEmpty()) return res;
 
     (item->parent() ? item->parent()->asFolder()->_children : _items).removeOne(item);
+    for (auto subitem : subitems)
+        if (subitem->isFolder())
+            _allFolders.remove(subitem->id());
+        else _allMemos.remove(subitem->id());
     _allFolders.remove(item->id());
 
     delete item;
@@ -290,3 +297,25 @@ FolderItem* Catalog::findFolderById(int id) const
 {
     return findInContainerById(_allFolders, id);
 }
+
+void Catalog::fillSubitemsFlat(FolderItem* root, QVector<CatalogItem*>& subitems)
+{
+    for (CatalogItem* item : root->children())
+    {
+        subitems.append(item);
+
+        if (item->isFolder())
+            fillSubitemsFlat(item->asFolder(), subitems);
+    }
+}
+
+void Catalog::fillMemoIdsFlat(FolderItem* root, QVector<int> &ids)
+{
+    for (CatalogItem* item : root->children())
+    {
+        if (item->isFolder())
+            fillMemoIdsFlat(item->asFolder(), ids);
+        else ids.append(item->id());
+    }
+}
+

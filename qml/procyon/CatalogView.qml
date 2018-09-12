@@ -18,10 +18,8 @@ Rectangle {
 
     Connections {
         target: catalog
-        onItemCreated: {
-            catalogTreeView.expand(parentIndex)
-            catalogSelector.setCurrentIndex(newIndex, ItemSelectionModel.ClearAndSelect)
-        }
+        onNeedExpandIndex: catalogTreeView.expand(index)
+        onNeedSelectIndex: catalogSelector.setCurrentIndex(index, ItemSelectionModel.ClearAndSelect)
     }
 
     function getExpandedIdsStr() {
@@ -121,6 +119,11 @@ Rectangle {
                 smooth: true
                 height: 16
                 width: 16
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            Label {
+                text: styleData.value ? styleData.value.itemId : ""
+                color: styleData.selected ? Appearance.textColorSelected() : Appearance.textColorModest()
                 anchors.verticalCenter: parent.verticalCenter
             }
             Label {

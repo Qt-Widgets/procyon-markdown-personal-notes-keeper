@@ -314,29 +314,43 @@ QString CatalogHandler::saveMemo(const QMap<QString, QVariant>& data)
 void CatalogHandler::createMemo(int folderId)
 {
     if (!_catalog) return;
+    auto parentItem = _catalog->findFolderById(folderId);
+    if (!parentItem) return;
 
     // TODO: select memo type
-    auto memoType = plainTextMemoType();
-
-    auto parentItem = _catalog->findFolderById(folderId);
-
-    auto memo = memoType->makeMemo();
+    auto memo = plainTextMemoType()->makeMemo();
     auto res = _catalog->createMemo(parentItem, memo);
-    if (!res.ok())
-        return error(res.error());
+    if (!res.ok()) return error(res.error());
 
-    // TODO: merge (_catalogModel->itemAdded) and (emit itemCreated) into single method and signal raised by CatalogModel
-    QModelIndex parentIndex = parentItem ? _catalogModel->findIndex(parentItem) : QModelIndex();
+    QModelIndex parentIndex = _catalogModel->findIndex(parentItem);
     _catalogModel->itemAdded(parentIndex);
 
     MemoItem* newItem = res.result();
     QModelIndex newIndex = _catalogModel->findIndex(newItem, parentIndex);
-    emit itemCreated(parentIndex, newIndex);
 
+    emit needExpandIndex(parentIndex);
+    emit needSelectIndex(newIndex);
     emit memoCountChanged();
     emit memoCreated(res.result()->id());
 
     qInfo() << "New memo created in" << folderId << ":" << newItem->id();
+}
+
+void CatalogHandler::deleteMemo(int memoId)
+{
+    if (!_catalog) return;
+    auto memoItem = _catalog->findMemoById(memoId);
+    if (!memoItem) return;
+
+    ItemRemoverGuard guard(_catalogModel, _catalogModel->findIndex(memoItem));
+
+    auto res = _catalog->removeMemo(memoItem);
+    if (!res.isEmpty()) return error(res);
+
+    emit memoCountChanged();
+    emit memoDeleted(memoId);
+
+    qInfo() << "Memo deleted" << memoId;
 }
 
 QMap<QString, QVariant> CatalogHandler::getFolderInfo(int folderId)
@@ -355,8 +369,7 @@ QString CatalogHandler::renameFolder(int folderId, const QString& newTitle)
 {
     if (!_catalog) return QString();
     auto item = _catalog->findFolderById(folderId);
-    if (!item)
-        return NO_TRANSLATE("Folder id=%1 is not found in the catalog").arg(folderId);
+    if (!item) return QString();
 
     auto res = _catalog->renameFolder(item, newTitle);
     if (!res.isEmpty()) return res;
@@ -382,10 +395,35 @@ QString CatalogHandler::createFolder(int parentFolderId, const QString& title)
 
     FolderItem* newItem = res.result();
     QModelIndex newIndex = _catalogModel->findIndex(newItem, parentIndex);
-    emit itemCreated(parentIndex, newIndex);
+
+    emit needExpandIndex(parentIndex);
+    emit needSelectIndex(newIndex);
 
     qInfo() << "New folder created in" << parentFolderId << ":" << newItem->id();
     return QString();
+}
+
+void CatalogHandler::deleteFolder(int folderId)
+{
+    if (!_catalog) return;
+
+    auto folderItem = _catalog->findFolderById(folderId);
+    if (!folderItem) return;
+
+    QVector<int> deletedMemoIds;
+    _catalog->fillMemoIdsFlat(folderItem, deletedMemoIds);
+
+    ItemRemoverGuard guard(_catalogModel, _catalogModel->findIndex(folderItem));
+
+    auto res = _catalog->removeFolder(folderItem);
+    if (!res.isEmpty()) return error(res);
+
+    for (auto id : deletedMemoIds)
+        emit memoDeleted(id);
+    emit memoCountChanged();
+    emit needSelectIndex(guard.parentIndex);
+
+    qInfo() << "Folder deleted" << folderId;
 }
 
 QMap<QString, QVariant> CatalogHandler::getStoredSession()
