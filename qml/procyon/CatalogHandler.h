@@ -54,6 +54,9 @@ signals:
     void memoChanged(const QMap<QString, QVariant>& memoData) const;
     void folderRenamed(int folderId) const;
 
+    // TODO it should be signal of CatalogModel
+    void itemCreated(const QModelIndex& parentIndex, const QModelIndex& newIndex) const;
+
 public slots:
     void loadSettings();
     void saveSettings();
@@ -79,6 +82,7 @@ public slots:
 
     QMap<QString, QVariant> getFolderInfo(int folderId);
     QString renameFolder(int folderId, const QString& newTitle);
+    QString createFolder(int parentFolderId, const QString& title);
 
 private:
     Catalog *_catalog = nullptr;

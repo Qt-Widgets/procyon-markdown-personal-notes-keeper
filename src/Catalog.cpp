@@ -153,7 +153,7 @@ QString Catalog::renameFolder(FolderItem* item, const QString& title)
     return QString();
 }
 
-QString Catalog::createFolder(FolderItem* parent, const QString& title)
+FolderResult Catalog::createFolder(FolderItem* parent, const QString& title)
 {
     FolderItem* folder = new FolderItem;
     folder->_title = title;
@@ -163,14 +163,14 @@ QString Catalog::createFolder(FolderItem* parent, const QString& title)
     if (!res.isEmpty())
     {
         delete folder;
-        return res;
+        return FolderResult::fail(res);
     }
 
     (parent ? parent->_children : _items).append(folder);
     _allFolders.insert(folder->id(), folder);
     // TODO sort items after inserting
 
-    return QString();
+    return FolderResult::ok(folder);
 }
 
 QString Catalog::removeFolder(FolderItem* item)

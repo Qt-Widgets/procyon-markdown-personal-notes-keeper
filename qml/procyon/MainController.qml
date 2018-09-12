@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.0
@@ -18,22 +18,34 @@ Item {
 
     signal memoModified(int memoId, bool modified)
 
+    function createMemo(parentFolderId) {
+        if (parentFolderId < 1) return
+        console.log("TODO: Create memo in " + parentFolderId)
+    }
+
+    function deleteMemo(memoId) {
+        if (memoId < 1) return
+        console.log("TODO: Delete memo " + memoId)
+    }
+
     function openMemo(memoId) {
+        if (memoId < 1) return
         // No special activity is required
         memoOpened(memoId)
     }
 
     function renameFolder(folderId) {
-        if (folderId > 0) {
-            renameFolderDialog.folderId = folderId
-            renameFolderDialog.visible = true
-        }
-        else __showSelectFolderHint()
+        if (folderId < 1) return
+        folderDialog.showForRename(folderId)
     }
 
-    function __showSelectFolderHint() {
-        // TODO: it better to be a tool-tip or a balloon than a message box
-        __showDialog(infoDialog, qsTr("Please, select a folder in the Catalog Panel"))
+    function createFolder(parentFolderId) {
+        folderDialog.showForCreate(parentFolderId)
+    }
+
+    function deleteFolder(folderId) {
+        if (folderId < 1) return
+        console.log("TODO: Delete folder " + folderId)
     }
 
     function __showDialog(dialog, message) {
@@ -46,17 +58,23 @@ Item {
     MessageDialog { id: warningDialog; icon: StandardIcon.Warning }
 
     Dialog {
-        id: renameFolderDialog
+        id: folderDialog
         standardButtons: StandardButton.Ok | StandardButton.Cancel
 
+        property bool doCreate: false
         property int folderId: 0
         property string folderTitle: ""
 
         ColumnLayout {
             spacing: 6
-            Label { text: qsTr("Enter a new title for the folder") }
+            anchors.fill: parent
+            Label {
+                id: promptLabel;
+                text: "It's autowidth adjuster and will be overriden"
+            }
             RowLayout {
                 spacing: 0
+                Layout.fillWidth: true
                 Label { id: pathLabel; color: Appearance.textColorModest() }
                 Label { id: titleLabel; font.bold: true }
             }
@@ -68,15 +86,36 @@ Item {
             }
         }
 
-        onVisibleChanged: {
-            if (!visible) return
+        function showForCreate(parentFolderId) {
+            promptLabel.text = qsTr("Enter a title for new folder")
+            folderId = parentFolderId
+            if (folderId > 0) {
+                var info = catalog.getFolderInfo(folderId)
+                if (info.folderPath.length > 0)
+                    pathLabel.text = info.folderPath + "/" + info.folderTitle + "/"
+                else pathLabel.text = ""
+            }
+            else pathLabel.text = ""
+            folderTitle = ""
+            titleLabel.text = "<?>"
+            titleEditor.text = ""
+            doCreate = true
+            visible = true
+        }
+
+        function showForRename(folderId) {
+            promptLabel.text = qsTr("Enter a new title for the folder")
+            folderDialog.folderId = folderId
             var info = catalog.getFolderInfo(folderId)
             folderTitle = info.folderTitle
-            pathLabel.text = "/" + info.folderPath + "/"
+            pathLabel.text = info.folderPath.length > 0 ? (info.folderPath + "/") : ""
             titleLabel.text = info.folderTitle + ":"
             titleEditor.text = info.folderTitle
-            titleEditor.focus = true
+            doCreate = false
+            visible = true
         }
+
+        onVisibleChanged: if (visible) titleEditor.focus = true
 
         onAccepted: {
             var newTitle = titleEditor.text.trim()
@@ -88,7 +127,9 @@ Item {
                 console.log("Old and new titles are the same, nothing to change")
                 return
             }
-            var res = catalog.renameFolder(folderId, newTitle)
+            var res = doCreate
+                    ? catalog.createFolder(folderId, newTitle)
+                    : catalog.renameFolder(folderId, newTitle)
             if (res.length > 0)
                 __showDialog(errorDialog, res)
         }

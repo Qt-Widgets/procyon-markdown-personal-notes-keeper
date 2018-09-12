@@ -131,6 +131,8 @@ private:
     friend class FolderManager;
 };
 
+typedef OperationResult<FolderItem*> FolderResult;
+
 //------------------------------------------------------------------------------
 
 class MemoItem : public CatalogItem
@@ -172,7 +174,7 @@ public:
     IntResult countMemos() const;
 
     QString renameFolder(FolderItem* item, const QString& title);
-    QString createFolder(FolderItem* parent, const QString& title);
+    FolderResult createFolder(FolderItem* parent, const QString& title);
     QString removeFolder(FolderItem* item);
     QString createMemo(FolderItem* parent, Memo *memo);
     QString updateMemo(MemoItem* item, Memo* memo);

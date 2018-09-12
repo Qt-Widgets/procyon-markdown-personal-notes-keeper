@@ -2,15 +2,27 @@ import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQml.Models 2.2
 
+import org.orion_project.procyon.catalog 1.0
 import "appearance.js" as Appearance
 
 Rectangle {
     property MainController controller: null
+    property CatalogHandler catalog: null
     property variant catalogModel: null
     property int selectedFolderId: 0
     property int selectedMemoId: 0
     property string selectedTitle: ""
     property string selectedIconSource: ""
+
+    onCatalogModelChanged: if (!catalogModel) __updateSelection(null)
+
+    Connections {
+        target: catalog
+        onItemCreated: {
+            catalogTreeView.expand(parentIndex)
+            catalogSelector.setCurrentIndex(newIndex, ItemSelectionModel.ClearAndSelect)
+        }
+    }
 
     function getExpandedIdsStr() {
         var expandedIds = []
@@ -64,17 +76,19 @@ Rectangle {
         var memoId = 0
         var title = ""
         var iconSource = ""
-        var indexData = catalogModel.data(index)
-        if ("itemId" in indexData) {
-            if (indexData.isFolder) {
-                folderId = indexData.itemId
-                iconSource = "qrc:/icon/folder_closed"
+        if (index) {
+            var indexData = catalogModel.data(index)
+            if ("itemId" in indexData) {
+                if (indexData.isFolder) {
+                    folderId = indexData.itemId
+                    iconSource = "qrc:/icon/folder_closed"
+                }
+                else {
+                    memoId = indexData.itemId
+                    iconSource = indexData.iconPath
+                }
+                title = indexData.itemTitle
             }
-            else {
-                memoId = indexData.itemId
-                iconSource = indexData.iconPath
-            }
-            title = indexData.itemTitle
         }
         selectedFolderId = folderId
         selectedMemoId = memoId
@@ -89,7 +103,7 @@ Rectangle {
         anchors.fill: parent
 
         selection: ItemSelectionModel {
-            id: memoSelector
+            id: catalogSelector
             model: catalogModel
             onCurrentChanged: __updateSelection(current)
         }
@@ -150,8 +164,21 @@ Rectangle {
         }
         MenuSeparator {}
         MenuItem {
-            text: qsTr("Rename Folder...")
+            text: qsTr("&New Subfolder...")
+            onTriggered: controller.createFolder(selectedFolderId)
+        }
+        MenuItem {
+            text: qsTr("New &Memo...")
+            onTriggered: controller.createMemo(selectedFolderId)
+        }
+        MenuSeparator {}
+        MenuItem {
+            text: qsTr("&Rename Folder...")
             onTriggered: controller.renameFolder(selectedFolderId)
+        }
+        MenuItem {
+            text: qsTr("&Delete Folder")
+            onTriggered: controller.deleteFolder(selectedFolderId)
         }
     }
 
@@ -166,6 +193,11 @@ Rectangle {
         MenuItem {
             text: qsTr("&Open Memo")
             onTriggered: controller.openMemo(selectedMemoId)
+        }
+        MenuSeparator {}
+        MenuItem {
+            text: qsTr("&Delete Memo")
+            onTriggered: controller.deleteMemo(selectedMemoId)
         }
     }
 }

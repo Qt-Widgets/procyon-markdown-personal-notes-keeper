@@ -160,14 +160,6 @@ ApplicationWindow {
                 if (onAccept) onAccept()
             }
         }
-
-        function deleteMemo(memoId) {
-
-        }
-
-        function newMemo() {
-
-        }
     }
 
     Item {
@@ -294,14 +286,15 @@ ApplicationWindow {
             }
             Action {
                 id: newMemoAction
-                text: qsTr("New Memo")
-                onTriggered: operations.newMemo()
+                text: qsTr("New &Memo")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.newMemo(catalogView.selectedFolderId)
             }
             Action {
                 id: deleteMemoAction
-                text: qsTr("Delete Memo")
+                text: qsTr("&Delete Memo")
                 enabled: catalogView.selectedMemoId > 0
-                onTriggered: operations.deleteMemo(catalogView.selectedMemoId)
+                onTriggered: controller.deleteMemo(catalogView.selectedMemoId)
             }
             Action {
                 id: closeMemoAction
@@ -342,10 +335,28 @@ ApplicationWindow {
                 onTriggered: memoPagesView.currentMemoPage.cancelEditing()
             }
             Action {
+                id: makeTopLevelFolderAction
+                text: qsTr("New &Top Level Folder...")
+                enabled: catalog.isOpened
+                onTriggered: controller.createFolder(0)
+            }
+            Action {
+                id: makeFolderAction
+                text: qsTr("New &Folder...")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.createFolder(catalogView.selectedFolderId)
+            }
+            Action {
                 id: renameFolderAction
-                text: qsTr("Rename Folder...")
+                text: qsTr("&Rename Folder...")
                 enabled: catalogView.selectedFolderId > 0
                 onTriggered: controller.renameFolder(catalogView.selectedFolderId)
+            }
+            Action {
+                id: deleteFolderAction
+                text: qsTr("Delete F&older")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.deleteFolder(catalogView.selectedFolderId)
             }
         }
         Item {
@@ -426,7 +437,10 @@ ApplicationWindow {
         Menu {
             id: catalogMenu
             title: qsTr("&Catalog")
+            MenuItem { action: makeTopLevelFolderAction }
+            MenuItem { action: makeFolderAction }
             MenuItem { action: renameFolderAction }
+            MenuItem { action: deleteFolderAction }
             MenuSeparator {}
             MenuItem { action: openMemoAction }
             MenuItem { action: newMemoAction }
@@ -503,6 +517,7 @@ ApplicationWindow {
 
         CatalogView {
             id: catalogView
+            catalog: catalog
             controller: controller
             catalogModel: catalog.model
             width: 200

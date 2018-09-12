@@ -48,9 +48,9 @@ HEADERS += \
     ../../src/Catalog.h \
     ../../src/CatalogStore.h \
     ../../src/SqlHelper.h \
-    ../../src/CatalogModel.h \
     ../../src/Memo.h \
     DocumentHandler.h \
     ../../src/hl/HighlightingRule.h \
     ../../src/hl/PythonSyntaxHighlighter.h \
-    ../../src/hl/ShellMemoSyntaxHighlighter.h
+    ../../src/hl/ShellMemoSyntaxHighlighter.h \
+    ../../src/CatalogModel.h

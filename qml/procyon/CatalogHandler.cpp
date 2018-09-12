@@ -6,8 +6,8 @@
 #include <QTimer>
 
 #include "../../src/Catalog.h"
-#include "../../src/CatalogModel.h"
 #include "../../src/CatalogStore.h"
+#include "../../src/CatalogModel.h"
 #include "../../src/Memo.h"
 
 // We may not translate some messages as they point to an inconsistent
@@ -325,7 +325,7 @@ QMap<QString, QVariant> CatalogHandler::getFolderInfo(int folderId)
 
 QString CatalogHandler::renameFolder(int folderId, const QString& newTitle)
 {
-    if (!_catalog) return {};
+    if (!_catalog) return QString();
     auto item = _catalog->findFolderById(folderId);
     if (!item)
         return NO_TRANSLATE("Folder id=%1 is not found in the catalog").arg(folderId);
@@ -337,6 +337,25 @@ QString CatalogHandler::renameFolder(int folderId, const QString& newTitle)
     emit folderRenamed(folderId);
 
     qInfo() << "Folder" << folderId << "renamed";
+    return QString();
+}
+
+QString CatalogHandler::createFolder(int parentFolderId, const QString& title)
+{
+    if (!_catalog) return QString();
+
+    auto parentItem = _catalog->findFolderById(parentFolderId);
+    auto res = _catalog->createFolder(parentItem, title);
+    if (!res.ok()) return res.error();
+
+    QModelIndex parentIndex = parentItem ? _catalogModel->findIndex(parentItem) : QModelIndex();
+    _catalogModel->itemAdded(parentIndex);
+
+    FolderItem* newItem = res.result();
+    QModelIndex newIndex = _catalogModel->findIndex(newItem, parentIndex);
+    emit itemCreated(parentIndex, newIndex);
+
+    qInfo() << "New folder created in" << parentFolderId << ":" << newItem->id();
     return QString();
 }
 
