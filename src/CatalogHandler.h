@@ -9,6 +9,10 @@
 class Catalog;
 class CatalogModel;
 
+QT_BEGIN_NAMESPACE
+class QQuickItem;
+QT_END_NAMESPACE
+
 class CatalogHandler : public QObject
 {
     Q_OBJECT
@@ -42,6 +46,7 @@ public:
     void setMemoWordWrap(bool on);
 
 signals:
+    void dummyNotify() const;
     void error(const QString &message) const;
     void info(const QString &message) const;
     void fileNameChanged() const;
@@ -90,6 +95,7 @@ public slots:
     void deleteFolder(int folderId);
 
 private:
+    QQuickItem *_mainWindow = nullptr;
     Catalog *_catalog = nullptr;
     CatalogModel *_catalogModel = nullptr;
     QStringList _recentFiles;

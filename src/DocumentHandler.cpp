@@ -1,6 +1,6 @@
 #include "DocumentHandler.h"
-#include "../../src/hl/PythonSyntaxHighlighter.h"
-#include "../../src/hl/ShellMemoSyntaxHighlighter.h"
+#include "highlighter/PythonSyntaxHighlighter.h"
+#include "highlighter/ShellMemoSyntaxHighlighter.h"
 
 #include <QDebug>
 #include <QQuickTextDocument>
@@ -68,7 +68,7 @@ void DocumentHandler::applyHighlighter()
     auto text = _doc->toPlainText();
 
     // TODO preserve highlighter if its type is not changed
-    // TODO highlighter should be selected bu user and saved into catalog
+    // TODO highlighter should be selected by user and saved into catalog
     if (text.startsWith("#!/usr/bin/env python"))
         _highlighter.reset(new PythonSyntaxHighlighter(_doc));
     else if (text.startsWith("#shell-memo"))

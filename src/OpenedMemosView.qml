@@ -183,7 +183,7 @@ Rectangle {
                 ColumnLayout {
                     Image {
                         id: closeButton
-                        source: "toolbar/memo_close"
+                        source: "qrc:/toolbar/memo_close"
                         Layout.preferredHeight: 16
                         Layout.preferredWidth: 16
                         Layout.rightMargin: 3

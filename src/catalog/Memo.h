@@ -2,7 +2,6 @@
 #define MEMO_H
 
 #include <QString>
-#include <QMap>
 
 class MemoType;
 

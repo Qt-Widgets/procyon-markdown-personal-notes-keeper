@@ -5,10 +5,10 @@
 #include <QSettings>
 #include <QTimer>
 
-#include "../../src/Catalog.h"
-#include "../../src/CatalogStore.h"
-#include "../../src/CatalogModel.h"
-#include "../../src/Memo.h"
+#include "catalog/Catalog.h"
+#include "catalog/CatalogStore.h"
+#include "catalog/Memo.h"
+#include "CatalogModel.h"
 
 // We may not translate some messages as they point to an inconsistent
 // program state and they are not a message to a user but a reason to debug

@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>src/appearance.js</file>
+        <file>src/MainWindow.qml</file>
+        <file>src/MemoView.qml</file>
+        <file>src/CatalogView.qml</file>
+        <file>src/OpenedMemosView.qml</file>
+        <file>src/MemoPagesView.qml</file>
+        <file>src/MainController.qml</file>
+    </qresource>
+    <qresource prefix="/icon">
+        <file alias="main">img/icon/main.svg</file>
+        <file alias="folder_opened">img/icon/folder_opened.svg</file>
+        <file alias="folder_closed">img/icon/folder_closed.svg</file>
+        <file alias="memo_plain_text">img/icon/sticky_note.svg</file>
+        <file alias="modified">img/icon/modified_overlay.png</file>
+    </qresource>
+    <qresource prefix="/toolbar">
+        <file alias="memo_save">img/toolbar/check_green.svg</file>
+        <file alias="memo_edit">img/toolbar/pencil.svg</file>
+        <file alias="memo_cancel">img/toolbar/revert_red.svg</file>
+        <file alias="memo_close">img/toolbar/close.svg</file>
+    </qresource>
+</RCC>

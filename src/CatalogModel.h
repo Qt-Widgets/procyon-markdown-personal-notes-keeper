@@ -4,7 +4,7 @@
 #include <QAbstractItemModel>
 #include <QDebug>
 
-#include "Catalog.h"
+#include "catalog/Catalog.h"
 
 class CatalogModel : public QAbstractItemModel
 {
