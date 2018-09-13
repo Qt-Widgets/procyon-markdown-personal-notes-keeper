@@ -97,118 +97,56 @@ Rectangle {
         anchors.fill: parent
 
         RowLayout {
-            id: headerRow
+            Layout.fillWidth: true
+            Layout.topMargin: 6
 
-            Rectangle {
-                id: headerTextBackground
-
-                color: editMemoMode ? Appearance.editorColor() : Appearance.baseColor()
-                radius: 4
-                height: 30
-
-                Layout.topMargin: 4
+            TextField {
+                id: headerText
+                font { pixelSize: 24 }
+                readOnly: !editMemoMode
+                selectByMouse: true
+                style: TextFieldStyle {
+                    selectionColor: Appearance.selectionColor()
+                    selectedTextColor: Appearance.textColorSelected()
+                    background: Rectangle {
+                        color: editMemoMode ? Appearance.editorColor() : Appearance.baseColor()
+                        radius: 4
+                        height: 30
+                    }
+                }
                 Layout.fillWidth: true
 
-                TextInput {
-                    id: headerText
-                    anchors.fill: parent
-                    font { pixelSize: 24 }
-                    leftPadding: 4
-                    readOnly: !editMemoMode
-                    selectByMouse: true
-                    verticalAlignment: TextEdit.AlignVCenter
-                    wrapMode: TextEdit.NoWrap
+                property bool isProcessing: false
+                property bool isModified: false
 
-                    property bool isProcessing: false
-                    property bool isModified: false
-
-                    onTextChanged: {
-                        isModified = true
-                        if (!isProcessing)
-                            controller.memoModified(memoId, true)
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.RightButton
-                        onClicked: headerContextMenu.popup()
-                    }
-
-                    Menu {
-                        id: headerContextMenu
-                        MenuItem {
-                            text: qsTr("&Undo")
-                            iconName: "edit-undo"
-                            visible: editMemoMode
-                            enabled: headerText.canUndo
-                            onTriggered: headerText.undo()
-                        }
-                        MenuItem {
-                            text: qsTr("&Redo")
-                            iconName: "edit-redo"
-                            visible: editMemoMode
-                            enabled: headerText.canRedo
-                            onTriggered: headerText.redo()
-                        }
-                        MenuSeparator {}
-                        MenuItem {
-                            text: qsTr("Cu&t")
-                            iconName: "edit-cut"
-                            visible: editMemoMode
-                            enabled: headerText.selectionEnd > headerText.selectionStart
-                            onTriggered: headerText.cut()
-                        }
-                        MenuItem {
-                            text: qsTr("&Copy")
-                            iconName: "edit-copy"
-                            enabled: headerText.selectionEnd > headerText.selectionStart
-                            onTriggered: headerText.copy()
-                        }
-                        MenuItem {
-                            text: qsTr("&Paste")
-                            iconName: "edit-paste"
-                            visible: editMemoMode
-                            enabled: headerText.canPaste
-                            onTriggered: headerText.paste()
-                        }
-                        MenuSeparator {}
-                        MenuItem {
-                            text: qsTr("Select &All")
-                            iconName: "edit-select-all"
-                            onTriggered: headerText.selectAll()
-                        }
-                    }
+                onTextChanged: {
+                    isModified = true
+                    if (!isProcessing)
+                        controller.memoModified(memoId, true)
                 }
             }
-
-            RowLayout {
-                id: headerToolbar
-
-                Layout.topMargin: 4
-
-                ToolButton {
-                    visible: !editMemoMode
-                    tooltip: qsTr("Edit memo")
-                    iconSource: "qrc:/toolbar/memo_edit"
-                    onClicked: editMemoMode = true
-                }
-                ToolButton {
-                    visible: editMemoMode
-                    tooltip: qsTr("Save changes")
-                    iconSource: "qrc:/toolbar/memo_save"
-                    onClicked: saveChanges()
-                }
-                ToolButton {
-                    visible: editMemoMode
-                    tooltip: qsTr("Cancel changes")
-                    iconSource: "qrc:/toolbar/memo_cancel"
-                    onClicked: cancelEditing()
-                }
-                ToolButton {
-                    tooltip: qsTr("Close memo")
-                    iconSource: "qrc:/toolbar/memo_close"
-                    onClicked: controller.needToCloseMemo(memoId)
-                }
+            ToolButton {
+                visible: !editMemoMode
+                tooltip: qsTr("Edit memo")
+                iconSource: "qrc:/toolbar/memo_edit"
+                onClicked: editMemoMode = true
+            }
+            ToolButton {
+                visible: editMemoMode
+                tooltip: qsTr("Save changes")
+                iconSource: "qrc:/toolbar/memo_save"
+                onClicked: saveChanges()
+            }
+            ToolButton {
+                visible: editMemoMode
+                tooltip: qsTr("Cancel changes")
+                iconSource: "qrc:/toolbar/memo_cancel"
+                onClicked: cancelEditing()
+            }
+            ToolButton {
+                tooltip: qsTr("Close memo")
+                iconSource: "qrc:/toolbar/memo_close"
+                onClicked: controller.needToCloseMemo(memoId)
             }
         }
 
@@ -234,6 +172,11 @@ Rectangle {
             Layout.bottomMargin: 4
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            style: TextAreaStyle {
+                selectionColor: Appearance.selectionColor()
+                selectedTextColor: Appearance.textColorSelected()
+            }
         }
     }
 }
