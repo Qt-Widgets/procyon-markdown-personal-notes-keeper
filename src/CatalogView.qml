@@ -14,7 +14,9 @@ Rectangle {
     property string selectedTitle: ""
     property string selectedIconSource: ""
 
-    onCatalogModelChanged: if (!catalogModel) __updateSelection(null)
+    onCatalogModelChanged: {
+        if (!catalogModel) __updateSelection(null)
+    }
 
     Connections {
         target: catalog
@@ -76,7 +78,7 @@ Rectangle {
         var iconSource = ""
         if (index) {
             var indexData = catalogModel.data(index)
-            if ("itemId" in indexData) {
+            if (indexData && "itemId" in indexData) {
                 if (indexData.isFolder) {
                     folderId = indexData.itemId
                     iconSource = "qrc:/icon/folder_closed"
@@ -121,11 +123,11 @@ Rectangle {
                 width: 16
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Label {
+            /*Label {
                 text: styleData.value ? styleData.value.itemId : ""
                 color: styleData.selected ? Appearance.textColorSelected() : Appearance.textColorModest()
                 anchors.verticalCenter: parent.verticalCenter
-            }
+            }*/
             Label {
                 text: styleData.value ? styleData.value.itemTitle : ""
                 font.pointSize: Appearance.fontSizeDefaultUI()
@@ -152,10 +154,19 @@ Rectangle {
             onClicked: {
                 if (selectedFolderId > 0) folderContextMenu.popup()
                 else if(selectedMemoId > 0) memoContextMenu.popup()
+                else defaultContextMenu.popup()
             }
         }
 
         TableViewColumn { role: "display" }
+    }
+
+    Menu {
+        id: defaultContextMenu
+        MenuItem {
+            text: qsTr("&New Root Folder...")
+            onTriggered: controller.createFolder(0)
+        }
     }
 
     Menu {

@@ -176,14 +176,14 @@ ApplicationWindow {
             id: fileActions
             Action {
                 id: newCatalogAction
-                text: qsTr("&New...")
+                text: qsTr("New...")
                 iconName: "document-new"
                 shortcut: StandardKey.New
                 onTriggered: newCatalogDialog.open()
             }
             Action {
                 id: openCatalogAction
-                text: qsTr("&Open...")
+                text: qsTr("Open...")
                 tooltip: qsTr("Open catalog")
                 iconName: "document-open"
                 shortcut: StandardKey.Open
@@ -191,13 +191,13 @@ ApplicationWindow {
             }
             Action {
                 id: closeCatalogAction
-                text: qsTr("&Close")
+                text: qsTr("Close")
                 enabled: catalog.isOpened
                 onTriggered: operations.closeCatalog()
             }
             Action {
                 id: quitAppAction
-                text: qsTr("E&xit")
+                text: qsTr("Exit")
                 iconName: "application-exit"
                 shortcut: StandardKey.Quit
                 onTriggered: Qt.quit()
@@ -209,7 +209,7 @@ ApplicationWindow {
             // They clash with built-in shortcuts of TextArea
             Action {
                 id: editUndoAction
-                text: qsTr("&Undo")
+                text: qsTr("Undo")
                 iconName: "edit-undo"
                 //shortcut: StandardKey.Undo -- Ambiguous shortcut overload
                 enabled: activeFocusItem && ("undo" in activeFocusItem)
@@ -218,7 +218,7 @@ ApplicationWindow {
             }
             Action {
                 id: editRedoAction
-                text: qsTr("&Redo")
+                text: qsTr("Redo")
                 iconName: "edit-redo"
                 //shortcut: StandardKey.Redo -- Ambiguous shortcut overload
                 enabled: activeFocusItem && ("redo" in activeFocusItem)
@@ -227,7 +227,7 @@ ApplicationWindow {
             }
             Action {
                 id: editCutAction
-                text: qsTr("Cu&t")
+                text: qsTr("Cut")
                 iconName: "edit-cut"
                 //shortcut: StandardKey.Cut -- Ambiguous shortcut overload
                 enabled: activeFocusItem && ("cut" in activeFocusItem)
@@ -236,7 +236,7 @@ ApplicationWindow {
             }
             Action {
                 id: editCopyAction
-                text: qsTr("&Copy")
+                text: qsTr("Copy")
                 iconName: "edit-copy"
                 //shortcut: StandardKey.Copy -- Ambiguous shortcut overload
                 enabled: activeFocusItem && ("copy" in activeFocusItem)
@@ -244,7 +244,7 @@ ApplicationWindow {
             }
             Action {
                 id: editPasteAction
-                text: qsTr("&Paste")
+                text: qsTr("Paste")
                 iconName: "edit-paste"
                 //shortcut: StandardKey.Paste -- Ambiguous shortcut overload
                 enabled: activeFocusItem && ("paste" in activeFocusItem)
@@ -253,7 +253,7 @@ ApplicationWindow {
             }
             Action {
                 id: editSelectAllAction
-                text: qsTr("Select &All")
+                text: qsTr("Select All")
                 iconName: "edit-select-all"
                 //shortcut: StandardKey.SelectAll -- Ambiguous shortcut overload
                 enabled: activeFocusItem && ("selectAll" in activeFocusItem)
@@ -264,21 +264,21 @@ ApplicationWindow {
             id: viewActions
             Action {
                 id: showOpenedMemosViewAction
-                text: qsTr("&Opened Memos Panel")
+                text: qsTr("Opened Memos Panel")
                 checkable: true
                 checked: true
                 onToggled: openedMemosView.visible = checked
             }
             Action {
                 id: showCatalogViewAction
-                text: qsTr("&Catalog Panel")
+                text: qsTr("Catalog Panel")
                 checkable: true
                 checked: true
                 onToggled: catalogView.visible = checked
             }
             Action {
                 id: showStatusBarAction
-                text: qsTr("&Status Bar")
+                text: qsTr("Status Bar")
                 checkable: true
                 checked: true
                 onToggled: statusBar.visible = checked
@@ -288,25 +288,25 @@ ApplicationWindow {
             id: catalogActions
             Action {
                 id: openMemoAction
-                text: qsTr("&Open Memo")
+                text: qsTr("Open Memo")
                 enabled: catalogView.selectedMemoId > 0
                 onTriggered: controller.openMemo(catalogView.selectedMemoId)
             }
             Action {
                 id: newMemoAction
-                text: qsTr("New &Memo")
+                text: qsTr("New Memo")
                 enabled: catalogView.selectedFolderId > 0
                 onTriggered: catalog.createMemo(catalogView.selectedFolderId)
             }
             Action {
                 id: deleteMemoAction
-                text: qsTr("&Delete Memo")
+                text: qsTr("Delete Memo")
                 enabled: catalogView.selectedMemoId > 0
                 onTriggered: controller.deleteMemo(catalogView.selectedMemoId)
             }
             Action {
                 id: closeMemoAction
-                text: qsTr("&Close Memo")
+                text: qsTr("Close Memo")
                 iconSource: "qrc:/toolbar/memo_close"
                 shortcut: StandardKey.Close
                 enabled: openedMemosView.currentMemoId > 0
@@ -314,13 +314,13 @@ ApplicationWindow {
             }
             Action {
                 id: closeAllMemosAction
-                text: qsTr("Close &All Memos")
+                text: qsTr("Close All Memos")
                 enabled: openedMemosView.currentMemoId > 0
                 onTriggered: operations.closeAllMemos()
             }
             Action {
                 id: editMemoAction
-                text: qsTr("&Edit Memo")
+                text: qsTr("Edit Memo")
                 iconSource: "qrc:/toolbar/memo_edit"
                 shortcut: "Return,Return"
                 enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
@@ -328,7 +328,7 @@ ApplicationWindow {
             }
             Action {
                 id: saveMemoAction
-                text: qsTr("&Save Memo")
+                text: qsTr("Save Memo")
                 iconSource: "qrc:/toolbar/memo_save"
                 shortcut: StandardKey.Save
                 enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
@@ -344,25 +344,25 @@ ApplicationWindow {
             }
             Action {
                 id: makeTopLevelFolderAction
-                text: qsTr("New &Top Level Folder...")
+                text: qsTr("New Root Folder...")
                 enabled: catalog.isOpened
                 onTriggered: controller.createFolder(0)
             }
             Action {
                 id: makeFolderAction
-                text: qsTr("New &Folder...")
+                text: qsTr("New Folder...")
                 enabled: catalogView.selectedFolderId > 0
                 onTriggered: controller.createFolder(catalogView.selectedFolderId)
             }
             Action {
                 id: renameFolderAction
-                text: qsTr("&Rename Folder...")
+                text: qsTr("Rename Folder...")
                 enabled: catalogView.selectedFolderId > 0
                 onTriggered: controller.renameFolder(catalogView.selectedFolderId)
             }
             Action {
                 id: deleteFolderAction
-                text: qsTr("Delete F&older")
+                text: qsTr("Delete Folder")
                 enabled: catalogView.selectedFolderId > 0
                 onTriggered: controller.deleteFolder(catalogView.selectedFolderId)
             }
@@ -390,7 +390,7 @@ ApplicationWindow {
         id: mainMenu
         Menu {
             id: fileMenu
-            title: qsTr("&File")
+            title: qsTr("File")
             MenuItem { action: newCatalogAction }
             MenuItem { action: openCatalogAction }
             MenuItem { action: closeCatalogAction }
@@ -425,7 +425,7 @@ ApplicationWindow {
         }
         Menu {
             id: editMenu
-            title: qsTr("&Edit")
+            title: qsTr("Edit")
             MenuItem { action: editUndoAction }
             MenuItem { action: editRedoAction }
             MenuSeparator {}
@@ -437,14 +437,14 @@ ApplicationWindow {
         }
         Menu {
             id: viewMenu
-            title: qsTr("&View")
+            title: qsTr("View")
             MenuItem { action: showOpenedMemosViewAction }
             MenuItem { action: showCatalogViewAction }
             MenuItem { action: showStatusBarAction }
         }
         Menu {
             id: catalogMenu
-            title: qsTr("&Catalog")
+            title: qsTr("Catalog")
             MenuItem { action: makeTopLevelFolderAction }
             MenuItem { action: makeFolderAction }
             MenuItem { action: renameFolderAction }
@@ -463,7 +463,7 @@ ApplicationWindow {
         }
         Menu {
             id: optionsMenu
-            title: qsTr("&Options")
+            title: qsTr("Options")
             MenuItem { action: chooseMemoFontAction }
             MenuItem { action: memoWordWrapAction }
         }
@@ -471,6 +471,7 @@ ApplicationWindow {
 
     statusBar: StatusBar {
         id: statusBar
+        visible: !catalog.isOpened
 
         RowLayout {
             anchors.fill: parent
