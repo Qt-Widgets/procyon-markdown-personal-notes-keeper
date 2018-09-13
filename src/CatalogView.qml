@@ -153,8 +153,8 @@ Rectangle {
             acceptedButtons: Qt.RightButton
             onClicked: {
                 if (selectedFolderId > 0) folderContextMenu.popup()
-                else if(selectedMemoId > 0) memoContextMenu.popup()
-                else defaultContextMenu.popup()
+                else if (selectedMemoId > 0) memoContextMenu.popup()
+                else if (catalog.isOpened) defaultContextMenu.popup()
             }
         }
 

@@ -100,6 +100,8 @@ QString CatalogHandler::urlToFileName(const QUrl &fileUrl) const
 
 void CatalogHandler::newCatalog(const QUrl &fileUrl)
 {
+    qInfo() << "Creating catalog" << fileUrl;
+
     auto fileName = urlToFileName(fileUrl);
     if (fileName.isEmpty())
     {
@@ -117,6 +119,8 @@ void CatalogHandler::newCatalog(const QUrl &fileUrl)
 
 void CatalogHandler::loadCatalogUrl(const QUrl &fileUrl)
 {
+    qInfo() << "Loading catalog from url" << fileUrl;
+
     auto fileName = urlToFileName(fileUrl);
     if (fileName.isEmpty())
     {
@@ -129,6 +133,8 @@ void CatalogHandler::loadCatalogUrl(const QUrl &fileUrl)
 
 void CatalogHandler::loadCatalogFile(const QString &fileName)
 {
+    qInfo() << "Loading catalog from file" << fileName;
+
     if (fileName.isEmpty())
     {
         qWarning() << "Filename is not set";

@@ -46,16 +46,6 @@ MemoItem::~MemoItem()
 
 //------------------------------------------------------------------------------
 
-QString Catalog::fileFilter()
-{
-    return tr("Procyon Memo Catalogs (*.enot);;All files (*.*)");
-}
-
-QString Catalog::defaultFileExt()
-{
-    return QStringLiteral("enot");
-}
-
 CatalorResult Catalog::open(const QString& fileName)
 {
     QString res = CatalogStore::openDatabase(fileName);

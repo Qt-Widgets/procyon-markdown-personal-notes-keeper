@@ -18,6 +18,7 @@ ApplicationWindow {
     color: Appearance.baseColor()
 
     property bool forceClosing: false
+    property var recentFolder: openCatalogDialog.shortcuts.documents
 
     Settings {
         category: "MainWindow"
@@ -30,6 +31,11 @@ ApplicationWindow {
         property alias catalogViewWidth: catalogView.width
         property alias catalogViewVisible: showCatalogViewAction.checked
         property alias statusBarVisible: showStatusBarAction.checked
+    }
+
+    Settings {
+        category: "State"
+        property alias recentFolder: mainWindow.recentFolder
     }
 
     CatalogHandler {
@@ -64,6 +70,9 @@ ApplicationWindow {
         catalog.loadSettings()
 
         memoWordWrapAction.checked = catalog.memoWordWrap
+
+        openCatalogDialog.folder = mainWindow.recentFolder
+        newCatalogDialog.folder = mainWindow.recentFolder
 
         if (catalog.recentFile)
             operations.loadCatalogFile(catalog.recentFile)
@@ -544,16 +553,20 @@ ApplicationWindow {
         FileDialog {
             id: openCatalogDialog
             nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
-            folder: shortcuts.documents
-            onAccepted: operations.loadCatalogUrl(fileUrl)
+            onAccepted: {
+                mainWindow.recentFolder = folder
+                operations.loadCatalogUrl(fileUrl)
+            }
         }
 
         FileDialog {
             id: newCatalogDialog
             nameFilters: openCatalogDialog.nameFilters
             selectExisting: false
-            folder: shortcuts.documents
-            onAccepted: operations.createNewCatalog(fileUrl)
+            onAccepted: {
+                mainWindow.recentFolder = folder
+                operations.createNewCatalog(fileUrl)
+            }
         }
 
         FontDialog {
