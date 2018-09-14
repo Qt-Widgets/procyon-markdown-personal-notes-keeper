@@ -93,6 +93,12 @@ Rectangle {
         controller.memoModified(memoId, false)
     }
 
+    function toggleFocus() {
+        if (headerText.focus)
+            textArea.focus = true
+        else headerText.focus = true
+    }
+
     ColumnLayout {
         anchors.fill: parent
 

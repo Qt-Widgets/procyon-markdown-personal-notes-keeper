@@ -165,7 +165,7 @@ Rectangle {
                     spacing: 3
 
                     Label {
-                        text: model.memoTitle
+                        text: model.memoTitle /*+ " <i>(" + model.memoId + ")</i>"*/
                         color: memoItemDelegate.selected ? Appearance.textColorSelected() : Appearance.textColor()
                         font.pointSize: Appearance.fontSizeDefaultUI()
                         font.bold: memoItemDelegate.selected

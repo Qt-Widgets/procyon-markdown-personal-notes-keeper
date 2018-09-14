@@ -136,7 +136,7 @@ ApplicationWindow {
 
             var activeMemoId = session.activeMemo
             if (activeMemoId > 0)
-                openedMemosView.currentMemoId = activeMemoId
+                controller.openMemo(activeMemoId)
         }
 
         function storeSession() {
@@ -176,6 +176,14 @@ ApplicationWindow {
                 console.log("TODO show dialog with multi-selector")
                 if (onAccept) onAccept()
             }
+        }
+    }
+
+    Shortcut {
+        sequence: "F2"
+        onActivated: {
+            if (memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode)
+                memoPagesView.currentMemoPage.toggleFocus()
         }
     }
 
