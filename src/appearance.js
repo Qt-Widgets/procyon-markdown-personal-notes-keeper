@@ -1,27 +1,31 @@
 .pragma library
 
 function baseColor() {
-    return "Gainsboro";
+    return "Gainsboro"
 }
 
 function editorColor() {
-    return "White";
+    return "White"
 }
 
 function selectionColor() {
-    return "SteelBlue";
+    return "SteelBlue"
+}
+
+function hoverColor() {
+    return "AliceBlue"
 }
 
 function textColor() {
-    return "Black";
+    return "Black"
 }
 
 function textColorSelected() {
-    return "White";
+    return "White"
 }
 
 function textColorModest() {
-    return "Gray";
+    return "Gray"
 }
 
 function fontSizeDefaultUI() {

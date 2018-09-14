@@ -118,11 +118,14 @@ Rectangle {
             id: memoItemDelegate
             width: parent.width
             height: 40
-            color: ListView.isCurrentItem ? Appearance.selectionColor() : Appearance.editorColor()
+            color: ListView.isCurrentItem ? Appearance.selectionColor() : (
+                itemMouseArea.containsMouse ? Appearance.hoverColor() : Appearance.editorColor())
             property bool selected: ListView.isCurrentItem
 
             MouseArea {
+                id: itemMouseArea
                 anchors.fill: parent
+                hoverEnabled: true
                 onClicked: memosListView.currentIndex = index
             }
 
@@ -183,6 +186,7 @@ Rectangle {
                 ColumnLayout {
                     Image {
                         id: closeButton
+                        visible: itemMouseArea.containsMouse || model.memoId === currentMemoId
                         source: "qrc:/toolbar/memo_close"
                         Layout.preferredHeight: 16
                         Layout.preferredWidth: 16
