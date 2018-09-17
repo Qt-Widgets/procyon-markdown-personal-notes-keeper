@@ -106,6 +106,9 @@ Rectangle {
         document.isMemoModified = modified
         document.isMemoProcessing = false
 
+        // HACK: TextArea doesn't repaint itself after highlighter has changed
+        // and explicit call to TextArea.update() doesn't help too.
+        // So do some complex to force repainting
         var selStart = textArea.selectionStart
         var selEnd = textArea.selectionEnd
         var curPos = textArea.cursorPosition

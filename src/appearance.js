@@ -1,5 +1,9 @@
 .pragma library
 
+function transparentColor() {
+    return "#00FFFFFF"
+}
+
 function baseColor() {
     return "Gainsboro"
 }
@@ -14,6 +18,10 @@ function selectionColor() {
 
 function hoverColor() {
     return "AliceBlue"
+}
+
+function hoverColorTransparent() {
+    return "#154682B4" // transparent SteelBlue
 }
 
 function borderColorLight() {

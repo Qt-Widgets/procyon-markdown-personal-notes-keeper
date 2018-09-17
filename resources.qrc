@@ -8,6 +8,9 @@
         <file>src/MemoPagesView.qml</file>
         <file>src/MainController.qml</file>
     </qresource>
+    <qresource prefix="/misc">
+        <file alias="background">img/background.png</file>
+    </qresource>
     <qresource prefix="/icon">
         <file alias="main">img/icon/main.svg</file>
         <file alias="folder_opened">img/icon/folder_opened.svg</file>

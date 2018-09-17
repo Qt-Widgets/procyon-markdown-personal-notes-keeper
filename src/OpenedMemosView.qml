@@ -31,6 +31,14 @@ Rectangle {
         }
     }
 
+    Image {
+        source: "qrc:/misc/background"
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        height: 256
+        width: 256
+    }
+
     Connections {
         target: controller
 
@@ -108,6 +116,7 @@ Rectangle {
         anchors.fill: parent
         focus: true
 
+
         onCurrentIndexChanged: {
             var memoId = __getMemoId(currentIndex)
             if (memoId > 0 &&  memoId !== currentMemoId)
@@ -119,7 +128,7 @@ Rectangle {
             width: parent.width
             height: 40
             color: ListView.isCurrentItem ? Appearance.selectionColor() : (
-                itemMouseArea.containsMouse ? Appearance.hoverColor() : Appearance.editorColor())
+                itemMouseArea.containsMouse ? Appearance.hoverColorTransparent() : Appearance.transparentColor())
             property bool selected: ListView.isCurrentItem
 
             MouseArea {
@@ -134,7 +143,7 @@ Rectangle {
 
                 Rectangle {
                     id: iconPlace
-                    color: memoItemDelegate.color
+                    color: Appearance.transparentColor()
                     Layout.preferredHeight: 40
                     Layout.preferredWidth: 36
                     Layout.leftMargin: 0
