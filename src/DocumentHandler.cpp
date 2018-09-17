@@ -29,13 +29,13 @@ void DocumentHandler::setTarget(QQuickItem *target)
     }
 }
 
-void DocumentHandler::applyTextStyles()
+void DocumentHandler::applyTextStyles(bool rehighlight)
 {
     if (!_doc) return;
     _doc->setUndoRedoEnabled(false);
     processHyperlinks();
     // Should be applied after hyperlinks to get correct finish style.
-    applyHighlighter();
+    applyHighlighter(rehighlight);
     _doc->setUndoRedoEnabled(true);
 }
 
@@ -63,7 +63,7 @@ void DocumentHandler::processHyperlinks()
     }
 }
 
-void DocumentHandler::applyHighlighter()
+void DocumentHandler::applyHighlighter(bool rehighlight)
 {
     auto text = _doc->toPlainText();
 
@@ -75,6 +75,9 @@ void DocumentHandler::applyHighlighter()
         _highlighter.reset(new ShellMemoSyntaxHighlighter(_doc));
     else
         _highlighter.reset();
+
+    if (rehighlight && _highlighter)
+        _highlighter->rehighlight();
 }
 
 bool DocumentHandler::isMemoModified() const

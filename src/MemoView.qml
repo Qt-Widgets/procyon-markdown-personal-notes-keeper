@@ -99,6 +99,21 @@ Rectangle {
         else headerText.focus = true
     }
 
+    function updateHighlight() {
+        var modified = document.isMemoModified
+        document.isMemoProcessing = true
+        document.applyTextStyles(true)
+        document.isMemoModified = modified
+        document.isMemoProcessing = false
+
+        var selStart = textArea.selectionStart
+        var selEnd = textArea.selectionEnd
+        var curPos = textArea.cursorPosition
+        textArea.selectAll()
+        textArea.select(selStart, selEnd)
+        textArea.cursorPosition = curPos
+    }
+
     ColumnLayout {
         anchors.fill: parent
 
@@ -148,6 +163,11 @@ Rectangle {
                 tooltip: qsTr("Cancel changes")
                 iconSource: "qrc:/toolbar/memo_cancel"
                 onClicked: cancelEditing()
+            }
+            Rectangle {
+                width: 2
+                height: 24
+                border.color: Appearance.borderColorLight()
             }
             ToolButton {
                 tooltip: qsTr("Close memo")

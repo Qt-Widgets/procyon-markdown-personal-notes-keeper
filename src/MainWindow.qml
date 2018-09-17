@@ -322,19 +322,32 @@ ApplicationWindow {
                 onTriggered: controller.deleteMemo(catalogView.selectedMemoId)
             }
             Action {
-                id: closeMemoAction
-                text: qsTr("Close Memo")
-                iconSource: "qrc:/toolbar/memo_close"
-                shortcut: StandardKey.Close
-                enabled: openedMemosView.currentMemoId > 0
-                onTriggered: operations.closeMemo(openedMemosView.currentMemoId)
+                id: makeTopLevelFolderAction
+                text: qsTr("New Root Folder...")
+                enabled: catalog.isOpened
+                onTriggered: controller.createFolder(0)
             }
             Action {
-                id: closeAllMemosAction
-                text: qsTr("Close All Memos")
-                enabled: openedMemosView.currentMemoId > 0
-                onTriggered: operations.closeAllMemos()
+                id: makeFolderAction
+                text: qsTr("New Folder...")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.createFolder(catalogView.selectedFolderId)
             }
+            Action {
+                id: renameFolderAction
+                text: qsTr("Rename Folder...")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.renameFolder(catalogView.selectedFolderId)
+            }
+            Action {
+                id: deleteFolderAction
+                text: qsTr("Delete Folder")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.deleteFolder(catalogView.selectedFolderId)
+            }
+        }
+        Item {
+            id: memoActions
             Action {
                 id: editMemoAction
                 text: qsTr("Edit Memo")
@@ -360,28 +373,24 @@ ApplicationWindow {
                 onTriggered: memoPagesView.currentMemoPage.cancelEditing()
             }
             Action {
-                id: makeTopLevelFolderAction
-                text: qsTr("New Root Folder...")
-                enabled: catalog.isOpened
-                onTriggered: controller.createFolder(0)
+                id: highlightMemoAction
+                text: qsTr("Update Highlight")
+                enabled: memoPagesView.currentMemoPage
+                onTriggered: memoPagesView.currentMemoPage.updateHighlight()
             }
             Action {
-                id: makeFolderAction
-                text: qsTr("New Folder...")
-                enabled: catalogView.selectedFolderId > 0
-                onTriggered: controller.createFolder(catalogView.selectedFolderId)
+                id: closeMemoAction
+                text: qsTr("Close Memo")
+                iconSource: "qrc:/toolbar/memo_close"
+                shortcut: StandardKey.Close
+                enabled: openedMemosView.currentMemoId > 0
+                onTriggered: operations.closeMemo(openedMemosView.currentMemoId)
             }
             Action {
-                id: renameFolderAction
-                text: qsTr("Rename Folder...")
-                enabled: catalogView.selectedFolderId > 0
-                onTriggered: controller.renameFolder(catalogView.selectedFolderId)
-            }
-            Action {
-                id: deleteFolderAction
-                text: qsTr("Delete Folder")
-                enabled: catalogView.selectedFolderId > 0
-                onTriggered: controller.deleteFolder(catalogView.selectedFolderId)
+                id: closeAllMemosAction
+                text: qsTr("Close All Memos")
+                enabled: openedMemosView.currentMemoId > 0
+                onTriggered: operations.closeAllMemos()
             }
         }
         Item {
@@ -470,10 +479,15 @@ ApplicationWindow {
             MenuItem { action: openMemoAction }
             MenuItem { action: newMemoAction }
             MenuItem { action: deleteMemoAction }
-            MenuSeparator {}
+        }
+        Menu {
+            id: memoMenu
+            title: qsTr("Memo")
             MenuItem { action: editMemoAction }
             MenuItem { action: saveMemoAction }
             MenuItem { action: cancelMemoAction }
+            MenuSeparator {}
+            MenuItem { action: highlightMemoAction }
             MenuSeparator {}
             MenuItem { action: closeMemoAction }
             MenuItem { action: closeAllMemosAction }

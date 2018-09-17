@@ -16,6 +16,10 @@ function hoverColor() {
     return "AliceBlue"
 }
 
+function borderColorLight() {
+    return "Silver"
+}
+
 function textColor() {
     return "Black"
 }

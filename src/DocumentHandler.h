@@ -32,7 +32,7 @@ signals:
     void documentModified(bool changed);
 
 public slots:
-    void applyTextStyles();
+    void applyTextStyles(bool rehighlight = false);
 
 private:
     QQuickItem *_target;
@@ -41,7 +41,7 @@ private:
     bool _isMemoProcessing = false;
 
     void processHyperlinks();
-    void applyHighlighter();
+    void applyHighlighter(bool rehighlight);
 };
 
 #endif // DOCUMENTHANDLER_H
