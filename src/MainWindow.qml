@@ -76,56 +76,16 @@ ApplicationWindow {
         memoWordWrapMenuItem.checked = catalog.memoWordWrap
 
         if (catalog.recentFile)
-            operations.loadCatalogFile(catalog.recentFile)
+            controller.loadCatalogFile(catalog.recentFile)
     }
 
     onClosing: {
         if (!forceClosing) {
             close.accepted = false
             catalog.saveSettings()
-            operations.closeCatalog(function() {
+            controller.closeCatalog(function() {
                 forceClosing = true
                 mainWindow.close()
-            })
-        }
-    }
-
-    Item {
-        id: operations
-
-        function createNewCatalog(fileUrl) {
-            closeCatalog(function() {
-                catalog.newCatalog(fileUrl)
-            });
-        }
-
-        function loadCatalogFile(fileName) {
-            if (!catalog.sameFile(fileName)) {
-                closeCatalog(function() {
-                    catalog.loadCatalogFile(fileName)
-                    controller.__restoreSession()
-                })
-            }
-        }
-
-        function loadCatalogUrl(fileUrl) {
-            if (!catalog.sameUrl(fileUrl)) {
-                closeCatalog(function() {
-                    catalog.loadCatalogUrl(fileUrl)
-                    controller.__restoreSession()
-                })
-            }
-        }
-
-        function closeCatalog(onAccept) {
-            if (!catalog.isOpened) {
-                onAccept()
-                return
-            }
-            controller.__storeSession()
-            controller.closeAllMemos(function() {
-                catalog.closeCatalog()
-                onAccept()
             })
         }
     }
@@ -158,7 +118,7 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("Close")
                 enabled: catalog.isOpened
-                onTriggered: operations.closeCatalog()
+                onTriggered: controller.closeCatalog()
             }
             Menu {
                 id: mruFileMenu
@@ -167,7 +127,7 @@ ApplicationWindow {
                     model: catalog.recentFilesModel
                     MenuItem {
                         text: modelData
-                        onTriggered: operations.loadCatalogFile(text)
+                        onTriggered: controller.loadCatalogFile(text)
                     }
                     onObjectAdded: mruFileMenu.insertItem(index, object)
                     onObjectRemoved: mruFileMenu.removeItem(object)
@@ -455,7 +415,7 @@ ApplicationWindow {
             nameFilters: [qsTr("Procyon Memo Catalogs (*.enot)"), qsTr("All files (*.*)")]
             onAccepted: {
                 mainWindow.recentFolder = folder
-                operations.loadCatalogUrl(fileUrl)
+                controller.loadCatalogUrl(fileUrl)
             }
         }
 
@@ -465,7 +425,7 @@ ApplicationWindow {
             selectExisting: false
             onAccepted: {
                 mainWindow.recentFolder = folder
-                operations.createNewCatalog(fileUrl)
+                controller.createNewCatalog(fileUrl)
             }
         }
 

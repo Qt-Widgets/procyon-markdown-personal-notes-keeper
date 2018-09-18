@@ -29,6 +29,42 @@ Item {
         onMemoDeleted: memoClosed(memoId)
     }
 
+    function createNewCatalog(fileUrl) {
+        closeCatalog(function() {
+            catalog.newCatalog(fileUrl)
+        });
+    }
+
+    function loadCatalogFile(fileName) {
+        if (!catalog.sameFile(fileName)) {
+            closeCatalog(function() {
+                catalog.loadCatalogFile(fileName)
+                __restoreSession()
+            })
+        }
+    }
+
+    function loadCatalogUrl(fileUrl) {
+        if (!catalog.sameUrl(fileUrl)) {
+            closeCatalog(function() {
+                catalog.loadCatalogUrl(fileUrl)
+                __restoreSession()
+            })
+        }
+    }
+
+    function closeCatalog(onAccept) {
+        if (!catalog.isOpened) {
+            onAccept()
+            return
+        }
+        __storeSession()
+        closeAllMemos(function() {
+            catalog.closeCatalog()
+            onAccept()
+        })
+    }
+
     function makePath(itemPath, itemTitle) {
         var path = itemPath.length ? (itemPath + "/") : ""
         var title = itemTitle.length ? itemTitle : ("&lt;" + qsTr("Untitled") + "&gt;")
