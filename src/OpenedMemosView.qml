@@ -61,6 +61,8 @@ Rectangle {
                 memosListModel.remove(index, 1)
                 memosListView.currentIndex = Math.min(memosListModel.count-1, index)
                 currentMemoId = __getMemoId(memosListView.currentIndex)
+                if (currentMemoId > 0)
+                    controller.openMemo(currentMemoId)
             }
         }
 

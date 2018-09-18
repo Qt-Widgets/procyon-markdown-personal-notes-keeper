@@ -36,14 +36,21 @@ TabView {
 
         onMemoClosed: {
             var index = __getTabIndex(memoId)
-            if (index > -1)
+            if (index > -1) {
                 // TODO: tons of warnings about invalid parent are occurred here, don't know how to fix
                 removeTab(index)
+                currentIndex = -1
+                currentMemoId = 0
+                currentMemoPage = null
+            }
         }
 
         onAllMemosClosed: {
             while (count > 0)
                 removeTab(count-1)
+            currentIndex = -1
+            currentMemoId = 0
+            currentMemoPage = null
         }
     }
 

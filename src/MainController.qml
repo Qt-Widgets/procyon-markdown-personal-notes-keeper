@@ -9,6 +9,10 @@ import "appearance.js" as Appearance
 Item {
     property CatalogHandler catalog: null
 
+    // functions to be injected
+    property var isMemoModified // function(memoId)
+    property var saveModifiedMemo // function(memoId)
+
     signal memoOpened(int memoId)
     signal needToCloseMemo(int memoId)
     signal memoClosed(int memoId)

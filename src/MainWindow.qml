@@ -56,6 +56,8 @@ ApplicationWindow {
         id: controller
         catalog: catalog
         onNeedToCloseMemo: operations.closeMemo(memoId)
+        isMemoModified: memoPagesView.isMemoModified
+        saveModifiedMemo: memoPagesView.saveMemo
     }
 
     Component.onCompleted: {
@@ -149,9 +151,9 @@ ApplicationWindow {
 
         function closeMemo(memoId) {
             if (memoId > 0) {
-                if (memoPagesView.isMemoModified(memoId))
+                if (controller.isMemoModified(memoId))
                     saveAndCloseMemoDialog.show(memoId,
-                                                memoPagesView.saveMemo,
+                                                controller.saveMemo,
                                                 controller.memoClosed)
                 else
                     controller.memoClosed(memoId)
