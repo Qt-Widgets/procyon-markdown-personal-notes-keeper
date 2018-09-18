@@ -26,7 +26,6 @@ class CatalogHandler : public QObject
     Q_PROPERTY(bool hasRecentFiles READ hasRecentFiles NOTIFY recentFilesChanged)
     Q_PROPERTY(QString recentFile READ recentFile NOTIFY recentFilesChanged)
     Q_PROPERTY(QFont memoFont READ memoFont WRITE setMemoFont NOTIFY memoFontChanged)
-    Q_PROPERTY(bool memoWordWrap READ memoWordWrap WRITE setMemoWordWrap NOTIFY memoWordWrapChanged)
 
 public:
     explicit CatalogHandler(QObject *parent = nullptr);
@@ -42,8 +41,6 @@ public:
     QString recentFile() const { return _recentFile; }
     QFont memoFont() const { return _memoFont; }
     void setMemoFont(const QFont& font);
-    bool memoWordWrap() const { return _memoWordWrap; }
-    void setMemoWordWrap(bool on);
 
 signals:
     void dummyNotify() const;
@@ -55,7 +52,6 @@ signals:
     void recentFilesChanged() const;
     void isOpenedChanged() const;
     void memoFontChanged() const;
-    void memoWordWrapChanged() const;
     void memoChanged(const QMap<QString, QVariant>& memoData) const;
     void folderRenamed(int folderId) const;
     void memoCreated(int memoId) const;
@@ -101,7 +97,6 @@ private:
     QStringList _recentFiles;
     QString _recentFile;
     QFont _memoFont;
-    bool _memoWordWrap;
 
     void catalogOpened(Catalog *catalog);
     void addToRecent(const QString &fileName);

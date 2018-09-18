@@ -59,6 +59,10 @@ ApplicationWindow {
         saveMemo: memoPagesView.saveMemo
     }
 
+    Options {
+        id: options
+    }
+
     Component.onCompleted: {
         // We can't restore visibility of these components automatically
         // because they are on a splitter and it restores their visibility
@@ -71,9 +75,9 @@ ApplicationWindow {
         openCatalogDialog.folder = mainWindow.recentFolder
         newCatalogDialog.folder = mainWindow.recentFolder
 
-        catalog.loadSettings()
+        memoWordWrapMenuItem.checked = options.memoWordWrap
 
-        memoWordWrapMenuItem.checked = catalog.memoWordWrap
+        catalog.loadSettings()
 
         if (catalog.recentFile)
             controller.loadCatalogFile(catalog.recentFile)
@@ -331,7 +335,7 @@ ApplicationWindow {
                 id: memoWordWrapMenuItem
                 text: qsTr("Word Wrap")
                 checkable: true
-                onToggled: catalog.memoWordWrap = checked
+                onToggled: options.memoWordWrap = checked
             }
         }
     }
@@ -384,6 +388,7 @@ ApplicationWindow {
 
         MemoPagesView {
             id: memoPagesView
+            options: options
             catalog: catalog
             controller: controller
             Layout.fillWidth: true

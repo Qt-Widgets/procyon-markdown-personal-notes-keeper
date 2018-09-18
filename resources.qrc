@@ -7,6 +7,7 @@
         <file>src/OpenedMemosView.qml</file>
         <file>src/MemoPagesView.qml</file>
         <file>src/MainController.qml</file>
+        <file>src/Options.qml</file>
     </qresource>
     <qresource prefix="/misc">
         <file alias="background">img/background.png</file>

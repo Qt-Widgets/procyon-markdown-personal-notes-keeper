@@ -8,8 +8,9 @@ TabView {
     tabsVisible: false
     frameVisible: false
 
-    property CatalogHandler catalog: null
-    property MainController controller: null
+    property Options options
+    property CatalogHandler catalog
+    property MainController controller
     property Component memoViewComponent: null
     property MemoView currentMemoPage: null
     property int currentMemoId: 0
@@ -23,6 +24,7 @@ TabView {
             if (index < 0) {
                 var tab = addTab(memoId, __getMemoViewComponent())
                 tab.active = true // force memo view creation
+                tab.item.options = options
                 tab.item.catalog = catalog
                 tab.item.controller = controller
                 tab.item.memoId = memoId

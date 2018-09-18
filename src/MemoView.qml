@@ -13,14 +13,20 @@ Rectangle {
 
     property int memoId: 0
     property bool editMemoMode: false
-    property CatalogHandler catalog: null
-    property MainController controller: null
+    property Options options
+    property CatalogHandler catalog
+    property MainController controller
+
+    DocumentHandler {
+        id: document
+        target: textArea
+        onDocumentModified: controller.memoModified(memoId, changed)
+    }
 
     Connections {
         target: catalog
 
-        onMemoFontChanged: textArea.font = catalog.memoFont
-        onMemoWordWrapChanged: textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
+        onMemoFontChanged: __applyMemoFont()
 
         onFolderRenamed: {
             // TODO: We can't say if the memo is in one of subfolders
@@ -30,15 +36,25 @@ Rectangle {
         }
     }
 
-    DocumentHandler {
-        id: document
-        target: textArea
-        onDocumentModified: controller.memoModified(memoId, changed)
+    Connections {
+        target: options
+        onMemoWordWrapChanged: __applyMemoWordWrap()
+    }
+
+    onOptionsChanged: {
+        __applyMemoWordWrap()
     }
 
     onCatalogChanged: {
+        __applyMemoFont()
+    }
+
+    function __applyMemoWordWrap() {
+        textArea.wrapMode = options.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
+    }
+
+    function __applyMemoFont() {
         textArea.font = catalog.memoFont
-        textArea.wrapMode = catalog.memoWordWrap ? TextEdit.Wrap : TextEdit.NoWrap
     }
 
     function loadMemo() {

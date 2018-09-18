@@ -43,7 +43,6 @@ void CatalogHandler::loadSettings()
 
     s.beginGroup("View");
     _memoFont = qvariant_cast<QFont>(s.value("memoFont", QFont("Arial", 12)));
-    _memoWordWrap = s.value("wordWrap", false).toBool();
     s.endGroup();
 }
 
@@ -63,7 +62,6 @@ void CatalogHandler::saveSettings()
 
     s.beginGroup("View");
     s.setValue("memoFont", _memoFont);
-    s.setValue("wordWrap", _memoWordWrap);
     s.endGroup();
 }
 
@@ -451,10 +449,4 @@ void CatalogHandler::setMemoFont(const QFont& font)
 {
     _memoFont = font;
     emit memoFontChanged();
-}
-
-void CatalogHandler::setMemoWordWrap(bool on)
-{
-    _memoWordWrap = on;
-    emit memoWordWrapChanged();
 }
