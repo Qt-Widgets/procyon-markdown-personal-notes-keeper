@@ -10,14 +10,21 @@ Item {
     property CatalogHandler catalog: null
 
     // functions to be injected
-    property var isMemoModified // function(memoId)
-    property var saveModifiedMemo // function(memoId)
+    property var isMemoModified // bool function(memoId)
+    property var getModifiedMemos // int[] function()
+    property var saveMemo // void function(memoId)
 
     signal memoOpened(int memoId)
-    signal needToCloseMemo(int memoId)
     signal memoClosed(int memoId)
     signal allMemosClosed()
     signal memoModified(int memoId, bool modified)
+
+    Connections {
+        target: catalog
+        onError: __showDialog(errorDialog, message)
+        onInfo: __showDialog(infoDialog, message)
+        onMemoDeleted: memoClosed(memoId)
+    }
 
     function makePath(itemPath, itemTitle) {
         var path = itemPath.length ? (itemPath + "/") : ""
@@ -58,6 +65,34 @@ Item {
                 makePath(info.folderPath, info.folderTitle),
                 function() { catalog.deleteFolder(folderId) }
             )
+    }
+
+    function closeMemo(memoId) {
+        if (memoId < 1) return
+        if (isMemoModified(memoId))
+            saveAndCloseMemoDialog.show(memoId, saveMemo, memoClosed)
+        else
+            memoClosed(memoId)
+    }
+
+    function closeAllMemos(onAccept) {
+        var changedMemos = getModifiedMemos()
+        if (changedMemos.length === 0) {
+            allMemosClosed()
+            if (onAccept) onAccept()
+        }
+        else if (changedMemos.length === 1) {
+            saveAndCloseMemoDialog.show(changedMemos[0].memoId,
+                                        saveMemo,
+                                        function() {
+                                            allMemosClosed()
+                                            if (onAccept) onAccept()
+                                        })
+        }
+        else {
+            console.log("TODO show dialog with multi-selector")
+            if (onAccept) onAccept()
+        }
     }
 
     function __showDialog(dialog, message) {
@@ -161,5 +196,40 @@ Item {
         }
 
         onYes: deleteMethod()
+    }
+
+    MessageDialog {
+        id: saveAndCloseMemoDialog
+        icon: StandardIcon.Question
+        standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Cancel
+        property int memoId: 0
+        property var saveMethod: null
+        property var closeMethod: null
+
+        function show(memoId, saveMethod, closeMethod) {
+            var info = catalog.getMemoInfo(memoId)
+            text = info.memoPath + "/<b>" + info.memoTitle + "</b><p>" + qsTr("Save changes?")
+            saveAndCloseMemoDialog.memoId = memoId
+            saveAndCloseMemoDialog.saveMethod = saveMethod
+            saveAndCloseMemoDialog.closeMethod = closeMethod
+            visible = true
+        }
+
+        onYes: {
+            if (saveMethod) {
+                var error = saveMethod(memoId)
+                if (error !== "") {
+                    errorDialog.show(error)
+                    return
+                }
+                if (closeMethod)
+                    closeMethod(memoId)
+            }
+        }
+
+        onNo: {
+            if (closeMethod)
+                closeMethod(memoId)
+        }
     }
 }

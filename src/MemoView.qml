@@ -176,7 +176,7 @@ Rectangle {
             ToolButton {
                 tooltip: qsTr("Close memo")
                 iconSource: "qrc:/toolbar/memo_close"
-                onClicked: controller.needToCloseMemo(memoId)
+                onClicked: controller.closeMemo(memoId)
             }
         }
 

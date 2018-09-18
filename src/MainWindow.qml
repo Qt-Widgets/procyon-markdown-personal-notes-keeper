@@ -41,23 +41,21 @@ ApplicationWindow {
     CatalogHandler {
         id: catalog
 
-        onError: errorDialog.show(message)
-        onInfo: infoDialog.show(message)
-
         onMemoCreated: {
             controller.openMemo(memoId)
-            editMemoAction.trigger()
-        }
 
-        onMemoDeleted: controller.memoClosed(memoId)
+            var page = memoPagesView.currentMemoPage
+            if (page && page.memoId == memoId && !page.editMemoMode)
+                page.beginEditing()
+        }
     }
 
     MainController {
         id: controller
         catalog: catalog
-        onNeedToCloseMemo: operations.closeMemo(memoId)
         isMemoModified: memoPagesView.isMemoModified
-        saveModifiedMemo: memoPagesView.saveMemo
+        getModifiedMemos: memoPagesView.getModifiedMemos
+        saveMemo: memoPagesView.saveMemo
     }
 
     Component.onCompleted: {
@@ -124,7 +122,7 @@ ApplicationWindow {
                 return
             }
             storeSession()
-            closeAllMemos(function() {
+            controller.closeAllMemos(function() {
                 catalog.closeCatalog()
                 onAccept()
             })
@@ -147,37 +145,6 @@ ApplicationWindow {
                 activeMemo: openedMemosView.currentMemoId,
                 expandedFolders: catalogView.getExpandedIdsStr()
             })
-        }
-
-        function closeMemo(memoId) {
-            if (memoId > 0) {
-                if (controller.isMemoModified(memoId))
-                    saveAndCloseMemoDialog.show(memoId,
-                                                controller.saveMemo,
-                                                controller.memoClosed)
-                else
-                    controller.memoClosed(memoId)
-            }
-        }
-
-        function closeAllMemos(onAccept) {
-            var changedMemos = memoPagesView.getModifiedMemos()
-            if (changedMemos.length === 0) {
-                controller.allMemosClosed()
-                if (onAccept) onAccept()
-            }
-            else if (changedMemos.length === 1) {
-                saveAndCloseMemoDialog.show(changedMemos[0].memoId,
-                                            memoPagesView.saveMemo,
-                                            function() {
-                                                controller.allMemosClosed()
-                                                if (onAccept) onAccept()
-                                            })
-            }
-            else {
-                console.log("TODO show dialog with multi-selector")
-                if (onAccept) onAccept()
-            }
         }
     }
 
@@ -400,12 +367,12 @@ ApplicationWindow {
                 iconSource: "qrc:/toolbar/memo_close"
                 shortcut: StandardKey.Close
                 enabled: openedMemosView.currentMemoId > 0
-                onTriggered: operations.closeMemo(openedMemosView.currentMemoId)
+                onTriggered: controller.closeMemo(openedMemosView.currentMemoId)
             }
             MenuItem {
                 text: qsTr("Close All Memos")
                 enabled: openedMemosView.currentMemoId > 0
-                onTriggered: operations.closeAllMemos()
+                onTriggered: controller.closeAllMemos()
             }
         }
         Menu {
@@ -523,61 +490,6 @@ ApplicationWindow {
         FontDialog {
             id: memoFontDialog
             onAccepted: catalog.memoFont = font
-        }
-
-        MessageDialog {
-            id: errorDialog
-            icon: StandardIcon.Critical
-
-            function show(message) {
-                text = message
-                visible = true
-            }
-        }
-
-        MessageDialog {
-            id: infoDialog
-            icon: StandardIcon.Information
-
-            function show(message) {
-                text = message
-                visible = true
-            }
-        }
-
-        MessageDialog {
-            id: saveAndCloseMemoDialog
-            icon: StandardIcon.Question
-            standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Cancel
-            property int memoId: 0
-            property var saveMethod: null
-            property var closeMethod: null
-
-            function show(memoId, saveMethod, closeMethod) {
-                var info = catalog.getMemoInfo(memoId)
-                text = info.memoPath + "/<b>" + info.memoTitle + "</b><p>Save changes?"
-                saveAndCloseMemoDialog.memoId = memoId
-                saveAndCloseMemoDialog.saveMethod = saveMethod
-                saveAndCloseMemoDialog.closeMethod = closeMethod
-                visible = true
-            }
-
-            onYes: {
-                if (saveMethod) {
-                    var error = saveMethod(memoId)
-                    if (error !== "") {
-                        errorDialog.show(error)
-                        return
-                    }
-                    if (closeMethod)
-                        closeMethod(memoId)
-                }
-            }
-
-            onNo: {
-                if (closeMethod)
-                    closeMethod(memoId)
-            }
         }
     }
 }

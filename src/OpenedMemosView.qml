@@ -202,7 +202,7 @@ Rectangle {
                         Layout.rightMargin: 3
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: controller.needToCloseMemo(model.memoId)
+                            onClicked: controller.closeMemo(model.memoId)
                         }
                     }
                 }
