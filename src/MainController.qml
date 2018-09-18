@@ -12,7 +12,10 @@ Item {
     // functions to be injected
     property var isMemoModified // bool function(memoId)
     property var getModifiedMemos // int[] function()
+    property var getCurrentMemoId // int function()
     property var saveMemo // void function(memoId)
+    property var storeSessionFuncs: [] // [void function(json)]
+    property var restoreSessionFuncs: [] // [void function(json)]
 
     signal memoOpened(int memoId)
     signal memoClosed(int memoId)
@@ -98,6 +101,26 @@ Item {
     function __showDialog(dialog, message) {
         dialog.text = message
         dialog.visible = true
+    }
+
+    function __restoreSession() {
+        var session = catalog.getStoredSession()
+
+        for (var i = 0; i < restoreSessionFuncs.length; i++)
+            restoreSessionFuncs[i](session)
+
+        openMemo(session.activeMemo)
+    }
+
+    function __storeSession() {
+        var session = {}
+
+        for (var i = 0; i < storeSessionFuncs.length; i++)
+            storeSessionFuncs[i](session)
+
+        session.activeMemo = getCurrentMemoId()
+
+        catalog.storeSession(session)
     }
 
     MessageDialog { id: infoDialog; icon: StandardIcon.Information }

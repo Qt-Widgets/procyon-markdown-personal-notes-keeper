@@ -55,6 +55,7 @@ ApplicationWindow {
         catalog: catalog
         isMemoModified: memoPagesView.isMemoModified
         getModifiedMemos: memoPagesView.getModifiedMemos
+        getCurrentMemoId: function(){ return openedMemosView.currentMemoId }
         saveMemo: memoPagesView.saveMemo
     }
 
@@ -67,12 +68,12 @@ ApplicationWindow {
         openedMemosView.visible = showOpenedMemosViewMenuItem.checked
         statusBar.visible = showStatusBarMenuItem.checked
 
+        openCatalogDialog.folder = mainWindow.recentFolder
+        newCatalogDialog.folder = mainWindow.recentFolder
+
         catalog.loadSettings()
 
         memoWordWrapMenuItem.checked = catalog.memoWordWrap
-
-        openCatalogDialog.folder = mainWindow.recentFolder
-        newCatalogDialog.folder = mainWindow.recentFolder
 
         if (catalog.recentFile)
             operations.loadCatalogFile(catalog.recentFile)
@@ -102,7 +103,7 @@ ApplicationWindow {
             if (!catalog.sameFile(fileName)) {
                 closeCatalog(function() {
                     catalog.loadCatalogFile(fileName)
-                    restoreSession()
+                    controller.__restoreSession()
                 })
             }
         }
@@ -111,7 +112,7 @@ ApplicationWindow {
             if (!catalog.sameUrl(fileUrl)) {
                 closeCatalog(function() {
                     catalog.loadCatalogUrl(fileUrl)
-                    restoreSession()
+                    controller.__restoreSession()
                 })
             }
         }
@@ -121,29 +122,10 @@ ApplicationWindow {
                 onAccept()
                 return
             }
-            storeSession()
+            controller.__storeSession()
             controller.closeAllMemos(function() {
                 catalog.closeCatalog()
                 onAccept()
-            })
-        }
-
-        function restoreSession() {
-            var session = catalog.getStoredSession()
-
-            openedMemosView.setAllIdsStr(session.openedMemos)
-            catalogView.setExpandedIdsStr(session.expandedFolders)
-
-            var activeMemoId = session.activeMemo
-            if (activeMemoId > 0)
-                controller.openMemo(activeMemoId)
-        }
-
-        function storeSession() {
-            catalog.storeSession({
-                openedMemos: openedMemosView.getAllIdsStr(),
-                activeMemo: openedMemosView.currentMemoId,
-                expandedFolders: catalogView.getExpandedIdsStr()
             })
         }
     }

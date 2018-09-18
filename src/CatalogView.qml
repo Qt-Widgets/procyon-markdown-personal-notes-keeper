@@ -24,18 +24,20 @@ Rectangle {
         onNeedSelectIndex: catalogSelector.setCurrentIndex(index, ItemSelectionModel.ClearAndSelect)
     }
 
-    function getExpandedIdsStr() {
-        var expandedIds = []
-        __getExpandedIds(null, expandedIds)
-        return expandedIds.join(';')
-    }
+    Component.onCompleted: {
+        controller.storeSessionFuncs.push(function(session){
+            var expandedIds = []
+            __getExpandedIds(null, expandedIds)
+            session.expandedFolders = expandedIds.join(';')
+        })
 
-    function setExpandedIdsStr(expandedIdsStr) {
-        var expandedIds = []
-        var expandedStr = expandedIdsStr.split(';')
-        for (var i = 0; i < expandedStr.length; i++)
-            expandedIds.push(parseInt(expandedStr[i]))
-        __setExpandedIds(null, expandedIds)
+        controller.restoreSessionFuncs.push(function(session){
+            var expandedIds = []
+            var expandedStr = session.expandedFolders.split(';')
+            for (var i = 0; i < expandedStr.length; i++)
+                expandedIds.push(parseInt(expandedStr[i]))
+            __setExpandedIds(null, expandedIds)
+        })
     }
 
     function __getExpandedIds(parentIndex, expandedIds) {

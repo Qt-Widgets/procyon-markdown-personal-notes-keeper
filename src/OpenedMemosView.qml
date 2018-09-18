@@ -78,20 +78,22 @@ Rectangle {
         }
     }
 
-    function getAllIdsStr() {
-        var ids = []
-        for (var i = 0; i < memosListModel.count; i++)
-            ids.push(memosListModel.get(i).memoId)
-        return ids.join(';')
-    }
+    Component.onCompleted: {
+        controller.storeSessionFuncs.push(function(session){
+            var memoIds = []
+            for (var i = 0; i < memosListModel.count; i++)
+                memoIds.push(memosListModel.get(i).memoId)
+            session.openedMemos = memoIds.join(';')
+        })
 
-    function setAllIdsStr(idsStr, activeId) {
-        var memoIdsStr = idsStr.split(';')
-        for (var i = 0; i < memoIdsStr.length; i++) {
-            var memoId = parseInt(memoIdsStr[i])
-            if (memoId > 0 && catalog.isValidId(memoId))
-                controller.openMemo(memoId)
-        }
+        controller.restoreSessionFuncs.push(function(session){
+            var memoIds = session.openedMemos.split(';')
+            for (var i = 0; i < memoIds.length; i++) {
+                var memoId = parseInt(memoIds[i])
+                if (memoId > 0 && catalog.isValidId(memoId))
+                    controller.openMemo(memoId)
+            }
+        })
     }
 
     function __getMemoId(index) {
