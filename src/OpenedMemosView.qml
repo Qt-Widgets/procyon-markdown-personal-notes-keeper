@@ -35,8 +35,6 @@ Rectangle {
         source: "qrc:/misc/background"
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        height: 256
-        width: 256
     }
 
     Connections {

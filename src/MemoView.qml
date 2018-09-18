@@ -122,7 +122,6 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.topMargin: 6
 
             TextField {
                 id: headerText
@@ -134,7 +133,8 @@ Rectangle {
                     selectedTextColor: Appearance.textColorSelected()
                     background: Rectangle {
                         color: editMemoMode ? Appearance.editorColor() : Appearance.baseColor()
-                        radius: 4
+                        border.color: Appearance.borderColorLight()
+                        border.width: editMemoMode ? 1 : 0
                         height: 30
                     }
                 }
@@ -168,9 +168,10 @@ Rectangle {
                 onClicked: cancelEditing()
             }
             Rectangle {
-                width: 2
+                width: 1
                 height: 24
-                border.color: Appearance.borderColorLight()
+                border.width: 0
+                color: Appearance.borderColorLight()
             }
             ToolButton {
                 tooltip: qsTr("Close memo")

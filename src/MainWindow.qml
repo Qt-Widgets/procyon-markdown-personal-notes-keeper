@@ -506,21 +506,22 @@ ApplicationWindow {
 
         RowLayout {
             anchors.fill: parent
+            anchors.margins: 2
             Row {
                 visible: catalog.isOpened
-                Label { text: qsTr("Memos: "); color: Appearance.textColorModest() }
-                Label { text: catalog.memoCount }
+                Label { text: qsTr("Memos: "); color: Appearance.textColorModest(); font.pointSize: Appearance.fontSizeDefaultUI() }
+                Label { text: catalog.memoCount; font.pointSize: Appearance.fontSizeDefaultUI() }
             }
             Row {
                 visible: catalog.isOpened
                 leftPadding: 6
-                Label { text: qsTr("Opened: "); color: Appearance.textColorModest() }
-                Label { text: memoPagesView.count }
+                Label { text: qsTr("Opened: "); color: Appearance.textColorModest(); font.pointSize: Appearance.fontSizeDefaultUI() }
+                Label { text: memoPagesView.count; font.pointSize: Appearance.fontSizeDefaultUI() }
             }
             Row {
                 leftPadding: 6
-                Label { text: qsTr("Catalog: "); color: Appearance.textColorModest() }
-                Label { text: catalog.filePath || qsTr("(not selected)") }
+                Label { text: qsTr("Catalog: "); color: Appearance.textColorModest(); font.pointSize: Appearance.fontSizeDefaultUI() }
+                Label { text: catalog.filePath || qsTr("(not selected)"); font.pointSize: Appearance.fontSizeDefaultUI() }
             }
             Item { Layout.fillWidth: true }
         }
@@ -539,7 +540,7 @@ ApplicationWindow {
             id: openedMemosView
             catalog: catalog
             controller: controller
-            width: 200
+            width: 255
             height: parent.height
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
@@ -551,6 +552,7 @@ ApplicationWindow {
             controller: controller
             Layout.fillWidth: true
             Layout.minimumWidth: 100
+            Layout.topMargin: 4
             Layout.leftMargin: openedMemosView.visible ? 0 : 4
             Layout.rightMargin: catalogView.visible ? 0 : 4
         }
@@ -560,7 +562,7 @@ ApplicationWindow {
             catalog: catalog
             controller: controller
             catalogModel: catalog.model
-            width: 200
+            width: 255
             Layout.maximumWidth: 400
             Layout.minimumWidth: 100
             Layout.rightMargin: 4
