@@ -141,6 +141,7 @@ Rectangle {
 
             TextField {
                 id: headerText
+                placeholderText: qsTr("Untitled")
                 font { pixelSize: 24 }
                 readOnly: !editMemoMode
                 selectByMouse: true

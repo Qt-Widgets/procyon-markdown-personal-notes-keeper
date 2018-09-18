@@ -131,10 +131,12 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
             }*/
             Label {
-                text: styleData.value ? styleData.value.itemTitle : ""
+                text: styleData.value && styleData.value.itemTitle.length ? styleData.value.itemTitle : qsTr("Untitled")
                 font.pointSize: Appearance.fontSizeDefaultUI()
                 font.bold: styleData.selected
-                color: styleData.selected ? Appearance.textColorSelected() : Appearance.textColor()
+                font.italic: !(styleData.value && styleData.value.itemTitle.length)
+                color: styleData.selected ? Appearance.textColorSelected() : (
+                       styleData.value && styleData.value.itemTitle.length ? Appearance.textColor() : Appearance.textColorModest())
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

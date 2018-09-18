@@ -179,9 +179,11 @@ Rectangle {
                     spacing: 3
 
                     Label {
-                        text: model.memoTitle /*+ " <i>(" + model.memoId + ")</i>"*/
-                        color: memoItemDelegate.selected ? Appearance.textColorSelected() : Appearance.textColor()
+                        text: model.memoTitle.length ? model.memoTitle : qsTr("Untitled")
+                        color: memoItemDelegate.selected ? Appearance.textColorSelected() : (
+                                  model.memoTitle.length ? Appearance.textColor() : Appearance.textColorModest())
                         font.pointSize: Appearance.fontSizeDefaultUI()
+                        font.italic: !model.memoTitle.length
                         font.bold: memoItemDelegate.selected
                         Layout.fillWidth: true
                     }
