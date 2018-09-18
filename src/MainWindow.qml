@@ -117,7 +117,8 @@ ApplicationWindow {
                 text: qsTr("Open...")
                 iconName: "document-open"
                 shortcut: StandardKey.Open
-                onTriggered: openCatalogDialog.open()
+                //onTriggered: openCatalogDialog.open()
+                onTriggered: controller.ddddd()
             }
             MenuItem {
                 text: qsTr("Close")

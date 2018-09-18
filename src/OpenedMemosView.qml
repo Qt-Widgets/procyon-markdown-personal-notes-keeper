@@ -118,7 +118,6 @@ Rectangle {
         anchors.fill: parent
         focus: true
 
-
         onCurrentIndexChanged: {
             var memoId = __getMemoId(currentIndex)
             if (memoId > 0 &&  memoId !== currentMemoId)

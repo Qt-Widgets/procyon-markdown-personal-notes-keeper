@@ -1,3 +1,4 @@
+import QtQml 2.2
 import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.3
@@ -129,8 +130,18 @@ Item {
                                         })
         }
         else {
-            console.log("TODO show dialog with multi-selector")
-            if (onAccept) onAccept()
+            closeMemosDialog.memosModel.clear()
+            for (var i = 0; i < changedMemos.length; i++) {
+                var info = catalog.getMemoInfo(changedMemos[i])
+                info.isChecked = true
+                closeMemosDialog.memosModel.append(info)
+            }
+            closeMemosDialog.saveMethod = saveMemo
+            closeMemosDialog.closeMethod = function() {
+                allMemosClosed()
+                if (onAccept) onAccept()
+            }
+            closeMemosDialog.visible = true
         }
     }
 
@@ -159,6 +170,10 @@ Item {
         catalog.storeSession(session)
     }
 
+    function ddddd() {
+        closeMemosDialog.visible = true
+    }
+
     MessageDialog { id: infoDialog; icon: StandardIcon.Information }
     MessageDialog { id: errorDialog; icon: StandardIcon.Critical }
     MessageDialog { id: warningDialog; icon: StandardIcon.Warning }
@@ -175,7 +190,7 @@ Item {
             spacing: 6
             anchors.fill: parent
             Label {
-                id: promptLabel;
+                id: promptLabel
                 text: "It's autowidth adjuster and will be overriden"
             }
             RowLayout {
@@ -262,8 +277,8 @@ Item {
         icon: StandardIcon.Question
         standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Cancel
         property int memoId: 0
-        property var saveMethod: null
-        property var closeMethod: null
+        property var saveMethod
+        property var closeMethod
 
         function show(memoId, saveMethod, closeMethod) {
             var info = catalog.getMemoInfo(memoId)
@@ -275,20 +290,53 @@ Item {
         }
 
         onYes: {
-            if (saveMethod) {
-                var error = saveMethod(memoId)
-                if (error !== "") {
-                    errorDialog.show(error)
-                    return
+            var error = saveMethod(memoId)
+            if (error !== "") {
+                errorDialog.show(error)
+                return
+            }
+            closeMethod(memoId)
+        }
+
+        onNo: closeMethod(memoId)
+    }
+
+    Dialog {
+        id: closeMemosDialog
+        standardButtons: StandardButton.Ok | StandardButton.Cancel
+
+        property var saveMethod
+        property var closeMethod
+
+        ColumnLayout {
+            spacing: 12
+            anchors.fill: parent
+            Label { text: qsTr("These memos were changed.\nMark those of them which need to be saved:") }
+            ScrollView {
+                ListView {
+                    spacing: 3
+                    model: ListModel { id: memosModel }
+                    delegate: CheckBox {
+                        text: model.memoTitle
+                        checked: model.isChecked
+                        onCheckedChanged: model.isChecked = checked
+                    }
                 }
-                if (closeMethod)
-                    closeMethod(memoId)
             }
         }
 
-        onNo: {
-            if (closeMethod)
-                closeMethod(memoId)
+        onAccepted: {
+            for (var i = 0; i < memosModel.count; i++) {
+                var item = memosModel.get(i)
+                if (item.isChecked) {
+                    var error = saveMethod(item.memoId)
+                    if (error !== "") {
+                        errorDialog.show(error)
+                        return
+                    }
+                }
+            }
+            closeMethod(memoId)
         }
     }
 }
