@@ -27,10 +27,10 @@ ApplicationWindow {
         property alias windowWidth: mainWindow.width
         property alias windowHeight: mainWindow.height
         property alias openedMemosViewWidth: openedMemosView.width
-        property alias openedMemosViewVisible: showOpenedMemosViewAction.checked
+        property alias openedMemosViewVisible: showOpenedMemosViewMenuItem.checked
         property alias catalogViewWidth: catalogView.width
-        property alias catalogViewVisible: showCatalogViewAction.checked
-        property alias statusBarVisible: showStatusBarAction.checked
+        property alias catalogViewVisible: showCatalogViewMenuItem.checked
+        property alias statusBarVisible: showStatusBarMenuItem.checked
     }
 
     Settings {
@@ -63,13 +63,13 @@ ApplicationWindow {
         // because they are on a splitter and it restores their visibility
         // after its panels are restored. So we store action check state instead
         // and use it for setting visibilty of splitter subcomponents at the very end.
-        catalogView.visible = showCatalogViewAction.checked
-        openedMemosView.visible = showOpenedMemosViewAction.checked
-        statusBar.visible = showStatusBarAction.checked
+        catalogView.visible = showCatalogViewMenuItem.checked
+        openedMemosView.visible = showOpenedMemosViewMenuItem.checked
+        statusBar.visible = showStatusBarMenuItem.checked
 
         catalog.loadSettings()
 
-        memoWordWrapAction.checked = catalog.memoWordWrap
+        memoWordWrapMenuItem.checked = catalog.memoWordWrap
 
         openCatalogDialog.folder = mainWindow.recentFolder
         newCatalogDialog.folder = mainWindow.recentFolder
@@ -187,239 +187,28 @@ ApplicationWindow {
         }
     }
 
-    Item {
-        id: actions
-        Item {
-            id: fileActions
-            Action {
-                id: newCatalogAction
-                text: qsTr("New...")
-                iconName: "document-new"
-                shortcut: StandardKey.New
-                onTriggered: newCatalogDialog.open()
-            }
-            Action {
-                id: openCatalogAction
-                text: qsTr("Open...")
-                tooltip: qsTr("Open catalog")
-                iconName: "document-open"
-                shortcut: StandardKey.Open
-                onTriggered: openCatalogDialog.open()
-            }
-            Action {
-                id: closeCatalogAction
-                text: qsTr("Close")
-                enabled: catalog.isOpened
-                onTriggered: operations.closeCatalog()
-            }
-            Action {
-                id: quitAppAction
-                text: qsTr("Exit")
-                iconName: "application-exit"
-                shortcut: StandardKey.Quit
-                onTriggered: Qt.quit()
-            }
-        }
-        Item {
-            id: editActions
-            // TODO: how to display edit actions shortcuts in the main menu?
-            // They clash with built-in shortcuts of TextArea
-            Action {
-                id: editUndoAction
-                text: qsTr("Undo")
-                iconName: "edit-undo"
-                //shortcut: StandardKey.Undo -- Ambiguous shortcut overload
-                enabled: activeFocusItem && ("undo" in activeFocusItem)
-                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
-                onTriggered: activeFocusItem.undo()
-            }
-            Action {
-                id: editRedoAction
-                text: qsTr("Redo")
-                iconName: "edit-redo"
-                //shortcut: StandardKey.Redo -- Ambiguous shortcut overload
-                enabled: activeFocusItem && ("redo" in activeFocusItem)
-                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
-                onTriggered: activeFocusItem.redo()
-            }
-            Action {
-                id: editCutAction
-                text: qsTr("Cut")
-                iconName: "edit-cut"
-                //shortcut: StandardKey.Cut -- Ambiguous shortcut overload
-                enabled: activeFocusItem && ("cut" in activeFocusItem)
-                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
-                onTriggered: activeFocusItem.cut()
-            }
-            Action {
-                id: editCopyAction
-                text: qsTr("Copy")
-                iconName: "edit-copy"
-                //shortcut: StandardKey.Copy -- Ambiguous shortcut overload
-                enabled: activeFocusItem && ("copy" in activeFocusItem)
-                onTriggered: activeFocusItem.copy()
-            }
-            Action {
-                id: editPasteAction
-                text: qsTr("Paste")
-                iconName: "edit-paste"
-                //shortcut: StandardKey.Paste -- Ambiguous shortcut overload
-                enabled: activeFocusItem && ("paste" in activeFocusItem)
-                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
-                onTriggered: activeFocusItem.paste()
-            }
-            Action {
-                id: editSelectAllAction
-                text: qsTr("Select All")
-                iconName: "edit-select-all"
-                //shortcut: StandardKey.SelectAll -- Ambiguous shortcut overload
-                enabled: activeFocusItem && ("selectAll" in activeFocusItem)
-                onTriggered: activeFocusItem.selectAll()
-            }
-        }
-        Item {
-            id: viewActions
-            Action {
-                id: showOpenedMemosViewAction
-                text: qsTr("Opened Memos Panel")
-                checkable: true
-                checked: true
-                onToggled: openedMemosView.visible = checked
-            }
-            Action {
-                id: showCatalogViewAction
-                text: qsTr("Catalog Panel")
-                checkable: true
-                checked: true
-                onToggled: catalogView.visible = checked
-            }
-            Action {
-                id: showStatusBarAction
-                text: qsTr("Status Bar")
-                checkable: true
-                checked: true
-                onToggled: statusBar.visible = checked
-            }
-        }
-        Item {
-            id: catalogActions
-            Action {
-                id: openMemoAction
-                text: qsTr("Open Memo")
-                enabled: catalogView.selectedMemoId > 0
-                onTriggered: controller.openMemo(catalogView.selectedMemoId)
-            }
-            Action {
-                id: newMemoAction
-                text: qsTr("New Memo")
-                enabled: catalogView.selectedFolderId > 0
-                onTriggered: catalog.createMemo(catalogView.selectedFolderId)
-            }
-            Action {
-                id: deleteMemoAction
-                text: qsTr("Delete Memo")
-                enabled: catalogView.selectedMemoId > 0
-                onTriggered: controller.deleteMemo(catalogView.selectedMemoId)
-            }
-            Action {
-                id: makeTopLevelFolderAction
-                text: qsTr("New Root Folder...")
-                enabled: catalog.isOpened
-                onTriggered: controller.createFolder(0)
-            }
-            Action {
-                id: makeFolderAction
-                text: qsTr("New Folder...")
-                enabled: catalogView.selectedFolderId > 0
-                onTriggered: controller.createFolder(catalogView.selectedFolderId)
-            }
-            Action {
-                id: renameFolderAction
-                text: qsTr("Rename Folder...")
-                enabled: catalogView.selectedFolderId > 0
-                onTriggered: controller.renameFolder(catalogView.selectedFolderId)
-            }
-            Action {
-                id: deleteFolderAction
-                text: qsTr("Delete Folder")
-                enabled: catalogView.selectedFolderId > 0
-                onTriggered: controller.deleteFolder(catalogView.selectedFolderId)
-            }
-        }
-        Item {
-            id: memoActions
-            Action {
-                id: editMemoAction
-                text: qsTr("Edit Memo")
-                iconSource: "qrc:/toolbar/memo_edit"
-                shortcut: "Return,Return"
-                enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
-                onTriggered: memoPagesView.currentMemoPage.beginEditing()
-            }
-            Action {
-                id: saveMemoAction
-                text: qsTr("Save Memo")
-                iconSource: "qrc:/toolbar/memo_save"
-                shortcut: StandardKey.Save
-                enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
-                onTriggered: memoPagesView.currentMemoPage.saveChanges()
-            }
-            Action {
-                id: cancelMemoAction
-                text: qsTr("Cancel Changes")
-                iconSource: "qrc:/toolbar/memo_cancel"
-                shortcut: "Esc,Esc"
-                enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
-                onTriggered: memoPagesView.currentMemoPage.cancelEditing()
-            }
-            Action {
-                id: highlightMemoAction
-                text: qsTr("Update Highlight")
-                enabled: memoPagesView.currentMemoPage
-                onTriggered: memoPagesView.currentMemoPage.updateHighlight()
-            }
-            Action {
-                id: closeMemoAction
-                text: qsTr("Close Memo")
-                iconSource: "qrc:/toolbar/memo_close"
-                shortcut: StandardKey.Close
-                enabled: openedMemosView.currentMemoId > 0
-                onTriggered: operations.closeMemo(openedMemosView.currentMemoId)
-            }
-            Action {
-                id: closeAllMemosAction
-                text: qsTr("Close All Memos")
-                enabled: openedMemosView.currentMemoId > 0
-                onTriggered: operations.closeAllMemos()
-            }
-        }
-        Item {
-            id: optionsActions
-            Action {
-                id: chooseMemoFontAction
-                text: qsTr("Choose Memo Font...")
-                onTriggered: {
-                    memoFontDialog.font = catalog.memoFont
-                    memoFontDialog.open()
-                }
-            }
-            Action {
-                id: memoWordWrapAction
-                text: qsTr("Word Wrap")
-                checkable: true
-                onToggled: catalog.memoWordWrap = checked
-            }
-        }
-    }
-
     menuBar: MenuBar {
         id: mainMenu
         Menu {
             id: fileMenu
             title: qsTr("File")
-            MenuItem { action: newCatalogAction }
-            MenuItem { action: openCatalogAction }
-            MenuItem { action: closeCatalogAction }
+            MenuItem {
+                text: qsTr("New...")
+                iconName: "document-new"
+                shortcut: StandardKey.New
+                onTriggered: newCatalogDialog.open()
+            }
+            MenuItem {
+                text: qsTr("Open...")
+                iconName: "document-open"
+                shortcut: StandardKey.Open
+                onTriggered: openCatalogDialog.open()
+            }
+            MenuItem {
+                text: qsTr("Close")
+                enabled: catalog.isOpened
+                onTriggered: operations.closeCatalog()
+            }
             Menu {
                 id: mruFileMenu
                 title: qsTr("&Recent Files")
@@ -447,56 +236,192 @@ ApplicationWindow {
                 }
             }
             MenuSeparator {}
-            MenuItem { action: quitAppAction }
+            MenuItem {
+                text: qsTr("Exit")
+                iconName: "application-exit"
+                shortcut: StandardKey.Quit
+                onTriggered: Qt.quit()
+            }
         }
         Menu {
+            // TODO: how to display edit actions shortcuts in the main menu?
+            // They clash with built-in shortcuts of TextArea
             id: editMenu
             title: qsTr("Edit")
-            MenuItem { action: editUndoAction }
-            MenuItem { action: editRedoAction }
+            MenuItem {
+                text: qsTr("Undo")
+                iconName: "edit-undo"
+                //shortcut: StandardKey.Undo -- Ambiguous shortcut overload
+                enabled: activeFocusItem && ("undo" in activeFocusItem)
+                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.undo()
+            }
+            MenuItem {
+                text: qsTr("Redo")
+                iconName: "edit-redo"
+                //shortcut: StandardKey.Redo -- Ambiguous shortcut overload
+                enabled: activeFocusItem && ("redo" in activeFocusItem)
+                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.redo()
+            }
             MenuSeparator {}
-            MenuItem { action: editCutAction }
-            MenuItem { action: editCopyAction }
-            MenuItem { action: editPasteAction }
+            MenuItem {
+                text: qsTr("Cut")
+                iconName: "edit-cut"
+                //shortcut: StandardKey.Cut -- Ambiguous shortcut overload
+                enabled: activeFocusItem && ("cut" in activeFocusItem)
+                         && (!("readOnly" in activeFocusItem) || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.cut()
+            }
+            MenuItem {
+                text: qsTr("Copy")
+                iconName: "edit-copy"
+                //shortcut: StandardKey.Copy -- Ambiguous shortcut overload
+                enabled: activeFocusItem && ("copy" in activeFocusItem)
+                onTriggered: activeFocusItem.copy()
+            }
+            MenuItem {
+                text: qsTr("Paste")
+                iconName: "edit-paste"
+                //shortcut: StandardKey.Paste -- Ambiguous shortcut overload
+                enabled: activeFocusItem && ("paste" in activeFocusItem)
+                         && (!activeFocusItem["readOnly"] || !activeFocusItem.readOnly)
+                onTriggered: activeFocusItem.paste()
+            }
             MenuSeparator {}
-            MenuItem { action: editSelectAllAction }
+            MenuItem {
+                text: qsTr("Select All")
+                iconName: "edit-select-all"
+                //shortcut: StandardKey.SelectAll -- Ambiguous shortcut overload
+                enabled: activeFocusItem && ("selectAll" in activeFocusItem)
+                onTriggered: activeFocusItem.selectAll()
+            }
         }
         Menu {
             id: viewMenu
             title: qsTr("View")
-            MenuItem { action: showOpenedMemosViewAction }
-            MenuItem { action: showCatalogViewAction }
-            MenuItem { action: showStatusBarAction }
+            MenuItem {
+                id: showOpenedMemosViewMenuItem
+                text: qsTr("Opened Memos Panel")
+                checkable: true
+                checked: true
+                onToggled: openedMemosView.visible = checked
+            }
+            MenuItem {
+                id: showCatalogViewMenuItem
+                text: qsTr("Catalog Panel")
+                checkable: true
+                checked: true
+                onToggled: catalogView.visible = checked
+            }
+            MenuItem {
+                id: showStatusBarMenuItem
+                text: qsTr("Status Bar")
+                checkable: true
+                checked: true
+                onToggled: statusBar.visible = checked
+            }
         }
         Menu {
             id: catalogMenu
             title: qsTr("Catalog")
-            MenuItem { action: makeTopLevelFolderAction }
-            MenuItem { action: makeFolderAction }
-            MenuItem { action: renameFolderAction }
-            MenuItem { action: deleteFolderAction }
+            MenuItem {
+                text: qsTr("New Root Folder...")
+                enabled: catalog.isOpened
+                onTriggered: controller.createFolder(0)
+            }
+            MenuItem {
+                text: qsTr("New Folder...")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.createFolder(catalogView.selectedFolderId)
+            }
+            MenuItem {
+                text: qsTr("Rename Folder...")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.renameFolder(catalogView.selectedFolderId)
+            }
+            MenuItem {
+                text: qsTr("Delete Folder")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: controller.deleteFolder(catalogView.selectedFolderId)
+            }
             MenuSeparator {}
-            MenuItem { action: openMemoAction }
-            MenuItem { action: newMemoAction }
-            MenuItem { action: deleteMemoAction }
+            MenuItem {
+                text: qsTr("Open Memo")
+                enabled: catalogView.selectedMemoId > 0
+                onTriggered: controller.openMemo(catalogView.selectedMemoId)
+            }
+            MenuItem {
+                text: qsTr("New Memo")
+                enabled: catalogView.selectedFolderId > 0
+                onTriggered: catalog.createMemo(catalogView.selectedFolderId)
+            }
+            MenuItem {
+                text: qsTr("Delete Memo")
+                enabled: catalogView.selectedMemoId > 0
+                onTriggered: controller.deleteMemo(catalogView.selectedMemoId)
+            }
         }
         Menu {
             id: memoMenu
             title: qsTr("Memo")
-            MenuItem { action: editMemoAction }
-            MenuItem { action: saveMemoAction }
-            MenuItem { action: cancelMemoAction }
+            MenuItem {
+                text: qsTr("Edit Memo")
+                iconSource: "qrc:/toolbar/memo_edit"
+                shortcut: "Return,Return"
+                enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
+                onTriggered: memoPagesView.currentMemoPage.beginEditing()
+            }
+            MenuItem {
+                text: qsTr("Save Memo")
+                iconSource: "qrc:/toolbar/memo_save"
+                shortcut: StandardKey.Save
+                enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
+                onTriggered: memoPagesView.currentMemoPage.saveChanges()
+            }
+            MenuItem {
+                text: qsTr("Cancel Changes")
+                iconSource: "qrc:/toolbar/memo_cancel"
+                shortcut: "Esc,Esc"
+                enabled: memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode
+                onTriggered: memoPagesView.currentMemoPage.cancelEditing()
+            }
             MenuSeparator {}
-            MenuItem { action: highlightMemoAction }
+            MenuItem {
+                text: qsTr("Update Highlight")
+                enabled: memoPagesView.currentMemoPage
+                onTriggered: memoPagesView.currentMemoPage.updateHighlight()
+            }
             MenuSeparator {}
-            MenuItem { action: closeMemoAction }
-            MenuItem { action: closeAllMemosAction }
+            MenuItem {
+                text: qsTr("Close Memo")
+                iconSource: "qrc:/toolbar/memo_close"
+                shortcut: StandardKey.Close
+                enabled: openedMemosView.currentMemoId > 0
+                onTriggered: operations.closeMemo(openedMemosView.currentMemoId)
+            }
+            MenuItem {
+                text: qsTr("Close All Memos")
+                enabled: openedMemosView.currentMemoId > 0
+                onTriggered: operations.closeAllMemos()
+            }
         }
         Menu {
             id: optionsMenu
             title: qsTr("Options")
-            MenuItem { action: chooseMemoFontAction }
-            MenuItem { action: memoWordWrapAction }
+            MenuItem {
+                text: qsTr("Choose Memo Font...")
+                onTriggered: {
+                    memoFontDialog.font = catalog.memoFont
+                    memoFontDialog.open()
+                }
+            }
+            MenuItem {
+                id: memoWordWrapMenuItem
+                text: qsTr("Word Wrap")
+                checkable: true
+                onToggled: catalog.memoWordWrap = checked
+            }
         }
     }
 
