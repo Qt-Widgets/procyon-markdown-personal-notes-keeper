@@ -80,6 +80,7 @@ Rectangle {
 
     function beginEditing() {
         editMemoMode = true
+        // TODO: it does not activate text area, we only have to click it
         textArea.focus = true
     }
 
@@ -112,7 +113,8 @@ Rectangle {
     function toggleFocus() {
         if (headerText.focus)
             textArea.focus = true
-        else headerText.focus = true
+        else if (textArea.focus)
+            headerText.focus = true
     }
 
     function updateHighlight() {
@@ -131,6 +133,16 @@ Rectangle {
         textArea.selectAll()
         textArea.select(selStart, selEnd)
         textArea.cursorPosition = curPos
+    }
+
+    function deactivate() {
+        // We have to disable inactive page because it remains accepting keyboard events
+        // and if it is in edit mode we can accidentally type something into invisible memo
+        enabled = false
+    }
+
+    function activate() {
+        enabled = true
     }
 
     ColumnLayout {
@@ -211,7 +223,6 @@ Rectangle {
             readOnly: !editMemoMode
             wrapMode: TextEdit.Wrap
             font.pointSize: 11
-            focus: true
             selectByMouse: true
             selectByKeyboard: true
             onLinkActivated: Qt.openUrlExternally(link)

@@ -121,7 +121,7 @@ Item {
         }
         var memoIds = getModifiedMemoIds()
         if (memoIds.length === 0)
-            closeAllMemosAndAccept()
+            closeMemos()
         else if (memoIds.length === 1)
             saveAndCloseMemoDialog.show(memoIds[0], saveMemo, closeMemos)
         else

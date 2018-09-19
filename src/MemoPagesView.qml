@@ -33,7 +33,11 @@ TabView {
             }
             currentIndex = index
             currentMemoId = memoId
+            if (currentMemoPage)
+                currentMemoPage.deactivate()
             currentMemoPage = (currentIndex < 0) ? null : getTab(currentIndex).item
+            if (currentMemoPage)
+                currentMemoPage.activate()
         }
 
         onMemoClosed: {
