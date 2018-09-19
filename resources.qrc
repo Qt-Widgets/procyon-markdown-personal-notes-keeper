@@ -17,7 +17,8 @@
         <file alias="folder_opened">img/icon/folder_opened.svg</file>
         <file alias="folder_closed">img/icon/folder_closed.svg</file>
         <file alias="memo_plain_text">img/icon/sticky_note.svg</file>
-        <file alias="modified">img/icon/modified_overlay.png</file>
+        <file alias="modified">img/icon/modified_overlay_24.png</file>
+        <file alias="save_memos_dialog">img/icon/save_48.png</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="memo_save">img/toolbar/check_green.svg</file>

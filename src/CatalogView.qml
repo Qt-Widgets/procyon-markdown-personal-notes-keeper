@@ -131,7 +131,8 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
             }*/
             Label {
-                text: styleData.value && styleData.value.itemTitle.length ? styleData.value.itemTitle : qsTr("Untitled")
+                text: styleData.value && styleData.value.itemTitle ? (
+                      styleData.value.itemTitle.length ? styleData.value.itemTitle : qsTr("Untitled")) : ""
                 font.pointSize: Appearance.fontSizeDefaultUI()
                 font.bold: styleData.selected
                 font.italic: !(styleData.value && styleData.value.itemTitle.length)

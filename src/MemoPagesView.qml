@@ -68,17 +68,14 @@ TabView {
         return (index > -1) && getTab(index).item.isModified()
     }
 
-    function getModifiedMemos() {
-        var memoList = []
+    function getModifiedMemoIds() {
+        var memoIds = []
         for (var i = 0; i < count; i++) {
             var memoView = getTab(i).item
-            if (memoView.isModified()) {
-                var info = catalog.getMemoInfo(memoView.memoId)
-                info.checked = false
-                memoList.push(info)
-            }
+            if (memoView.isModified())
+                memoIds.push(memoView.memoId)
         }
-        return memoList
+        return memoIds
     }
 
     function __getMemoViewComponent() {

@@ -54,7 +54,7 @@ ApplicationWindow {
         id: controller
         catalog: catalog
         isMemoModified: memoPagesView.isMemoModified
-        getModifiedMemos: memoPagesView.getModifiedMemos
+        getModifiedMemoIds: memoPagesView.getModifiedMemoIds
         getCurrentMemoId: function(){ return openedMemosView.currentMemoId }
         saveMemo: memoPagesView.saveMemo
     }
@@ -87,10 +87,16 @@ ApplicationWindow {
         if (!forceClosing) {
             close.accepted = false
             catalog.saveSettings()
-            controller.closeCatalog(function() {
-                forceClosing = true
-                mainWindow.close()
-            })
+            controller.closeCatalog(mainWindowCloseTimer.start)
+        }
+    }
+
+    Timer {
+        id: mainWindowCloseTimer
+        interval: 0
+        onTriggered: {
+            forceClosing = true
+            mainWindow.close()
         }
     }
 
@@ -99,6 +105,21 @@ ApplicationWindow {
         onActivated: {
             if (memoPagesView.currentMemoPage && memoPagesView.currentMemoPage.editMemoMode)
                 memoPagesView.currentMemoPage.toggleFocus()
+        }
+    }
+
+    Item {
+        id: actions
+        Action {
+            id: editMemoAction
+            text: qsTr("Edit Memo")
+            iconSource: "qrc:/toolbar/memo_edit"
+            shortcut: "Return,Return"
+            enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
+            onTriggered: {
+             console.log("Begin editing " + memoPagesView.currentMemoPage.memoId)
+                memoPagesView.currentMemoPage.beginEditing()
+            }
         }
     }
 
@@ -117,8 +138,7 @@ ApplicationWindow {
                 text: qsTr("Open...")
                 iconName: "document-open"
                 shortcut: StandardKey.Open
-                //onTriggered: openCatalogDialog.open()
-                onTriggered: controller.ddddd()
+                onTriggered: openCatalogDialog.open()
             }
             MenuItem {
                 text: qsTr("Close")
@@ -282,11 +302,7 @@ ApplicationWindow {
             id: memoMenu
             title: qsTr("Memo")
             MenuItem {
-                text: qsTr("Edit Memo")
-                iconSource: "qrc:/toolbar/memo_edit"
-                shortcut: "Return,Return"
-                enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
-                onTriggered: memoPagesView.currentMemoPage.beginEditing()
+                action: editMemoAction
             }
             MenuItem {
                 text: qsTr("Save Memo")

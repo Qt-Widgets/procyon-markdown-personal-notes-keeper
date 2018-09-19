@@ -12,7 +12,7 @@ Item {
 
     // functions to be injected
     property var isMemoModified // bool function(memoId)
-    property var getModifiedMemos // int[] function()
+    property var getModifiedMemoIds // int[] function()
     property var getCurrentMemoId // int function()
     property var saveMemo // void function(memoId)
     property var storeSessionFuncs: [] // [void function(json)]
@@ -68,7 +68,7 @@ Item {
 
     function makePath(itemPath, itemTitle) {
         var path = itemPath.length ? (itemPath + "/") : ""
-        var title = itemTitle.length ? itemTitle : ("&lt;" + qsTr("Untitled") + "&gt;")
+        var title = itemTitle.length ? itemTitle : ("<i>&lt;" + qsTr("Untitled") + "&gt;</i>")
         return path + "<b>" + title + "</b>"
     }
 
@@ -111,38 +111,21 @@ Item {
         if (memoId < 1) return
         if (isMemoModified(memoId))
             saveAndCloseMemoDialog.show(memoId, saveMemo, memoClosed)
-        else
-            memoClosed(memoId)
+        else memoClosed(memoId)
     }
 
     function closeAllMemos(onAccept) {
-        var changedMemos = getModifiedMemos()
-        if (changedMemos.length === 0) {
+        var closeMemos = function() {
             allMemosClosed()
             if (onAccept) onAccept()
         }
-        else if (changedMemos.length === 1) {
-            saveAndCloseMemoDialog.show(changedMemos[0].memoId,
-                                        saveMemo,
-                                        function() {
-                                            allMemosClosed()
-                                            if (onAccept) onAccept()
-                                        })
-        }
-        else {
-            closeMemosDialog.memosModel.clear()
-            for (var i = 0; i < changedMemos.length; i++) {
-                var info = catalog.getMemoInfo(changedMemos[i])
-                info.isChecked = true
-                closeMemosDialog.memosModel.append(info)
-            }
-            closeMemosDialog.saveMethod = saveMemo
-            closeMemosDialog.closeMethod = function() {
-                allMemosClosed()
-                if (onAccept) onAccept()
-            }
-            closeMemosDialog.visible = true
-        }
+        var memoIds = getModifiedMemoIds()
+        if (memoIds.length === 0)
+            closeAllMemosAndAccept()
+        else if (memoIds.length === 1)
+            saveAndCloseMemoDialog.show(memoIds[0], saveMemo, closeMemos)
+        else
+            saveAndCloseMemosDialog.show(memoIds, saveMemo, closeMemos)
     }
 
     function __showDialog(dialog, message) {
@@ -168,10 +151,6 @@ Item {
         session.activeMemo = getCurrentMemoId()
 
         catalog.storeSession(session)
-    }
-
-    function ddddd() {
-        closeMemosDialog.visible = true
     }
 
     MessageDialog { id: infoDialog; icon: StandardIcon.Information }
@@ -276,23 +255,25 @@ Item {
         id: saveAndCloseMemoDialog
         icon: StandardIcon.Question
         standardButtons: StandardButton.Yes | StandardButton.No | StandardButton.Cancel
-        property int memoId: 0
+        property int memoId
         property var saveMethod
         property var closeMethod
 
         function show(memoId, saveMethod, closeMethod) {
-            var info = catalog.getMemoInfo(memoId)
-            text = info.memoPath + "/<b>" + info.memoTitle + "</b><p>" + qsTr("Save changes?")
             saveAndCloseMemoDialog.memoId = memoId
             saveAndCloseMemoDialog.saveMethod = saveMethod
             saveAndCloseMemoDialog.closeMethod = closeMethod
+
+            var info = catalog.getMemoInfo(memoId)
+            text = makePath(info.memoPath, info.memoTitle) + "<p>" + qsTr("Save changes?")
+
             visible = true
         }
 
         onYes: {
             var error = saveMethod(memoId)
-            if (error !== "") {
-                errorDialog.show(error)
+            if (error.length) {
+                __showDialog(errorDialog, error)
                 return
             }
             closeMethod(memoId)
@@ -302,22 +283,31 @@ Item {
     }
 
     Dialog {
-        id: closeMemosDialog
+        id: saveAndCloseMemosDialog
         standardButtons: StandardButton.Ok | StandardButton.Cancel
 
         property var saveMethod
         property var closeMethod
+        property var memoIds
 
         ColumnLayout {
             spacing: 12
             anchors.fill: parent
-            Label { text: qsTr("These memos were changed.\nMark those of them which need to be saved:") }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+                Image { source: "qrc:/icon/save_memos_dialog" }
+                Label { text: qsTr("These memos were changed.\n" +
+                    "Which of them should be saved before closing?") }
+            }
             ScrollView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 ListView {
                     spacing: 3
-                    model: ListModel { id: memosModel }
+                    model: ListModel {id: memosModel }
                     delegate: CheckBox {
-                        text: model.memoTitle
+                        text: makePath(model.memoPath, model.memoTitle)
                         checked: model.isChecked
                         onCheckedChanged: model.isChecked = checked
                     }
@@ -325,18 +315,33 @@ Item {
             }
         }
 
+        function show(memoIds, saveMethod, closeMethod) {
+            saveAndCloseMemosDialog.memoIds = memoIds
+            saveAndCloseMemosDialog.saveMethod = saveMethod
+            saveAndCloseMemosDialog.closeMethod = closeMethod
+
+            memosModel.clear()
+            for (var i = 0; i < memoIds.length; i++) {
+                var info = catalog.getMemoInfo(memoIds[i])
+                info.isChecked = true
+                memosModel.append(info)
+            }
+
+            visible = true
+        }
+
         onAccepted: {
             for (var i = 0; i < memosModel.count; i++) {
                 var item = memosModel.get(i)
                 if (item.isChecked) {
                     var error = saveMethod(item.memoId)
-                    if (error !== "") {
-                        errorDialog.show(error)
+                    if (error.length) {
+                        __showDialog(errorDialog, error)
                         return
                     }
                 }
             }
-            closeMethod(memoId)
+            closeMethod()
         }
     }
 }
