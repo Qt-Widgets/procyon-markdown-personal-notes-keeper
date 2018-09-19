@@ -116,10 +116,7 @@ ApplicationWindow {
             iconSource: "qrc:/toolbar/memo_edit"
             shortcut: "Return,Return"
             enabled: memoPagesView.currentMemoPage && !memoPagesView.currentMemoPage.editMemoMode
-            onTriggered: {
-             console.log("Begin editing " + memoPagesView.currentMemoPage.memoId)
-                memoPagesView.currentMemoPage.beginEditing()
-            }
+            onTriggered: memoPagesView.currentMemoPage.beginEditing()
         }
     }
 
@@ -147,7 +144,7 @@ ApplicationWindow {
             }
             Menu {
                 id: mruFileMenu
-                title: qsTr("&Recent Files")
+                title: qsTr("Recent Files")
                 Instantiator {
                     model: catalog.recentFilesModel
                     MenuItem {
@@ -161,12 +158,12 @@ ApplicationWindow {
                     visible: catalog.hasRecentFiles
                 }
                 MenuItem {
-                    text: qsTr("&Delete Invalid Items ")
+                    text: qsTr("Delete Invalid Items ")
                     enabled: catalog.hasRecentFiles
                     onTriggered: catalog.deleteInvalidMruItems()
                 }
                 MenuItem {
-                    text: qsTr("&Clear History")
+                    text: qsTr("Clear History")
                     enabled: catalog.hasRecentFiles
                     onTriggered: catalog.deleteAllMruItems()
                 }
