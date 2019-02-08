@@ -3,6 +3,10 @@ TEMPLATE = app
 QT += quick quickcontrols2 sql
 !no_desktop: QT += widgets
 
+TARGET = procyon
+TEMPLATE = app
+DESTDIR = $$_PRO_FILE_PWD_/bin
+
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -42,8 +46,6 @@ QML_DESIGNER_IMPORT_PATH =
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-DESTDIR = $$_PRO_FILE_PWD_/bin 
 
 HEADERS += \
     src/CatalogHandler.h \
