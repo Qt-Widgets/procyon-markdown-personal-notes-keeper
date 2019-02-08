@@ -3,7 +3,7 @@
 PRODUCTVERSION 	{v1},{v2},{v3},{v4}
 FILEVERSION    	{v1},{v2},{v3},{v4}
 FILEOS         	0x4
-FILETYPE       	0
+FILETYPE       	1
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
