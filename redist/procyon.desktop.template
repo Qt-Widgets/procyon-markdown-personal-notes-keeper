@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Exec=FULL/PATH/TO/../bin/procyon
-Name=Procyon Note Keeper
-GenericName=Personal note keeping application
-Icon=FULL/PATH/TO/../img/icon/main.svg
-Terminal=false

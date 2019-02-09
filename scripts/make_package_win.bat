@@ -41,7 +41,7 @@ mkdir redist
 cd redist
 
 echo ***** Running windeployqt...
-windeployqt ..\..\bin\procyon.exe --dir . --no-translations --no-system-d3d-compiler --no-opengl-sw
+windeployqt ..\..\bin\procyon.exe --dir . --no-translations --no-system-d3d-compiler --no-opengl-sw --qmldir ..\..\src
 
 echo ***** Copy additional files which are ignored by windeployqt for some reason
 copy /Y %QT_DIR%\libgcc_s_seh-1.dll

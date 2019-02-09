@@ -6,3 +6,4 @@ GenericName=Personal note keeping application
 Exec=procyon
 Icon=procyon
 Categories=Office;
+Terminal=false

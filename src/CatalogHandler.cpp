@@ -85,7 +85,7 @@ bool CatalogHandler::sameUrl(const QUrl &fileUrl) const
 QString CatalogHandler::urlToFileName(const QUrl &fileUrl) const
 {
 #ifdef Q_OS_WIN
-    auto fileName = fileUrl.toString();
+    auto fileName = fileUrl.path();
     // Qt 5.10, 5.11.1: an url returned by FileDialog has format "file:///C:/dir/..."
     // `fileUrl.path()` strips only "file://" but leaves the slash there ("/C:/dir...")
     if (fileName.startsWith('/'))
