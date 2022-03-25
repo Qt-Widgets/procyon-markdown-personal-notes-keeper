@@ -1,17 +1,21 @@
 #include "MemoEditor.h"
 
 #include "../catalog/Catalog.h"
+#include "../highlighter/OriHighlighter.h"
 #include "../spellcheck/TextEditSpellcheck.h"
 #include "../spellcheck/Spellchecker.h"
 #include "../widgets/MemoTextEdit.h"
+#include "../TextEditHelpers.h"
+#include "orion/helpers/OriLayouts.h"
 
-#include <QPrinter>
+#include <QStyle>
+#include <QTimer>
 
 //------------------------------------------------------------------------------
 //                                 MemoEditor
 //------------------------------------------------------------------------------
 
-MemoEditor::MemoEditor(MemoItem *memoItem, QWidget *parent) : QWidget(parent), _memoItem(memoItem)
+MemoEditor::MemoEditor(MemoItem *memoItem) : QWidget(), _memoItem(memoItem)
 {
 }
 
@@ -19,8 +23,23 @@ MemoEditor::MemoEditor(MemoItem *memoItem, QWidget *parent) : QWidget(parent), _
 //                                TextMemoEditor
 //------------------------------------------------------------------------------
 
-TextMemoEditor::TextMemoEditor(MemoItem* memoItem, QWidget *parent) : MemoEditor(memoItem, parent)
+TextMemoEditor::TextMemoEditor(MemoItem* memoItem) : TextMemoEditor(memoItem, true)
 {
+}
+
+TextMemoEditor::TextMemoEditor(MemoItem* memoItem, bool createEditor) : MemoEditor(memoItem)
+{
+    if (!createEditor) return;
+
+    setEditor(new MemoTextEdit);
+    _editor->setReadOnly(true);
+
+    Ori::Layouts::LayoutV({_editor}).setMargin(0).useFor(this);
+
+    QTimer::singleShot(0, this, [this](){
+        auto sb = 1.5 * style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+        _editor->document()->setTextWidth(_editor->width() - sb);
+    });
 }
 
 void TextMemoEditor::setEditor(MemoTextEdit *editor)
@@ -52,6 +71,11 @@ bool TextMemoEditor::isModified() const
     return _editor->document()->isModified();
 }
 
+void TextMemoEditor::setModified(bool on)
+{
+    _editor->document()->setModified(on);
+}
+
 bool TextMemoEditor::wordWrap() const
 {
     return _editor->wordWrap();
@@ -69,6 +93,7 @@ QString TextMemoEditor::data() const
 
 void TextMemoEditor::toggleSpellcheck(bool on)
 {
+#ifdef ENABLE_SPELLCHECK
     if (on)
     {
         if (!_spellcheckLang.isEmpty())
@@ -88,6 +113,9 @@ void TextMemoEditor::toggleSpellcheck(bool on)
             _spellcheck = nullptr;
         }
     }
+#else
+    Q_UNUSED(on)
+#endif
 }
 
 void TextMemoEditor::setSpellcheckLang(const QString &lang)
@@ -123,15 +151,34 @@ void TextMemoEditor::setReadOnly(bool on)
 
 void TextMemoEditor::exportToPdf(const QString& fileName)
 {
-    exportToPdf(_editor->document(), fileName);
+    TextEditHelpers::exportToPdf(_editor->document(), fileName);
 }
 
-void TextMemoEditor::exportToPdf(QTextDocument* doc, const QString& fileName)
+void TextMemoEditor::showMemo()
 {
-    QPrinter printer(QPrinter::PrinterResolution);
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setPaperSize(QPrinter::A4);
-    printer.setOutputFileName(fileName);
+    _editor->setPlainText(_memoItem->data());
+    _editor->document()->setModified(false);
+}
 
-    doc->print(&printer);
+QString TextMemoEditor::highlighterName() const
+{
+    return _highlighter ? _highlighter->objectName() : QString();
+}
+
+void TextMemoEditor::setHighlighterName(const QString& name)
+{
+    if (!_highlighter && name.isEmpty()) return;
+    if (_highlighter && _highlighter->objectName() == name) return;
+
+    _editor->setUndoRedoEnabled(false);
+
+    if (_highlighter) delete _highlighter;
+    if (!name.isEmpty())
+    {
+        auto spec = Ori::Highlighter::getSpec(name);
+        if (spec)
+            _highlighter = new Ori::Highlighter::Highlighter(_editor->document(), spec);
+    }
+
+    _editor->setUndoRedoEnabled(true);
 }

@@ -1,6 +1,7 @@
 #include "TextEditHelpers.h"
 
 #include <QTextBlock>
+#include <QPrinter>
 
 //------------------------------------------------------------------------------
 //                                  TextFormat
@@ -10,7 +11,7 @@ QTextCharFormat TextFormat::get() const
 {
     QTextCharFormat f;
     if (!_fontFamily.isEmpty())
-        f.setFontFamily(_fontFamily);
+        f.setFontFamilies({_fontFamily});
     if (!_colorName.isEmpty())
         f.setForeground(QColor(_colorName));
     if (_bold)
@@ -41,7 +42,7 @@ namespace TextEditHelpers
 QString hyperlinkAt(const QTextCursor& cursor)
 {
     int cursorPos = cursor.positionInBlock() - (cursor.position() - cursor.anchor());
-    for (auto format : cursor.block().layout()->formats())
+    for (auto& format : cursor.block().layout()->formats())
         if (format.format.isAnchor() &&
             cursorPos >= format.start &&
             cursorPos < format.start + format.length)
@@ -51,5 +52,21 @@ QString hyperlinkAt(const QTextCursor& cursor)
         }
     return QString();
 }
+
+void exportToPdf(QTextDocument* doc, const QString& fileName)
+{
+    QPrinter printer(QPrinter::PrinterResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+    printer.setPageSize(QPageSize(QPageSize::A4));
+#else
+    printer.setPaperSize(QPrinter::A4);
+#endif
+    printer.setOutputFileName(fileName);
+
+    doc->print(&printer);
+}
+
 
 } // namespace TextEditHelpers
